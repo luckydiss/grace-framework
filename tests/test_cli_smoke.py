@@ -22,6 +22,13 @@ def write_temp_file(tmp_path: Path, content: str, name: str) -> Path:
     return path
 
 
+def write_repo_file(repo_dir: Path, relative_path: str, content: str) -> Path:
+    path = repo_dir / relative_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(textwrap.dedent(content).lstrip(), encoding="utf-8")
+    return path
+
+
 def module_header() -> str:
     return (
         "# @grace.module billing.pricing\n"
@@ -94,3 +101,61 @@ def test_cli_smoke_end_to_end(tmp_path: Path) -> None:
 
     assert reparse_result.returncode == 0
     assert "Parsed module billing.pricing with 1 block(s)" in reparse_result.stdout
+
+
+def test_cli_smoke_repo_level_json_end_to_end(tmp_path: Path) -> None:
+    repo_dir = tmp_path.parent / f"{tmp_path.name}_grace_repo"
+    repo_dir.mkdir(parents=True, exist_ok=True)
+
+    write_repo_file(
+        repo_dir,
+        "src/pricing.py",
+        (
+            module_header()
+            + "\n"
+            + "# @grace.anchor billing.pricing.apply_discount\n"
+            + "# @grace.complexity 2\n"
+            + "def apply_discount(price: int, percent: int) -> int:\n"
+            + "    return price - ((price * percent) // 100)\n"
+        ),
+    )
+    write_repo_file(
+        repo_dir,
+        "src/tax.py",
+        (
+            "# @grace.module billing.tax\n"
+            "# @grace.purpose Apply taxes.\n"
+            "# @grace.interfaces apply_tax(amount:int) -> int\n"
+            "# @grace.invariant Tax amount must never be negative.\n"
+            "# @grace.invariant Anchor ids remain stable for unchanged semantics.\n\n"
+            "# @grace.anchor billing.tax.apply_tax\n"
+            "# @grace.complexity 2\n"
+            "def apply_tax(amount: int) -> int:\n"
+            "    return amount\n"
+        ),
+    )
+
+    parse_result = run_cli("parse", str(repo_dir), "--json")
+    validate_result = run_cli("validate", str(repo_dir), "--json")
+    lint_result = run_cli("lint", str(repo_dir), "--json")
+    map_result = run_cli("map", str(repo_dir), "--json")
+
+    assert parse_result.returncode == 0
+    parse_payload = json.loads(parse_result.stdout)
+    assert parse_payload["ok"] is True
+    assert parse_payload["scope"] == "project"
+    assert parse_payload["file_count"] == 2
+
+    assert validate_result.returncode == 0
+    validate_payload = json.loads(validate_result.stdout)
+    assert validate_payload["ok"] is True
+    assert validate_payload["scope"] == "project"
+
+    assert lint_result.returncode == 0
+    lint_payload = json.loads(lint_result.stdout)
+    assert lint_payload["ok"] is True
+    assert lint_payload["scope"] == "project"
+
+    assert map_result.returncode == 0
+    map_payload = json.loads(map_result.stdout)
+    assert len(map_payload["modules"]) == 2

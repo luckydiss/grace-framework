@@ -7,6 +7,7 @@
 - The parser, validator, and linter are file/project model layers, not full repository analysis tools.
 - Patcher is single-file and single-block only.
 - CLI output is human-readable first; richer machine-readable outputs are limited to map JSON.
+- Cross-file `grace.links` are still constrained by the current parser's file-local link resolution baseline.
 
 ## Non-Goals
 

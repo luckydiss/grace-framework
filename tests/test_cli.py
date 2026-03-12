@@ -126,6 +126,20 @@ def test_cli_parse_success(tmp_path: Path) -> None:
     assert "Parsed module billing.pricing with 1 block(s)" in result.output
 
 
+def test_cli_parse_success_json_output(tmp_path: Path) -> None:
+    path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+
+    result = runner().invoke(CLI.app, ["parse", "--json", str(path)])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is True
+    assert payload["command"] == "parse"
+    assert payload["module_id"] == "billing.pricing"
+    assert payload["block_count"] == 1
+    assert payload["file"]["module"]["module_id"] == "billing.pricing"
+
+
 def test_cli_parse_failure(tmp_path: Path) -> None:
     path = write_temp_python_file(tmp_path, function_block(), name="pricing.py")
 
@@ -136,6 +150,19 @@ def test_cli_parse_failure(tmp_path: Path) -> None:
     assert "missing_required_module_annotation" in result.output
 
 
+def test_cli_parse_failure_json_output(tmp_path: Path) -> None:
+    path = write_temp_python_file(tmp_path, function_block(), name="pricing.py")
+
+    result = runner().invoke(CLI.app, ["parse", "--json", str(path)])
+
+    assert result.exit_code != 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is False
+    assert payload["command"] == "parse"
+    assert payload["stage"] == "parse"
+    assert any(error["code"] == "missing_required_module_annotation" for error in payload["errors"])
+
+
 def test_cli_validate_success(tmp_path: Path) -> None:
     path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
 
@@ -143,6 +170,18 @@ def test_cli_validate_success(tmp_path: Path) -> None:
 
     assert result.exit_code == 0
     assert "Validated module billing.pricing successfully" in result.output
+
+
+def test_cli_validate_success_json_output(tmp_path: Path) -> None:
+    path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+
+    result = runner().invoke(CLI.app, ["validate", "--json", str(path)])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is True
+    assert payload["command"] == "validate"
+    assert payload["validation"] == {"ok": True, "scope": "file"}
 
 
 def test_cli_validate_failure(tmp_path: Path) -> None:
@@ -159,6 +198,23 @@ def test_cli_validate_failure(tmp_path: Path) -> None:
     assert "anchor_module_prefix_mismatch" in result.output
 
 
+def test_cli_validate_failure_json_output(tmp_path: Path) -> None:
+    path = write_temp_python_file(
+        tmp_path,
+        make_file(function_block(anchor="external.apply_discount")),
+        name="pricing.py",
+    )
+
+    result = runner().invoke(CLI.app, ["validate", "--json", str(path)])
+
+    assert result.exit_code != 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is False
+    assert payload["command"] == "validate"
+    assert payload["stage"] == "validate"
+    assert any(issue["code"] == "anchor_module_prefix_mismatch" for issue in payload["issues"])
+
+
 def test_cli_lint_success(tmp_path: Path) -> None:
     path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
 
@@ -166,6 +222,20 @@ def test_cli_lint_success(tmp_path: Path) -> None:
 
     assert result.exit_code == 0
     assert "Lint passed for module billing.pricing" in result.output
+
+
+def test_cli_lint_success_json_output(tmp_path: Path) -> None:
+    path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+
+    result = runner().invoke(CLI.app, ["lint", "--json", str(path)])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is True
+    assert payload["command"] == "lint"
+    assert payload["warning_count"] == 0
+    assert payload["warnings"] == []
+    assert payload["clean"] is True
 
 
 def test_cli_lint_warnings_keep_zero_exit_code(tmp_path: Path) -> None:
@@ -180,6 +250,24 @@ def test_cli_lint_warnings_keep_zero_exit_code(tmp_path: Path) -> None:
     assert result.exit_code == 0
     assert "Lint warnings" in result.output
     assert "weak_belief" in result.output
+
+
+def test_cli_lint_warnings_json_output_keeps_zero_exit_code(tmp_path: Path) -> None:
+    path = write_temp_python_file(
+        tmp_path,
+        make_file(function_block(complexity="6", belief="maybe")),
+        name="pricing.py",
+    )
+
+    result = runner().invoke(CLI.app, ["lint", "--json", str(path)])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is True
+    assert payload["command"] == "lint"
+    assert payload["warning_count"] >= 1
+    assert payload["clean"] is False
+    assert any(issue["code"] == "weak_belief" for issue in payload["warnings"])
 
 
 def test_cli_map_success_with_json_output(tmp_path: Path) -> None:
@@ -213,6 +301,30 @@ def test_cli_patch_success(tmp_path: Path) -> None:
     assert "return 42" in path.read_text(encoding="utf-8")
 
 
+def test_cli_patch_success_json_output(tmp_path: Path) -> None:
+    path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    replacement_path = write_temp_python_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.pricing.apply_discount\n"
+            "# @grace.complexity 2\n"
+            "def apply_discount(price: int, percent: int) -> int:\n"
+            "    return 42\n"
+        ),
+        name="replacement.py",
+    )
+
+    result = runner().invoke(CLI.app, ["patch", "--json", str(path), "billing.pricing.apply_discount", str(replacement_path)])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is True
+    assert payload["command"] == "patch"
+    assert payload["anchor_id"] == "billing.pricing.apply_discount"
+    assert payload["warning_count"] == 0
+    assert payload["file"]["blocks"][0]["anchor_id"] == "billing.pricing.apply_discount"
+
+
 def test_cli_patch_failure_on_unknown_anchor(tmp_path: Path) -> None:
     path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
     replacement_path = write_temp_python_file(
@@ -232,6 +344,31 @@ def test_cli_patch_failure_on_unknown_anchor(tmp_path: Path) -> None:
     assert "Patch failed at stage target_lookup" in result.output
 
 
+def test_cli_patch_failure_on_unknown_anchor_json_output(tmp_path: Path) -> None:
+    path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    replacement_path = write_temp_python_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.pricing.apply_discount\n"
+            "# @grace.complexity 2\n"
+            "def apply_discount(price: int, percent: int) -> int:\n"
+            "    return 42\n"
+        ),
+        name="replacement.py",
+    )
+
+    result = runner().invoke(
+        CLI.app,
+        ["patch", "--json", str(path), "billing.pricing.unknown", str(replacement_path)],
+    )
+
+    assert result.exit_code != 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is False
+    assert payload["command"] == "patch"
+    assert payload["stage"] == "target_lookup"
+
+
 def test_cli_patch_failure_on_identity_mismatch(tmp_path: Path) -> None:
     path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
     replacement_path = write_temp_python_file(
@@ -249,6 +386,31 @@ def test_cli_patch_failure_on_identity_mismatch(tmp_path: Path) -> None:
 
     assert result.exit_code != 0
     assert "Patch failed at stage identity" in result.output
+
+
+def test_cli_patch_failure_on_identity_mismatch_json_output(tmp_path: Path) -> None:
+    path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    replacement_path = write_temp_python_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.pricing.other_name\n"
+            "# @grace.complexity 2\n"
+            "def apply_discount(price: int, percent: int) -> int:\n"
+            "    return 42\n"
+        ),
+        name="replacement.py",
+    )
+
+    result = runner().invoke(
+        CLI.app,
+        ["patch", "--json", str(path), "billing.pricing.apply_discount", str(replacement_path)],
+    )
+
+    assert result.exit_code != 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is False
+    assert payload["command"] == "patch"
+    assert payload["stage"] == "identity"
 
 
 def test_cli_validate_command_is_thin_wrapper_over_core_apis(tmp_path: Path, monkeypatch) -> None:

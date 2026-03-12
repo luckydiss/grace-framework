@@ -64,6 +64,9 @@ Derived artifacts must not invent new `module_id` or `anchor_id`.
 - CLI does not define new source-of-truth semantics.
 - Commands included in v1:
   `parse`, `validate`, `lint`, `map`, `patch`.
+- `parse`, `validate`, `lint`, and `map` accept either a file path or a directory path.
+- `parse`, `validate`, `lint`, and `patch` support `--json` for machine-readable agent workflows.
+- `map --json` emits the raw derived GRACE map payload.
 - Exit code behavior is stable:
   parse/validate/map/patch return non-zero on hard failure;
   lint returns zero on warnings and non-zero only on parse or validation failure.

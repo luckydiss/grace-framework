@@ -5,6 +5,7 @@ GRACE stands for Graph-RAG Anchored Code Engineering.
 GRACE v1 is a code-first framework/spec for LLM-oriented development where code is addressed by semantic anchors instead of line numbers. The source of truth is inline GRACE annotations in Python files.
 
 Canonical behavioral guarantees for the baseline live in [docs/v1_invariants.md](C:\Users\luckydiss\Documents\grace_framework\docs\v1_invariants.md).
+The shell-oriented agent contract lives in [docs/agent_contract.md](C:\Users\luckydiss\Documents\grace_framework\docs\agent_contract.md).
 
 ## Source Of Truth
 
@@ -63,10 +64,34 @@ Parse a file:
 grace parse examples/basic/pricing.py
 ```
 
+Parse a file for an agent:
+
+```bash
+grace parse examples/basic/pricing.py --json
+```
+
+Parse a directory for an agent:
+
+```bash
+grace parse repo/ --json
+```
+
 Validate a file:
 
 ```bash
 grace validate examples/basic/pricing.py
+```
+
+Validate a file for an agent:
+
+```bash
+grace validate examples/basic/pricing.py --json
+```
+
+Validate a directory for an agent:
+
+```bash
+grace validate repo/ --json
 ```
 
 Lint a file:
@@ -75,16 +100,40 @@ Lint a file:
 grace lint examples/basic/pricing.py
 ```
 
+Lint a file for an agent:
+
+```bash
+grace lint examples/basic/pricing.py --json
+```
+
+Lint a directory for an agent:
+
+```bash
+grace lint repo/ --json
+```
+
 Build a JSON map:
 
 ```bash
 grace map examples/basic/pricing.py --json
 ```
 
+Build a project JSON map:
+
+```bash
+grace map repo/ --json
+```
+
 Patch a block by anchor:
 
 ```bash
 grace patch examples/basic/pricing.py billing.pricing.apply_discount examples/basic/apply_discount.replacement.pyfrag
+```
+
+Patch a block for an agent:
+
+```bash
+grace patch examples/basic/pricing.py billing.pricing.apply_discount examples/basic/apply_discount.replacement.pyfrag --json
 ```
 
 ## Scope
