@@ -1,0 +1,11 @@
+{
+  "grace_version": "v1",
+  "entries": [
+    {
+      "path": "pricing.py",
+      "anchor_id": "billing.pricing.apply_discount",
+      "operation": "replace_block",
+      "replacement_file": "apply_discount.replacement.pyfrag"
+    }
+  ]
+}

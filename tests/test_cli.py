@@ -24,6 +24,7 @@ def load_cli_modules():
         "grace.linter",
         "grace.map",
         "grace.patcher",
+        "grace.plan",
         "grace.cli",
     ):
         sys.modules.pop(module_name, None)
@@ -33,7 +34,7 @@ def load_cli_modules():
     sys.modules["grace"] = grace_package
 
     loaded = {}
-    for module_name in ("models", "parser", "validator", "linter", "map", "patcher", "cli"):
+    for module_name in ("models", "parser", "validator", "linter", "map", "patcher", "plan", "cli"):
         spec = importlib.util.spec_from_file_location(f"grace.{module_name}", ROOT / "grace" / f"{module_name}.py")
         assert spec is not None and spec.loader is not None
         module = importlib.util.module_from_spec(spec)
@@ -48,11 +49,12 @@ def load_cli_modules():
         loaded["linter"],
         loaded["map"],
         loaded["patcher"],
+        loaded["plan"],
         loaded["cli"],
     )
 
 
-MODELS, PARSER, VALIDATOR, LINTER, MAP, PATCHER, CLI = load_cli_modules()
+MODELS, PARSER, VALIDATOR, LINTER, MAP, PATCHER, PLAN, CLI = load_cli_modules()
 
 
 def write_temp_python_file(tmp_path: Path, content: str, name: str = "sample.py") -> Path:
@@ -64,6 +66,18 @@ def write_temp_python_file(tmp_path: Path, content: str, name: str = "sample.py"
         pass
     path = writable_dir / name
     path.write_text(textwrap.dedent(content).lstrip(), encoding="utf-8")
+    return path
+
+
+def write_temp_json_file(tmp_path: Path, payload: dict, name: str = "plan.json") -> Path:
+    writable_dir = tmp_path.parent / f"{tmp_path.name}_cli_files"
+    writable_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        writable_dir.chmod(0o777)
+    except OSError:
+        pass
+    path = writable_dir / name
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return path
 
 
@@ -508,6 +522,114 @@ def test_cli_patch_failure_on_identity_mismatch_json_output(tmp_path: Path) -> N
     assert payload["stage"] == "identity"
     assert payload["identity_preserved"] is False
     assert payload["rollback_performed"] is False
+
+
+def test_cli_apply_plan_success_json_output(tmp_path: Path) -> None:
+    pricing_path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    replacement_path = write_temp_python_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.pricing.apply_discount\n"
+            "# @grace.complexity 2\n"
+            "def apply_discount(price: int, percent: int) -> int:\n"
+            "    return 42\n"
+        ),
+        name="replacement.py",
+    )
+    plan_path = write_temp_json_file(
+        tmp_path,
+        {
+            "grace_version": "v1",
+            "entries": [
+                {
+                    "path": str(pricing_path),
+                    "anchor_id": "billing.pricing.apply_discount",
+                    "operation": "replace_block",
+                    "replacement_file": str(replacement_path),
+                }
+            ],
+        },
+        name="plan.json",
+    )
+
+    result = runner().invoke(CLI.app, ["apply-plan", "--json", str(plan_path)])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is True
+    assert payload["command"] == "apply-plan"
+    assert payload["scope"] == "project"
+    assert payload["entry_count"] == 1
+    assert payload["applied_count"] == 1
+    assert payload["entries"][0]["result"]["ok"] is True
+    assert "return 42" in pricing_path.read_text(encoding="utf-8")
+
+
+def test_cli_apply_plan_failure_stops_on_first_failure_json_output(tmp_path: Path) -> None:
+    pricing_path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    tax_path = write_temp_python_file(
+        tmp_path,
+        make_file(
+            function_block(anchor="billing.tax.apply_tax", signature="def apply_tax(amount: int) -> int:", body="    return amount"),
+            header=module_header(module_id="billing.tax", interfaces="apply_tax(amount:int) -> int"),
+        ),
+        name="tax.py",
+    )
+    replacement_path = write_temp_python_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.pricing.apply_discount\n"
+            "# @grace.complexity 2\n"
+            "def apply_discount(price: int, percent: int) -> int:\n"
+            "    return 42\n"
+        ),
+        name="replacement.py",
+    )
+    failing_replacement_path = write_temp_python_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.tax.missing_anchor\n"
+            "# @grace.complexity 2\n"
+            "def apply_tax(amount: int) -> int:\n"
+            "    return amount + 1\n"
+        ),
+        name="failing_replacement.py",
+    )
+    plan_path = write_temp_json_file(
+        tmp_path,
+        {
+            "grace_version": "v1",
+            "entries": [
+                {
+                    "path": str(pricing_path),
+                    "anchor_id": "billing.pricing.apply_discount",
+                    "operation": "replace_block",
+                    "replacement_file": str(replacement_path),
+                },
+                {
+                    "path": str(tax_path),
+                    "anchor_id": "billing.tax.missing_anchor",
+                    "operation": "replace_block",
+                    "replacement_file": str(failing_replacement_path),
+                },
+            ],
+        },
+        name="plan.json",
+    )
+
+    result = runner().invoke(CLI.app, ["apply-plan", "--json", str(plan_path)])
+
+    assert result.exit_code != 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is False
+    assert payload["command"] == "apply-plan"
+    assert payload["stage"] == "apply_plan"
+    assert payload["applied_count"] == 1
+    assert payload["failed_index"] == 1
+    assert payload["entries"][0]["result"]["ok"] is True
+    assert payload["entries"][1]["result"]["ok"] is False
+    assert "return 42" in pricing_path.read_text(encoding="utf-8")
+    assert "return amount + 1" not in tax_path.read_text(encoding="utf-8")
 
 
 def test_cli_validate_command_is_thin_wrapper_over_core_apis(tmp_path: Path, monkeypatch) -> None:

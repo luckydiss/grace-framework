@@ -1,6 +1,6 @@
 # Agent Contract
 
-GRACE v0.3 development is aimed at shell-driven coding agents.
+GRACE v0.4 development is aimed at shell-driven coding agents.
 
 The intended consumer is a non-interactive agent that can run commands, read JSON, and then decide whether to navigate, patch, validate, or stop.
 
@@ -46,8 +46,9 @@ If no GRACE-annotated Python files are found, the command fails with:
 4. `grace map <path> --json`
 5. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
 6. `grace patch <path> <anchor_id> <replacement_file> --json`
-7. `grace validate <path> --json`
-8. `grace lint <path> --json`
+7. `grace apply-plan <plan_file> --json`
+8. `grace validate <path> --json`
+9. `grace lint <path> --json`
 
 ## Output Contract
 
@@ -69,6 +70,7 @@ For `map`:
 - `lint`: `0` on clean result and on warnings, non-zero only on parse or validation failure
 - `map`: `0` on success, non-zero on parse failure
 - `patch`: `0` on success, non-zero on patch failure
+- `apply-plan`: `0` on success, non-zero on plan-load failure or first patch failure
 
 ## Command JSON Shapes
 
@@ -330,12 +332,65 @@ Dry-run and preview semantics:
 - Lint warnings do not turn a successful patch into a hard failure.
 - Parse or validation failure remains blocking.
 
+### `apply-plan --json`
+
+Success:
+
+```json
+{
+  "ok": true,
+  "command": "apply-plan",
+  "scope": "project",
+  "plan_path": "examples/basic/apply_discount.plan.json",
+  "entry_count": 1,
+  "applied_count": 1,
+  "entries": [
+    {
+      "index": 0,
+      "path": "examples/basic/pricing.py",
+      "anchor_id": "billing.pricing.apply_discount",
+      "operation": "replace_block",
+      "result": {
+        "ok": true
+      }
+    }
+  ]
+}
+```
+
+Failure:
+
+```json
+{
+  "ok": false,
+  "command": "apply-plan",
+  "scope": "project",
+  "stage": "apply_plan",
+  "plan_path": "plan.json",
+  "entry_count": 2,
+  "applied_count": 1,
+  "failed_index": 1,
+  "message": "patch plan failed at entry 1",
+  "entries": []
+}
+```
+
+Patch plan semantics:
+
+- `PatchPlan` is a derived artifact, never source of truth.
+- Current operation set contains only `replace_block`.
+- Entries are applied sequentially in plan order.
+- Execution stops on the first failing entry.
+- Current baseline is not transactional:
+  already-applied earlier entries are not rolled back automatically.
+
 ## Notes For Agents
 
 - Prefer `--json` for machine workflows.
 - For directory inputs, agents should treat discovered-file ordering as stable.
 - Treat `lint` warnings as advisory, not blocking.
 - Treat `patch --dry-run` as preflight, not as an applied change.
+- Prefer `apply-plan` when the intended change spans multiple anchors.
 - Treat `patch` success as provisional until a follow-up `validate --json` succeeds.
 - Do not infer semantic identity from line numbers or file offsets.
 - Current baseline limitation:

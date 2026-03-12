@@ -9,6 +9,7 @@ import click
 from grace.linter import LintFailure, lint_file, lint_project
 from grace.map import build_file_map, build_project_map, map_to_dict
 from grace.patcher import PatchFailure, PatchStepResult, patch_block
+from grace.plan import ApplyPlanFailure, ApplyPlanSuccess, apply_patch_plan, load_patch_plan
 from grace.models import GraceFileModel, GraceParseFailure, GraceParseSuccess
 from grace.parser import GraceParseError, parse_python_file, try_parse_python_file
 from grace.validator import ValidationFailure, validate_file, validate_project
@@ -187,12 +188,59 @@ def _patch_success_payload(result) -> dict:
     }
 
 
+def _apply_plan_success_payload(plan_path: Path, result: ApplyPlanSuccess) -> dict:
+    return {
+        "ok": True,
+        "command": "apply-plan",
+        "scope": "project",
+        "plan_path": str(plan_path),
+        "entry_count": result.entry_count,
+        "applied_count": result.applied_count,
+        "entries": [_serialize_applied_patch_entry(entry) for entry in result.entries],
+    }
+
+
+def _apply_plan_failure_payload(plan_path: Path, result: ApplyPlanFailure) -> dict:
+    return {
+        "ok": False,
+        "command": "apply-plan",
+        "scope": "project",
+        "stage": "apply_plan",
+        "plan_path": str(plan_path),
+        "entry_count": result.entry_count,
+        "applied_count": result.applied_count,
+        "failed_index": result.failed_index,
+        "message": result.message,
+        "entries": [_serialize_applied_patch_entry(entry) for entry in result.entries],
+    }
+
+
 def _serialize_patch_step(step: PatchStepResult) -> dict:
     return {
         "status": step.status.value,
         "ok": step.status.value == "passed",
         "issue_count": step.issue_count,
     }
+
+
+def _serialize_applied_patch_entry(entry) -> dict:
+    return {
+        "index": entry.index,
+        "path": str(entry.path),
+        "anchor_id": entry.anchor_id,
+        "operation": entry.operation.value,
+        "result": _serialize_patch_result(entry.result),
+    }
+
+
+def _serialize_patch_result(result) -> dict:
+    if isinstance(result, PatchFailure):
+        payload = _patch_failure_payload(result)
+    else:
+        payload = _patch_success_payload(result)
+    payload.pop("command", None)
+    payload.pop("scope", None)
+    return payload
 
 
 def _project_parse_success_payload(command: str, root_path: Path, grace_files: tuple[GraceFileModel, ...]) -> dict:
@@ -379,6 +427,21 @@ def _emit_patch_success(result) -> None:
         click.echo(f"Lint warnings: {len(result.lint_issues)}")
         for issue in result.lint_issues:
             click.echo(f"- {issue.code.value}: {issue.message}")
+
+
+def _emit_apply_plan_success(plan_path: Path, result: ApplyPlanSuccess) -> None:
+    click.echo(f"Applied patch plan {plan_path}: {result.applied_count}/{result.entry_count} entry(s) succeeded")
+
+
+def _emit_apply_plan_failure(plan_path: Path, result: ApplyPlanFailure) -> None:
+    click.echo(
+        f"Patch plan failed at entry {result.failed_index} in {plan_path}: {result.message}",
+        err=True,
+    )
+    failed_entry = result.entries[-1]
+    failed_result = failed_entry.result
+    if isinstance(failed_result, PatchFailure):
+        _emit_patch_failure(failed_result)
 
 
 @click.group(help="GRACE v1 CLI")
@@ -661,6 +724,43 @@ def patch_command(path: Path, anchor_id: str, replacement_file: Path, dry_run: b
     if preview:
         _emit_patch_preview(result)
     _emit_patch_success(result)
+
+
+@app.command("apply-plan")
+@click.argument("plan_file", type=_path_argument(dir_okay=False))
+@click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
+def apply_plan_command(plan_file: Path, as_json: bool) -> None:
+    try:
+        plan = load_patch_plan(plan_file)
+    except (json.JSONDecodeError, ValueError) as error:
+        if as_json:
+            _emit_json(
+                {
+                    "ok": False,
+                    "command": "apply-plan",
+                    "scope": "project",
+                    "stage": "plan_load",
+                    "plan_path": str(plan_file),
+                    "message": str(error),
+                }
+            )
+            raise click.exceptions.Exit(code=1) from error
+        click.echo(f"Failed to load patch plan {plan_file}: {error}", err=True)
+        raise click.exceptions.Exit(code=1) from error
+
+    result = apply_patch_plan(plan)
+    if isinstance(result, ApplyPlanFailure):
+        if as_json:
+            _emit_json(_apply_plan_failure_payload(plan_file, result))
+            raise click.exceptions.Exit(code=1)
+        _emit_apply_plan_failure(plan_file, result)
+        raise click.exceptions.Exit(code=1)
+
+    if as_json:
+        _emit_json(_apply_plan_success_payload(plan_file, result))
+        return
+
+    _emit_apply_plan_success(plan_file, result)
 
 
 def main(argv: list[str] | None = None) -> int:

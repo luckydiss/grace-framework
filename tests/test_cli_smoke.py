@@ -103,6 +103,63 @@ def test_cli_smoke_end_to_end(tmp_path: Path) -> None:
     assert "Parsed module billing.pricing with 1 block(s)" in reparse_result.stdout
 
 
+def test_cli_smoke_apply_plan_end_to_end(tmp_path: Path) -> None:
+    target_path = write_temp_file(
+        tmp_path,
+        (
+            module_header()
+            + "\n"
+            + "# @grace.anchor billing.pricing.apply_discount\n"
+            + "# @grace.complexity 2\n"
+            + "def apply_discount(price: int, percent: int) -> int:\n"
+            + "    return price - ((price * percent) // 100)\n"
+        ),
+        "pricing.py",
+    )
+    replacement_path = write_temp_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.pricing.apply_discount\n"
+            "# @grace.complexity 2\n"
+            "def apply_discount(price: int, percent: int) -> int:\n"
+            "    return 42\n"
+        ),
+        "apply_discount.replacement.pyfrag",
+    )
+    plan_path = write_temp_file(
+        tmp_path,
+        json.dumps(
+            {
+                "grace_version": "v1",
+                "entries": [
+                    {
+                        "path": str(target_path),
+                        "anchor_id": "billing.pricing.apply_discount",
+                        "operation": "replace_block",
+                        "replacement_file": str(replacement_path),
+                    }
+                ],
+            },
+            indent=2,
+        ),
+        "apply_discount.plan.json",
+    )
+
+    result = run_cli("apply-plan", str(plan_path), "--json")
+    validate_result = run_cli("validate", str(target_path), "--json")
+
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["ok"] is True
+    assert payload["command"] == "apply-plan"
+    assert payload["applied_count"] == 1
+    assert "return 42" in target_path.read_text(encoding="utf-8")
+
+    assert validate_result.returncode == 0
+    validate_payload = json.loads(validate_result.stdout)
+    assert validate_payload["ok"] is True
+
+
 def test_cli_smoke_repo_level_json_end_to_end(tmp_path: Path) -> None:
     repo_dir = tmp_path.parent / f"{tmp_path.name}_grace_repo"
     repo_dir.mkdir(parents=True, exist_ok=True)

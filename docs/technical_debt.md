@@ -6,8 +6,7 @@
 - CLI is intentionally minimal and shell-oriented.
 - The parser, validator, and linter are file/project model layers, not full repository analysis tools.
 - Patcher is single-file and single-block only.
-- Patch workflow is still single-operation oriented; patch plans do not exist yet.
-- Cross-file `grace.links` are still constrained by the current parser's file-local link resolution baseline.
+- Apply-plan is sequential only; it does not provide transactional all-or-nothing execution.
 
 ## Non-Goals
 
@@ -22,6 +21,6 @@
 
 - Language-agnostic frontends beyond Python
 - Stronger repository-wide semantic analysis
-- Multi-file patch plans and transactional patch application
+- Transactional patch application and richer plan operations
 - Richer graph export and graph analytics
 - Better packaging polish and release automation

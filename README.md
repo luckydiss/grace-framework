@@ -30,6 +30,7 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 - `linter`: emits soft warnings for readability, maintainability, and machine-utility quality.
 - `map`: builds a derived navigation artifact from `GraceFileModel`.
 - `patcher`: replaces a semantic block by `anchor_id`, supports dry-run and preview, and rolls back on parse or validation failure.
+- `plan`: loads a derived `PatchPlan` artifact and applies `replace_block` entries sequentially.
 - `cli`: thin command wrapper over the existing APIs.
 
 ## Install
@@ -149,6 +150,18 @@ Patch a block for an agent:
 grace patch examples/basic/pricing.py billing.pricing.apply_discount examples/basic/apply_discount.replacement.pyfrag --json
 ```
 
+Apply a patch plan:
+
+```bash
+grace apply-plan examples/basic/apply_discount.plan.json
+```
+
+Apply a patch plan for an agent:
+
+```bash
+grace apply-plan examples/basic/apply_discount.plan.json --json
+```
+
 ## Scope
 
 GRACE v1 release scope includes:
@@ -159,12 +172,13 @@ GRACE v1 release scope includes:
 - derived map generation;
 - semantic block patching by `anchor_id`;
 - patch dry-run, preview, and structured JSON patch results;
+- derived patch plans with sequential `apply-plan` execution;
 - a minimal CLI.
 
 Deferred beyond v1:
 
 - graph analytics;
 - planning/generation flows;
-- multi-file patch orchestration;
+- multi-file transactional patch orchestration;
 - sidecar-first workflows;
 - line-based patch semantics.

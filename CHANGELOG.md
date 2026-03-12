@@ -11,6 +11,8 @@
 - Added deterministic directory discovery policy for GRACE-annotated Python files.
 - Added patch `--dry-run` and `--preview` for agent-safe semantic block preflight.
 - Added structured patch results with identity preservation, parse/validate step status, preview, hashes, and rollback state.
+- Added derived `PatchPlan` support with sequential `apply-plan` execution.
+- Added machine-readable `apply-plan --json` output for agent workflows.
 
 ## v0.1.0
 

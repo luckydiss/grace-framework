@@ -16,6 +16,7 @@ These are derived from parsed `GraceFileModel` objects:
 - CLI summaries and JSON output
 - Validation and lint reports
 - Patch results after re-parse and re-validation
+- Patch plans and apply-plan execution results
 
 Derived artifacts must not invent new `module_id` or `anchor_id`.
 
@@ -65,11 +66,12 @@ Derived artifacts must not invent new `module_id` or `anchor_id`.
 - CLI is a thin wrapper over core APIs.
 - CLI does not define new source-of-truth semantics.
 - Commands included in v1:
-  `parse`, `validate`, `lint`, `map`, `patch`.
+  `parse`, `validate`, `lint`, `map`, `patch`, `apply-plan`.
 - `parse`, `validate`, `lint`, and `map` accept either a file path or a directory path.
 - `parse`, `validate`, `lint`, and `patch` support `--json` for machine-readable agent workflows.
+- `apply-plan` supports `--json` for machine-readable multi-anchor execution results.
 - `patch` also supports `--dry-run` and `--preview` for agent-safe preflight and review.
 - `map --json` emits the raw derived GRACE map payload.
 - Exit code behavior is stable:
-  parse/validate/map/patch return non-zero on hard failure;
+  parse/validate/map/patch/apply-plan return non-zero on hard failure;
   lint returns zero on warnings and non-zero only on parse or validation failure.
