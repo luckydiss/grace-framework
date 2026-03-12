@@ -9,6 +9,8 @@
 - Added `docs/agent_contract.md` for shell-driven coding agents.
 - Added repo-level `parse`, `validate`, `lint`, and `map` for directory inputs.
 - Added deterministic directory discovery policy for GRACE-annotated Python files.
+- Added patch `--dry-run` and `--preview` for agent-safe semantic block preflight.
+- Added structured patch results with identity preservation, parse/validate step status, preview, hashes, and rollback state.
 
 ## v0.1.0
 

@@ -8,7 +8,7 @@ import click
 
 from grace.linter import LintFailure, lint_file, lint_project
 from grace.map import build_file_map, build_project_map, map_to_dict
-from grace.patcher import PatchFailure, patch_block
+from grace.patcher import PatchFailure, PatchStepResult, patch_block
 from grace.models import GraceFileModel, GraceParseFailure, GraceParseSuccess
 from grace.parser import GraceParseError, parse_python_file, try_parse_python_file
 from grace.validator import ValidationFailure, validate_file, validate_project
@@ -139,9 +139,23 @@ def _patch_failure_payload(result: PatchFailure) -> dict:
         "ok": False,
         "command": "patch",
         "scope": "file",
+        "target": {
+            "path": str(result.path),
+            "anchor_id": result.anchor_id,
+        },
         "stage": result.stage.value,
         "path": str(result.path),
         "anchor_id": result.anchor_id,
+        "dry_run": result.dry_run,
+        "identity_preserved": result.identity_preserved,
+        "parse": _serialize_patch_step(result.parse),
+        "validate": _serialize_patch_step(result.validation),
+        "lint_warnings": [],
+        "warning_count": 0,
+        "rollback_performed": result.rollback_performed,
+        "before_hash": result.before_hash,
+        "after_hash": result.after_hash,
+        "preview": result.preview,
         "message": result.message,
         "parse_errors": [issue.model_dump(mode="json") for issue in result.parse_errors],
         "validation_issues": [issue.model_dump(mode="json") for issue in result.validation_issues],
@@ -153,11 +167,31 @@ def _patch_success_payload(result) -> dict:
         "ok": True,
         "command": "patch",
         "scope": "file",
+        "target": {
+            "path": str(result.path),
+            "anchor_id": result.anchor_id,
+        },
         "path": str(result.path),
         "anchor_id": result.anchor_id,
+        "dry_run": result.dry_run,
+        "identity_preserved": result.identity_preserved,
+        "parse": _serialize_patch_step(result.parse),
+        "validate": _serialize_patch_step(result.validation),
+        "lint_warnings": [issue.model_dump(mode="json") for issue in result.lint_issues],
         "warning_count": len(result.lint_issues),
-        "lint_issues": [issue.model_dump(mode="json") for issue in result.lint_issues],
+        "rollback_performed": result.rollback_performed,
+        "before_hash": result.before_hash,
+        "after_hash": result.after_hash,
+        "preview": result.preview,
         "file": result.file.model_dump(mode="json"),
+    }
+
+
+def _serialize_patch_step(step: PatchStepResult) -> dict:
+    return {
+        "status": step.status.value,
+        "ok": step.status.value == "passed",
+        "issue_count": step.issue_count,
     }
 
 
@@ -329,6 +363,22 @@ def _emit_patch_failure(result: PatchFailure) -> None:
         click.echo(f"- {issue.code.value}{location}: {issue.message}", err=True)
     for issue in result.validation_issues:
         click.echo(f"- {issue.code.value}: {issue.message}", err=True)
+
+
+def _emit_patch_preview(result) -> None:
+    click.echo(f"Patch preview for {result.anchor_id} in {result.path}")
+    click.echo(result.preview if result.preview else "(no diff)")
+
+
+def _emit_patch_success(result) -> None:
+    if result.dry_run:
+        click.echo(f"Dry-run succeeded for {result.anchor_id} in {result.path}")
+    else:
+        click.echo(f"Patched {result.anchor_id} in {result.path}")
+    if result.lint_issues:
+        click.echo(f"Lint warnings: {len(result.lint_issues)}")
+        for issue in result.lint_issues:
+            click.echo(f"- {issue.code.value}: {issue.message}")
 
 
 @click.group(help="GRACE v1 CLI")
@@ -591,10 +641,12 @@ def map_command(path: Path, as_json: bool) -> None:
 @click.argument("path", type=_path_argument(dir_okay=False))
 @click.argument("anchor_id")
 @click.argument("replacement_file", type=_path_argument(dir_okay=False))
+@click.option("--dry-run", is_flag=True, help="Simulate the patch without writing to disk.")
+@click.option("--preview", is_flag=True, help="Show a semantic block diff preview without writing to disk.")
 @click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
-def patch_command(path: Path, anchor_id: str, replacement_file: Path, as_json: bool) -> None:
+def patch_command(path: Path, anchor_id: str, replacement_file: Path, dry_run: bool, preview: bool, as_json: bool) -> None:
     replacement_source = replacement_file.read_text(encoding="utf-8")
-    result = patch_block(path, anchor_id, replacement_source)
+    result = patch_block(path, anchor_id, replacement_source, dry_run=(dry_run or preview))
     if isinstance(result, PatchFailure):
         if as_json:
             _emit_json(_patch_failure_payload(result))
@@ -606,11 +658,9 @@ def patch_command(path: Path, anchor_id: str, replacement_file: Path, as_json: b
         _emit_json(_patch_success_payload(result))
         return
 
-    click.echo(f"Patched {result.anchor_id} in {result.path}")
-    if result.lint_issues:
-        click.echo(f"Lint warnings: {len(result.lint_issues)}")
-        for issue in result.lint_issues:
-            click.echo(f"- {issue.code.value}: {issue.message}")
+    if preview:
+        _emit_patch_preview(result)
+    _emit_patch_success(result)
 
 
 def main(argv: list[str] | None = None) -> int:

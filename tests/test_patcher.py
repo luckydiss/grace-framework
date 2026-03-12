@@ -118,6 +118,11 @@ def test_patch_block_successfully_replaces_function_block(tmp_path: Path) -> Non
 
     assert isinstance(result, PATCHER.PatchSuccess)
     assert result.ok is True
+    assert result.identity_preserved is True
+    assert result.parse.status is PATCHER.PatchStepStatus.PASSED
+    assert result.validation.status is PATCHER.PatchStepStatus.PASSED
+    assert result.rollback_performed is False
+    assert result.before_hash != result.after_hash
     assert result.file.blocks[0].anchor_id == "billing.pricing.apply_discount"
     assert "max(discounted, 0)" in path.read_text(encoding="utf-8")
 
@@ -239,6 +244,7 @@ def test_patch_block_rolls_back_on_parser_failure(tmp_path: Path) -> None:
 
     assert isinstance(result, PATCHER.PatchFailure)
     assert result.stage is PATCHER.PatchFailureStage.PARSE
+    assert result.rollback_performed is False
     assert result.parse_errors
     assert path.read_text(encoding="utf-8") == original_text
 
@@ -290,6 +296,7 @@ def test_patch_block_rolls_back_on_validator_failure(tmp_path: Path) -> None:
 
     assert isinstance(result, PATCHER.PatchFailure)
     assert result.stage is PATCHER.PatchFailureStage.VALIDATE
+    assert result.rollback_performed is False
     assert result.validation_issues
     assert path.read_text(encoding="utf-8") == original_text
 
@@ -329,6 +336,46 @@ def test_patch_block_is_deterministic_on_repeated_application(tmp_path: Path) ->
     assert isinstance(second, PATCHER.PatchSuccess)
     assert first.file.model_dump(mode="python") == second.file.model_dump(mode="python")
     assert first_text == second_text
+
+
+def test_patch_block_dry_run_does_not_modify_file_and_returns_success(tmp_path: Path) -> None:
+    path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    original_text = path.read_text(encoding="utf-8")
+    replacement = (
+        "# @grace.anchor billing.pricing.apply_discount\n"
+        "# @grace.complexity 2\n"
+        "def apply_discount(price: int, percent: int) -> int:\n"
+        "    return 42\n"
+    )
+
+    result = PATCHER.patch_block(path, "billing.pricing.apply_discount", replacement, dry_run=True)
+
+    assert isinstance(result, PATCHER.PatchSuccess)
+    assert result.dry_run is True
+    assert result.identity_preserved is True
+    assert result.parse.status is PATCHER.PatchStepStatus.PASSED
+    assert result.validation.status is PATCHER.PatchStepStatus.PASSED
+    assert result.rollback_performed is False
+    assert "return 42" not in path.read_text(encoding="utf-8")
+    assert path.read_text(encoding="utf-8") == original_text
+
+
+def test_patch_block_returns_preview_diff_for_dry_run(tmp_path: Path) -> None:
+    path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    replacement = (
+        "# @grace.anchor billing.pricing.apply_discount\n"
+        "# @grace.complexity 2\n"
+        "def apply_discount(price: int, percent: int) -> int:\n"
+        "    return 42\n"
+    )
+
+    result = PATCHER.patch_block(path, "billing.pricing.apply_discount", replacement, dry_run=True)
+
+    assert isinstance(result, PATCHER.PatchSuccess)
+    assert "---" in result.preview
+    assert "+++ " in result.preview
+    assert "return 42" in result.preview
+    assert "return price - ((price * percent) // 100)" in result.preview
 
 
 def test_successful_patch_preserves_anchor_identity_exactly(tmp_path: Path) -> None:

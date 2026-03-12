@@ -54,6 +54,8 @@ Derived artifacts must not invent new `module_id` or `anchor_id`.
   annotation group plus bound `def`, `async def`, or `class`.
 - Preserves target block identity:
   replacement source must contain the same `@grace.anchor` as the requested target.
+- Supports dry-run preflight without writing patched contents to disk.
+- Supports semantic block preview diffs as derived output, not as a new coordinate system.
 - Re-parses, validates, and lints after applying a patch.
 - Rolls back to original file contents if parse or validation fails.
 - Allows successful patch completion with lint warnings.
@@ -66,6 +68,7 @@ Derived artifacts must not invent new `module_id` or `anchor_id`.
   `parse`, `validate`, `lint`, `map`, `patch`.
 - `parse`, `validate`, `lint`, and `map` accept either a file path or a directory path.
 - `parse`, `validate`, `lint`, and `patch` support `--json` for machine-readable agent workflows.
+- `patch` also supports `--dry-run` and `--preview` for agent-safe preflight and review.
 - `map --json` emits the raw derived GRACE map payload.
 - Exit code behavior is stable:
   parse/validate/map/patch return non-zero on hard failure;

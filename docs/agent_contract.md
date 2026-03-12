@@ -1,6 +1,6 @@
 # Agent Contract
 
-GRACE v0.2 development is aimed at shell-driven coding agents.
+GRACE v0.3 development is aimed at shell-driven coding agents.
 
 The intended consumer is a non-interactive agent that can run commands, read JSON, and then decide whether to navigate, patch, validate, or stop.
 
@@ -44,9 +44,10 @@ If no GRACE-annotated Python files are found, the command fails with:
 2. `grace validate <path> --json`
 3. `grace lint <path> --json`
 4. `grace map <path> --json`
-5. `grace patch <path> <anchor_id> <replacement_file> --json`
-6. `grace validate <path> --json`
-7. `grace lint <path> --json`
+5. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
+6. `grace patch <path> <anchor_id> <replacement_file> --json`
+7. `grace validate <path> --json`
+8. `grace lint <path> --json`
 
 ## Output Contract
 
@@ -255,10 +256,31 @@ Success:
 {
   "ok": true,
   "command": "patch",
+  "scope": "file",
+  "target": {
+    "path": "examples/basic/pricing.py",
+    "anchor_id": "billing.pricing.apply_discount"
+  },
   "path": "examples/basic/pricing.py",
   "anchor_id": "billing.pricing.apply_discount",
+  "dry_run": false,
+  "identity_preserved": true,
+  "parse": {
+    "status": "passed",
+    "ok": true,
+    "issue_count": 0
+  },
+  "validate": {
+    "status": "passed",
+    "ok": true,
+    "issue_count": 0
+  },
+  "lint_warnings": [],
   "warning_count": 0,
-  "lint_issues": [],
+  "rollback_performed": false,
+  "before_hash": "sha256-before",
+  "after_hash": "sha256-after",
+  "preview": "--- before\n+++ after",
   "file": {}
 }
 ```
@@ -269,20 +291,51 @@ Failure:
 {
   "ok": false,
   "command": "patch",
+  "scope": "file",
+  "target": {
+    "path": "examples/basic/pricing.py",
+    "anchor_id": "billing.pricing.apply_discount"
+  },
   "stage": "identity",
   "path": "examples/basic/pricing.py",
   "anchor_id": "billing.pricing.apply_discount",
+  "dry_run": true,
+  "identity_preserved": false,
+  "parse": {
+    "status": "not_run",
+    "ok": false,
+    "issue_count": 0
+  },
+  "validate": {
+    "status": "not_run",
+    "ok": false,
+    "issue_count": 0
+  },
+  "lint_warnings": [],
+  "warning_count": 0,
+  "rollback_performed": false,
+  "before_hash": "sha256-before",
+  "after_hash": "sha256-after",
+  "preview": "--- before\n+++ after",
   "message": "replacement_source anchor_id ... does not match target anchor_id ...",
   "parse_errors": [],
   "validation_issues": []
 }
 ```
 
+Dry-run and preview semantics:
+
+- `--dry-run` performs identity, parse, validate, and lint checks without writing to disk.
+- `--preview` shows a semantic block diff and also avoids writing to disk.
+- Lint warnings do not turn a successful patch into a hard failure.
+- Parse or validation failure remains blocking.
+
 ## Notes For Agents
 
 - Prefer `--json` for machine workflows.
 - For directory inputs, agents should treat discovered-file ordering as stable.
 - Treat `lint` warnings as advisory, not blocking.
+- Treat `patch --dry-run` as preflight, not as an applied change.
 - Treat `patch` success as provisional until a follow-up `validate --json` succeeds.
 - Do not infer semantic identity from line numbers or file offsets.
 - Current baseline limitation:

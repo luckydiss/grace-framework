@@ -320,9 +320,102 @@ def test_cli_patch_success_json_output(tmp_path: Path) -> None:
     payload = json.loads(result.output)
     assert payload["ok"] is True
     assert payload["command"] == "patch"
+    assert payload["target"] == {
+        "path": str(path),
+        "anchor_id": "billing.pricing.apply_discount",
+    }
     assert payload["anchor_id"] == "billing.pricing.apply_discount"
+    assert payload["dry_run"] is False
+    assert payload["identity_preserved"] is True
+    assert payload["parse"]["status"] == "passed"
+    assert payload["validate"]["status"] == "passed"
+    assert payload["rollback_performed"] is False
+    assert payload["before_hash"] != payload["after_hash"]
+    assert "preview" in payload
     assert payload["warning_count"] == 0
     assert payload["file"]["blocks"][0]["anchor_id"] == "billing.pricing.apply_discount"
+
+
+def test_cli_patch_dry_run_text_success_does_not_modify_file(tmp_path: Path) -> None:
+    path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    original_text = path.read_text(encoding="utf-8")
+    replacement_path = write_temp_python_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.pricing.apply_discount\n"
+            "# @grace.complexity 2\n"
+            "def apply_discount(price: int, percent: int) -> int:\n"
+            "    return 42\n"
+        ),
+        name="replacement.py",
+    )
+
+    result = runner().invoke(
+        CLI.app,
+        ["patch", "--dry-run", str(path), "billing.pricing.apply_discount", str(replacement_path)],
+    )
+
+    assert result.exit_code == 0
+    assert "Dry-run succeeded for billing.pricing.apply_discount" in result.output
+    assert path.read_text(encoding="utf-8") == original_text
+
+
+def test_cli_patch_preview_shows_diff_without_modifying_file(tmp_path: Path) -> None:
+    path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    original_text = path.read_text(encoding="utf-8")
+    replacement_path = write_temp_python_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.pricing.apply_discount\n"
+            "# @grace.complexity 2\n"
+            "def apply_discount(price: int, percent: int) -> int:\n"
+            "    return 42\n"
+        ),
+        name="replacement.py",
+    )
+
+    result = runner().invoke(
+        CLI.app,
+        ["patch", "--preview", str(path), "billing.pricing.apply_discount", str(replacement_path)],
+    )
+
+    assert result.exit_code == 0
+    assert "Patch preview for billing.pricing.apply_discount" in result.output
+    assert "---" in result.output
+    assert "+++" in result.output
+    assert "return 42" in result.output
+    assert path.read_text(encoding="utf-8") == original_text
+
+
+def test_cli_patch_dry_run_json_output_is_structured_and_does_not_modify_file(tmp_path: Path) -> None:
+    path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    original_text = path.read_text(encoding="utf-8")
+    replacement_path = write_temp_python_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.pricing.apply_discount\n"
+            "# @grace.complexity 2\n"
+            "def apply_discount(price: int, percent: int) -> int:\n"
+            "    return 42\n"
+        ),
+        name="replacement.py",
+    )
+
+    result = runner().invoke(
+        CLI.app,
+        ["patch", "--dry-run", "--json", str(path), "billing.pricing.apply_discount", str(replacement_path)],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is True
+    assert payload["dry_run"] is True
+    assert payload["identity_preserved"] is True
+    assert payload["parse"]["status"] == "passed"
+    assert payload["validate"]["status"] == "passed"
+    assert payload["rollback_performed"] is False
+    assert "return 42" in payload["preview"]
+    assert path.read_text(encoding="utf-8") == original_text
 
 
 def test_cli_patch_failure_on_unknown_anchor(tmp_path: Path) -> None:
@@ -367,6 +460,8 @@ def test_cli_patch_failure_on_unknown_anchor_json_output(tmp_path: Path) -> None
     assert payload["ok"] is False
     assert payload["command"] == "patch"
     assert payload["stage"] == "target_lookup"
+    assert payload["rollback_performed"] is False
+    assert payload["parse"]["status"] == "passed"
 
 
 def test_cli_patch_failure_on_identity_mismatch(tmp_path: Path) -> None:
@@ -411,6 +506,8 @@ def test_cli_patch_failure_on_identity_mismatch_json_output(tmp_path: Path) -> N
     assert payload["ok"] is False
     assert payload["command"] == "patch"
     assert payload["stage"] == "identity"
+    assert payload["identity_preserved"] is False
+    assert payload["rollback_performed"] is False
 
 
 def test_cli_validate_command_is_thin_wrapper_over_core_apis(tmp_path: Path, monkeypatch) -> None:

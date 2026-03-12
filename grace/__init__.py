@@ -29,7 +29,15 @@ from grace.models import (
     GraceParseSuccess,
     ParseErrorCode,
 )
-from grace.patcher import PatchFailure, PatchFailureStage, PatchResult, PatchSuccess, patch_block
+from grace.patcher import (
+    PatchFailure,
+    PatchFailureStage,
+    PatchResult,
+    PatchStepResult,
+    PatchStepStatus,
+    PatchSuccess,
+    patch_block,
+)
 from grace.parser import GraceParseError, parse_python_file, try_parse_python_file
 from grace.validator import (
     ValidationFailure,
@@ -66,6 +74,8 @@ __all__ = [
     "PatchFailure",
     "PatchFailureStage",
     "PatchResult",
+    "PatchStepResult",
+    "PatchStepStatus",
     "PatchSuccess",
     "ValidationFailure",
     "ValidationIssue",

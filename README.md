@@ -6,6 +6,7 @@ GRACE v1 is a code-first framework/spec for LLM-oriented development where code 
 
 Canonical behavioral guarantees for the baseline live in [docs/v1_invariants.md](C:\Users\luckydiss\Documents\grace_framework\docs\v1_invariants.md).
 The shell-oriented agent contract lives in [docs/agent_contract.md](C:\Users\luckydiss\Documents\grace_framework\docs\agent_contract.md).
+The longer-term development plan lives in [docs/roadmap.md](C:\Users\luckydiss\Documents\grace_framework\docs\roadmap.md).
 
 ## Source Of Truth
 
@@ -28,7 +29,7 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 - `validator`: enforces hard semantic and identity consistency on parsed GRACE objects.
 - `linter`: emits soft warnings for readability, maintainability, and machine-utility quality.
 - `map`: builds a derived navigation artifact from `GraceFileModel`.
-- `patcher`: replaces a semantic block by `anchor_id` with rollback on parse or validation failure.
+- `patcher`: replaces a semantic block by `anchor_id`, supports dry-run and preview, and rolls back on parse or validation failure.
 - `cli`: thin command wrapper over the existing APIs.
 
 ## Install
@@ -130,6 +131,18 @@ Patch a block by anchor:
 grace patch examples/basic/pricing.py billing.pricing.apply_discount examples/basic/apply_discount.replacement.pyfrag
 ```
 
+Dry-run a patch without writing to disk:
+
+```bash
+grace patch examples/basic/pricing.py billing.pricing.apply_discount examples/basic/apply_discount.replacement.pyfrag --dry-run
+```
+
+Preview a semantic block diff without writing to disk:
+
+```bash
+grace patch examples/basic/pricing.py billing.pricing.apply_discount examples/basic/apply_discount.replacement.pyfrag --preview
+```
+
 Patch a block for an agent:
 
 ```bash
@@ -145,6 +158,7 @@ GRACE v1 release scope includes:
 - soft lint warnings;
 - derived map generation;
 - semantic block patching by `anchor_id`;
+- patch dry-run, preview, and structured JSON patch results;
 - a minimal CLI.
 
 Deferred beyond v1:
