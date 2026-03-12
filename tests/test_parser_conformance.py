@@ -593,7 +593,7 @@ def test_links_with_spaces_are_normalized_to_clean_anchor_ids(tmp_path: Path) ->
     )
 
 
-def test_link_to_nonexistent_anchor_is_hard_error(tmp_path: Path) -> None:
+def test_current_parser_contract_allows_unresolved_link_target_for_deferred_project_validation(tmp_path: Path) -> None:
     content = make_file(
         function_block(
             anchor="billing.pricing.choose_discount_strategy",
@@ -605,8 +605,8 @@ def test_link_to_nonexistent_anchor_is_hard_error(tmp_path: Path) -> None:
         )
     )
 
-    error, _ = parse_failure(tmp_path, content)
-    assert "unknown_link_target" in error_codes(error)
+    parsed = parse_success(tmp_path, content)
+    assert parsed.blocks[0].links == ("billing.pricing.missing_anchor",)
 
 
 def test_empty_links_annotation_is_hard_error(tmp_path: Path) -> None:

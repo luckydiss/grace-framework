@@ -194,8 +194,6 @@ def parse_python_file(path: str | Path) -> GraceFileModel:
         )
 
     _finalize_module_annotations(module, errors)
-    _validate_link_targets(blocks, errors)
-
     if errors:
         raise GraceParseError(source_path, errors)
 
@@ -526,20 +524,6 @@ def _finalize_module_annotations(module: _ModuleAccumulator, errors: list[GraceP
                 message="missing required @grace.invariant",
             )
         )
-
-
-def _validate_link_targets(blocks: list[GraceBlockMetadata], errors: list[GraceParseIssue]) -> None:
-    existing_anchor_ids = {block.anchor_id for block in blocks}
-    for block in blocks:
-        for link_target in block.links:
-            if link_target not in existing_anchor_ids:
-                errors.append(
-                    GraceParseIssue(
-                        code=ParseErrorCode.UNKNOWN_LINK_TARGET,
-                        message=f"grace.links references unknown anchor id {link_target!r}",
-                        line=block.line_start,
-                    )
-                )
 
 
 def _collect_definition_targets(tree: ast.AST) -> dict[int, _DefinitionTarget]:

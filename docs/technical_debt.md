@@ -7,6 +7,7 @@
 - The parser, validator, and linter are file/project model layers, not full repository analysis tools.
 - Patcher is single-file and single-block only.
 - Apply-plan is sequential only; it does not provide transactional all-or-nothing execution.
+- Repo graph is currently exposed through the existing map contract; there is no separate graph module or richer graph schema yet.
 
 ## Non-Goals
 

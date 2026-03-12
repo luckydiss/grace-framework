@@ -138,6 +138,40 @@ def test_build_project_map_for_two_files(tmp_path: Path) -> None:
     assert len(grace_map.anchors) == 2
 
 
+def test_project_map_builds_cross_file_link_edges(tmp_path: Path) -> None:
+    file_a = parse_file(
+        tmp_path,
+        make_file(
+            function_block(
+                anchor="billing.pricing.apply_discount",
+                complexity="6",
+                belief="Pricing thresholds remain deterministic for the project baseline.",
+                links="billing.tax.apply_tax",
+            )
+        ),
+        name="pricing.py",
+    )
+    file_b = parse_file(
+        tmp_path,
+        make_file(
+            function_block(
+                anchor="billing.tax.apply_tax",
+                signature="def apply_tax(amount: int) -> int:",
+                body="    return amount",
+            ),
+            header=module_header(module_id="billing.tax", interfaces="apply_tax(amount:int) -> int"),
+        ),
+        name="tax.py",
+    )
+
+    grace_map = MAP.build_project_map([file_a, file_b])
+    link_edges = [edge for edge in grace_map.edges if edge.type == "anchor_links_to_anchor"]
+
+    assert len(link_edges) == 1
+    assert link_edges[0].source == "billing.pricing.apply_discount"
+    assert link_edges[0].target == "billing.tax.apply_tax"
+
+
 def test_map_does_not_introduce_new_identity(tmp_path: Path) -> None:
     grace_file = parse_file(
         tmp_path,

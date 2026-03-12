@@ -61,7 +61,7 @@ For `parse`, `validate`, `lint`, and `patch`:
 For `map`:
 
 - `--json` prints the raw derived GRACE map payload.
-- For directory input, this is a project map built from all discovered GRACE files.
+- For directory input, this is a project semantic graph built from all discovered GRACE files.
 
 ## Exit Codes
 
@@ -384,6 +384,23 @@ Patch plan semantics:
 - Current baseline is not transactional:
   already-applied earlier entries are not rolled back automatically.
 
+### `map --json`
+
+For project input, `map --json` is the canonical cross-file semantic graph contract.
+
+It contains:
+
+- `modules[]`
+- `anchors[]`
+- `edges[]`
+
+At minimum, `edges[]` includes:
+
+- `module_has_anchor`
+- `anchor_links_to_anchor`
+
+Cross-file `grace.links` are preserved as `anchor_links_to_anchor` edges when the target anchor exists somewhere in the parsed project.
+
 ## Notes For Agents
 
 - Prefer `--json` for machine workflows.
@@ -393,5 +410,4 @@ Patch plan semantics:
 - Prefer `apply-plan` when the intended change spans multiple anchors.
 - Treat `patch` success as provisional until a follow-up `validate --json` succeeds.
 - Do not infer semantic identity from line numbers or file offsets.
-- Current baseline limitation:
-  cross-file `grace.links` are not yet part of the parse-stable project contract because link resolution is still file-local in the parser.
+- Treat repo `map --json` as the canonical cross-file graph view for current GRACE baseline.

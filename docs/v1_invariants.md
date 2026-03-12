@@ -17,6 +17,7 @@ These are derived from parsed `GraceFileModel` objects:
 - Validation and lint reports
 - Patch results after re-parse and re-validation
 - Patch plans and apply-plan execution results
+- Project maps that expose cross-file semantic graph edges
 
 Derived artifacts must not invent new `module_id` or `anchor_id`.
 
@@ -29,6 +30,7 @@ Derived artifacts must not invent new `module_id` or `anchor_id`.
 - Enforces required module header fields and block annotation structure.
 - Enforces `complexity` as integer `1..10`.
 - Enforces `belief` when `complexity >= 6`.
+- Preserves `grace.links` as parsed semantic references without requiring file-local target resolution.
 
 ## Validator Guarantees
 
@@ -72,6 +74,7 @@ Derived artifacts must not invent new `module_id` or `anchor_id`.
 - `apply-plan` supports `--json` for machine-readable multi-anchor execution results.
 - `patch` also supports `--dry-run` and `--preview` for agent-safe preflight and review.
 - `map --json` emits the raw derived GRACE map payload.
+- Project `map --json` is the canonical cross-file semantic graph contract in the current baseline.
 - Exit code behavior is stable:
   parse/validate/map/patch/apply-plan return non-zero on hard failure;
   lint returns zero on warnings and non-zero only on parse or validation failure.

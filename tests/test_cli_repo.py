@@ -247,6 +247,47 @@ def test_cli_validate_directory_json_success_for_multiple_valid_files(tmp_path: 
     assert payload["validation"] == {"ok": True, "scope": "project"}
 
 
+def test_cli_validate_directory_json_allows_cross_file_links_when_target_exists(tmp_path: Path) -> None:
+    repo_dir = create_repo_dir(tmp_path)
+    write_temp_python_file(
+        repo_dir,
+        "src/pricing.py",
+        make_file(
+            module_header(
+                module_id="billing.pricing",
+                interfaces="choose_discount_strategy(customer_tier:str) -> int",
+            ),
+            function_block(
+                anchor="billing.pricing.choose_discount_strategy",
+                complexity="6",
+                belief="Pricing thresholds remain deterministic for the project baseline.",
+                links="billing.tax.apply_tax",
+                signature="def choose_discount_strategy(customer_tier: str) -> int:",
+                body="    return 0",
+            ),
+        ),
+    )
+    write_temp_python_file(
+        repo_dir,
+        "src/tax.py",
+        make_file(
+            module_header(module_id="billing.tax", interfaces="apply_tax(amount:int) -> int"),
+            function_block(
+                anchor="billing.tax.apply_tax",
+                signature="def apply_tax(amount: int) -> int:",
+                body="    return amount",
+            ),
+        ),
+    )
+
+    result = runner().invoke(CLI.app, ["validate", "--json", str(repo_dir)])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is True
+    assert payload["scope"] == "project"
+
+
 def test_cli_validate_directory_json_failure_for_project_issue(tmp_path: Path) -> None:
     repo_dir = create_repo_dir(tmp_path)
     write_temp_python_file(
@@ -346,6 +387,51 @@ def test_cli_map_directory_json_success(tmp_path: Path) -> None:
     assert payload["grace_version"] == "v1"
     assert len(payload["modules"]) == 2
     assert len(payload["anchors"]) == 2
+
+
+def test_cli_map_directory_json_includes_cross_file_anchor_link_edge(tmp_path: Path) -> None:
+    repo_dir = create_repo_dir(tmp_path)
+    write_temp_python_file(
+        repo_dir,
+        "src/pricing.py",
+        make_file(
+            module_header(
+                module_id="billing.pricing",
+                interfaces="choose_discount_strategy(customer_tier:str) -> int",
+            ),
+            function_block(
+                anchor="billing.pricing.choose_discount_strategy",
+                complexity="6",
+                belief="Pricing thresholds remain deterministic for the project baseline.",
+                links="billing.tax.apply_tax",
+                signature="def choose_discount_strategy(customer_tier: str) -> int:",
+                body="    return 0",
+            ),
+        ),
+    )
+    write_temp_python_file(
+        repo_dir,
+        "src/tax.py",
+        make_file(
+            module_header(module_id="billing.tax", interfaces="apply_tax(amount:int) -> int"),
+            function_block(
+                anchor="billing.tax.apply_tax",
+                signature="def apply_tax(amount: int) -> int:",
+                body="    return amount",
+            ),
+        ),
+    )
+
+    result = runner().invoke(CLI.app, ["map", "--json", str(repo_dir)])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert {
+        (edge["type"], edge["source"], edge["target"])
+        for edge in payload["edges"]
+    } >= {
+        ("anchor_links_to_anchor", "billing.pricing.choose_discount_strategy", "billing.tax.apply_tax"),
+    }
 
 
 def test_cli_directory_json_discovery_failure_when_no_grace_files_found(tmp_path: Path) -> None:

@@ -28,7 +28,7 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 - `parser`: parses inline annotations and binds them to `def`, `async def`, `class`, and methods.
 - `validator`: enforces hard semantic and identity consistency on parsed GRACE objects.
 - `linter`: emits soft warnings for readability, maintainability, and machine-utility quality.
-- `map`: builds a derived navigation artifact from `GraceFileModel`.
+- `map`: builds a derived semantic graph artifact from `GraceFileModel`, including repo-level cross-file anchor edges.
 - `patcher`: replaces a semantic block by `anchor_id`, supports dry-run and preview, and rolls back on parse or validation failure.
 - `plan`: loads a derived `PatchPlan` artifact and applies `replace_block` entries sequentially.
 - `cli`: thin command wrapper over the existing APIs.
@@ -170,6 +170,7 @@ GRACE v1 release scope includes:
 - file and project validation;
 - soft lint warnings;
 - derived map generation;
+- repo-level cross-file semantic graph edges in project maps;
 - semantic block patching by `anchor_id`;
 - patch dry-run, preview, and structured JSON patch results;
 - derived patch plans with sequential `apply-plan` execution;

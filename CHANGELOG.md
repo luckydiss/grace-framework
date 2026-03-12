@@ -13,6 +13,8 @@
 - Added structured patch results with identity preservation, parse/validate step status, preview, hashes, and rollback state.
 - Added derived `PatchPlan` support with sequential `apply-plan` execution.
 - Added machine-readable `apply-plan --json` output for agent workflows.
+- Moved `grace.links` target existence checks out of parser and into validator/project scope.
+- Made repo `map --json` the canonical cross-file semantic graph contract for agents.
 
 ## v0.1.0
 
