@@ -4,6 +4,8 @@ GRACE stands for Graph-RAG Anchored Code Engineering.
 
 GRACE v1 is a code-first framework/spec for LLM-oriented development where code is addressed by semantic anchors instead of line numbers. The source of truth is inline GRACE annotations in Python files.
 
+Canonical behavioral guarantees for the baseline live in [docs/v1_invariants.md](C:\Users\luckydiss\Documents\grace_framework\docs\v1_invariants.md).
+
 ## Source Of Truth
 
 GRACE v1 is inline-first:
