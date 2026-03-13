@@ -31,6 +31,22 @@ This matrix records current GRACE adapter coverage after the TypeScript pilot, t
 | TypeScript | Pilot | Basic + async-shape + service-shape + links-shape | Stable | Narrow runtime coverage; unsupported arrow/function-expression bindings fail predictably. |
 | Go | Pilot | Basic + async-shape equivalent + service-shape + links-shape | Stable | Async parity is represented by a regular-function equivalent; interface blocks remain unsupported. |
 
+## Support Tier Policy
+
+GRACE uses three support tiers for adapters:
+
+| Tier | Meaning | Requirements |
+| --- | --- | --- |
+| Reference | Normative baseline for adapter behavior | broadest docs coverage, conformance, parity, eval stability |
+| Pilot | Narrow but honest runtime support | explicit unsupported syntax list, conformance, parity, eval coverage |
+| Experimental | Boundary proof only | not yet a contract baseline; may lack full parity/eval coverage |
+
+Current status:
+
+- Python = Reference
+- TypeScript = Pilot
+- Go = Pilot
+
 ## Multi-Language Behavior Guarantees
 
 Across Python, TypeScript, and Go adapters, GRACE guarantees:

@@ -75,6 +75,20 @@ To add a new language later:
 
 Current runtime support includes Python plus limited `.ts` and `.go` pilots.
 
+## Adapter Authoring Workflow
+
+The normative implementation checklist for future adapters lives in `docs/adapter_authoring.md`.
+
+In practice, a new adapter should be introduced with:
+
+1. adapter implementation
+2. dispatch registration
+3. basic example
+4. parity fixtures
+5. conformance coverage
+6. eval coverage
+7. compatibility/docs updates
+
 ## Important Non-Goals
 
 This layer does not:

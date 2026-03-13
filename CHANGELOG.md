@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added `docs/adapter_authoring.md` to define a repeatable workflow for future language adapters.
+- Added reusable adapter harness helpers for parity, conformance, and eval tests.
+- Documented support tiers (`reference`, `pilot`, `experimental`) for adapter maturity.
 - Hardened repo discovery so only files with a real top-level `@grace.module` preamble become directory parse/map candidates.
 - Restored successful `grace parse . --json` and `grace map . --json` on the repository root without weakening parser semantics.
 - Added protocol freeze documentation for CLI/JSON envelopes, curated validation scopes, and derived artifact policy.

@@ -8,9 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import pytest
-
-
-ROOT = Path(__file__).resolve().parents[1]
+from tests._adapter_harness import ADAPTER_CASES, ROOT, write_adapter_fixture
 
 
 @lru_cache(maxsize=1)
@@ -68,25 +66,9 @@ def _reload_modules():
     MODELS, PARSER, LANGUAGE_ADAPTER, PYTHON_ADAPTER, GO_ADAPTER, TYPESCRIPT_ADAPTER = load_modules()
 
 
-def write_fixture_file(tmp_path: Path, name: str, content: str) -> Path:
-    writable_dir = tmp_path.parent / f"{tmp_path.name}_adapter_conformance_files"
-    writable_dir.mkdir(parents=True, exist_ok=True)
-    try:
-        writable_dir.chmod(0o777)
-    except OSError:
-        pass
-    path = writable_dir / name
-    path.write_text(textwrap.dedent(content).lstrip(), encoding="utf-8")
-    return path
-
-
 @pytest.mark.parametrize(
     ("path", "module_name", "class_name"),
-    [
-        (ROOT / "examples" / "parity" / "python" / "basic.py", "python_adapter", "PythonAdapter"),
-        (ROOT / "examples" / "parity" / "typescript" / "basic.ts", "typescript_adapter", "TypeScriptAdapter"),
-        (ROOT / "examples" / "parity" / "go" / "basic.go", "go_adapter", "GoAdapter"),
-    ],
+    [(case["parity_basic"], f"{case['language']}_adapter", case["class_name"]) for case in ADAPTER_CASES],
 )
 def test_adapter_registry_detects_supported_file_types(path: Path, module_name: str, class_name: str) -> None:
     adapter = LANGUAGE_ADAPTER.get_language_adapter_for_path(path)
@@ -101,11 +83,7 @@ def test_adapter_registry_detects_supported_file_types(path: Path, module_name: 
 
 @pytest.mark.parametrize(
     "path",
-    [
-        ROOT / "examples" / "parity" / "python" / "basic.py",
-        ROOT / "examples" / "parity" / "typescript" / "basic.ts",
-        ROOT / "examples" / "parity" / "go" / "basic.go",
-    ],
+    [case["parity_basic"] for case in ADAPTER_CASES],
 )
 def test_adapter_build_grace_file_model_returns_grace_file_model(path: Path) -> None:
     adapter = LANGUAGE_ADAPTER.get_language_adapter_for_path(path)
@@ -117,11 +95,7 @@ def test_adapter_build_grace_file_model_returns_grace_file_model(path: Path) -> 
 
 @pytest.mark.parametrize(
     "path",
-    [
-        ROOT / "examples" / "parity" / "python" / "basic.py",
-        ROOT / "examples" / "parity" / "typescript" / "basic.ts",
-        ROOT / "examples" / "parity" / "go" / "basic.go",
-    ],
+    [case["parity_basic"] for case in ADAPTER_CASES],
 )
 def test_adapter_output_is_deterministic(path: Path) -> None:
     adapter = LANGUAGE_ADAPTER.get_language_adapter_for_path(path)
@@ -133,11 +107,7 @@ def test_adapter_output_is_deterministic(path: Path) -> None:
 
 @pytest.mark.parametrize(
     "path",
-    [
-        ROOT / "examples" / "parity" / "python" / "basic.py",
-        ROOT / "examples" / "parity" / "typescript" / "basic.ts",
-        ROOT / "examples" / "parity" / "go" / "basic.go",
-    ],
+    [case["parity_basic"] for case in ADAPTER_CASES],
 )
 def test_adapter_block_spans_are_valid_and_monotonic(path: Path) -> None:
     adapter = LANGUAGE_ADAPTER.get_language_adapter_for_path(path)
@@ -217,7 +187,7 @@ def test_adapter_extracts_module_metadata(path: Path, expected_purpose: str) -> 
     ],
 )
 def test_invalid_grace_files_produce_predictable_parse_failures(tmp_path: Path, name: str, content: str) -> None:
-    path = write_fixture_file(tmp_path, name, content)
+    path = write_adapter_fixture(tmp_path, name, content)
 
     with pytest.raises(Exception) as exc_info:
         PARSER.parse_python_file(path)

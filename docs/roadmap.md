@@ -160,6 +160,26 @@ Explicit non-goals for this stage:
 - UI / IDE work
 - source-of-truth expansion
 
+## v0.18 - Adapter SDK Hardening
+
+Goal:
+
+Make adding a new adapter a routine engineering task instead of a one-off architecture exercise.
+
+Focus:
+
+- adapter authoring guide
+- reusable conformance/parity/eval harness patterns
+- support tier policy
+- fixture templates and release checklist
+
+Explicit non-goals for this stage:
+
+- new adapter runtime
+- broader syntax coverage for existing pilots
+- core semantics changes
+- Tree-sitter refactors beyond current pilot needs
+
 ## v0.3 - Strong Patch Workflow
 
 Goal:

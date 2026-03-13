@@ -1,55 +1,10 @@
 from __future__ import annotations
 
 import textwrap
-from pathlib import Path
 
 from grace.models import ParseErrorCode
 from grace.parser import parse_python_file
-
-
-ROOT = Path(__file__).resolve().parents[1]
-
-
-def _semantic_shape(path: Path) -> dict[str, object]:
-    grace_file = parse_python_file(path)
-    return {
-        "module_id": grace_file.module.module_id,
-        "block_count": len(grace_file.blocks),
-        "blocks": [
-            {
-                "anchor_id": block.anchor_id,
-                "kind": block.kind.value,
-                "complexity": block.complexity,
-                "links": list(block.links),
-                "is_async": block.is_async,
-            }
-            for block in grace_file.blocks
-        ],
-    }
-
-
-def _minimal_common_shape(path: Path) -> dict[str, object]:
-    grace_file = parse_python_file(path)
-    return {
-        "module_id": grace_file.module.module_id,
-        "block_count": len(grace_file.blocks),
-        "blocks": [
-            {
-                "anchor_id": block.anchor_id,
-                "complexity": block.complexity,
-                "links": list(block.links),
-            }
-            for block in grace_file.blocks
-        ],
-    }
-
-
-def _write_fixture(tmp_path: Path, name: str, content: str) -> Path:
-    fixture_dir = tmp_path.parent / f"{tmp_path.name}_adapter_eval_files"
-    fixture_dir.mkdir(parents=True, exist_ok=True)
-    path = fixture_dir / name
-    path.write_text(textwrap.dedent(content).lstrip(), encoding="utf-8")
-    return path
+from tests._adapter_harness import PARITY_GROUPS, ROOT, minimal_common_shape, normalized_semantic_shape, write_adapter_fixture
 
 
 def _adapter_eval_metrics(tmp_path: Path) -> dict[str, float]:
@@ -77,39 +32,16 @@ def _adapter_eval_metrics(tmp_path: Path) -> dict[str, float]:
         parse_successes += 1
         deterministic_successes += int(first.model_dump(mode="python") == second.model_dump(mode="python"))
 
-    parity_groups = (
-        (
-            ROOT / "examples" / "parity" / "python" / "basic.py",
-            ROOT / "examples" / "parity" / "typescript" / "basic.ts",
-            ROOT / "examples" / "parity" / "go" / "basic.go",
-        ),
-        (
-            ROOT / "examples" / "parity" / "python" / "async_shape.py",
-            ROOT / "examples" / "parity" / "typescript" / "async_shape.ts",
-            ROOT / "examples" / "parity" / "go" / "async_shape.go",
-        ),
-        (
-            ROOT / "examples" / "parity" / "python" / "service_shape.py",
-            ROOT / "examples" / "parity" / "typescript" / "service_shape.ts",
-            ROOT / "examples" / "parity" / "go" / "service_shape.go",
-        ),
-        (
-            ROOT / "examples" / "parity" / "python" / "links_shape.py",
-            ROOT / "examples" / "parity" / "typescript" / "links_shape.ts",
-            ROOT / "examples" / "parity" / "go" / "links_shape.go",
-        ),
-    )
-
     parity_successes = 0
-    for paths in parity_groups:
-        shapes = [_minimal_common_shape(path) for path in paths]
+    for paths in PARITY_GROUPS:
+        shapes = [minimal_common_shape(path) for path in paths]
         parity_successes += int(shapes[0] == shapes[1] == shapes[2])
 
-    unsupported_cases = (
-        (
-            _write_fixture(
-                tmp_path,
-                "python_inert.py",
+        unsupported_cases = (
+            (
+                write_adapter_fixture(
+                    tmp_path,
+                    "python_inert.py",
                 """
                 # @grace.module demo.eval.python_inert
                 # @grace.purpose Python inert unsupported syntax fixture.
@@ -125,11 +57,11 @@ def _adapter_eval_metrics(tmp_path: Path) -> dict[str, float]:
                 """,
             ),
             True,
-        ),
-        (
-            _write_fixture(
-                tmp_path,
-                "python_invalid.py",
+            ),
+            (
+                write_adapter_fixture(
+                    tmp_path,
+                    "python_invalid.py",
                 """
                 # @grace.module demo.eval.python_invalid
                 # @grace.purpose Python invalid unsupported syntax fixture.
@@ -142,11 +74,11 @@ def _adapter_eval_metrics(tmp_path: Path) -> dict[str, float]:
                 """,
             ),
             False,
-        ),
-        (
-            _write_fixture(
-                tmp_path,
-                "typescript_inert.ts",
+            ),
+            (
+                write_adapter_fixture(
+                    tmp_path,
+                    "typescript_inert.ts",
                 """
                 // @grace.module demo.eval.typescript_inert
                 // @grace.purpose TypeScript inert unsupported syntax fixture.
@@ -163,11 +95,11 @@ def _adapter_eval_metrics(tmp_path: Path) -> dict[str, float]:
                 """,
             ),
             True,
-        ),
-        (
-            _write_fixture(
-                tmp_path,
-                "typescript_invalid.ts",
+            ),
+            (
+                write_adapter_fixture(
+                    tmp_path,
+                    "typescript_invalid.ts",
                 """
                 // @grace.module demo.eval.typescript_invalid
                 // @grace.purpose TypeScript invalid unsupported syntax fixture.
@@ -180,11 +112,11 @@ def _adapter_eval_metrics(tmp_path: Path) -> dict[str, float]:
                 """,
             ),
             False,
-        ),
-        (
-            _write_fixture(
-                tmp_path,
-                "go_inert.go",
+            ),
+            (
+                write_adapter_fixture(
+                    tmp_path,
+                    "go_inert.go",
                 """
                 // @grace.module demo.eval.go_inert
                 // @grace.purpose Go inert unsupported syntax fixture.
@@ -203,11 +135,11 @@ def _adapter_eval_metrics(tmp_path: Path) -> dict[str, float]:
                 """,
             ),
             True,
-        ),
-        (
-            _write_fixture(
-                tmp_path,
-                "go_invalid.go",
+            ),
+            (
+                write_adapter_fixture(
+                    tmp_path,
+                    "go_invalid.go",
                 """
                 // @grace.module demo.eval.go_invalid
                 // @grace.purpose Go invalid unsupported syntax fixture.
@@ -239,7 +171,7 @@ def _adapter_eval_metrics(tmp_path: Path) -> dict[str, float]:
 
     case_count = len(unsupported_cases)
     parse_count = len(parse_targets)
-    parity_count = len(parity_groups)
+    parity_count = len(PARITY_GROUPS)
     return {
         "adapter_parse_success_rate": parse_successes / parse_count,
         "semantic_parity_rate": parity_successes / parity_count,
@@ -260,7 +192,7 @@ def test_adapter_eval_metrics_are_stable(tmp_path: Path) -> None:
 
 
 def test_basic_python_and_typescript_fixtures_preserve_strict_shape() -> None:
-    python_shape = _semantic_shape(ROOT / "examples" / "parity" / "python" / "basic.py")
-    typescript_shape = _semantic_shape(ROOT / "examples" / "parity" / "typescript" / "basic.ts")
+    python_shape = normalized_semantic_shape(ROOT / "examples" / "parity" / "python" / "basic.py")
+    typescript_shape = normalized_semantic_shape(ROOT / "examples" / "parity" / "typescript" / "basic.ts")
 
     assert python_shape["blocks"] == typescript_shape["blocks"]

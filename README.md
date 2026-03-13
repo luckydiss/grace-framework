@@ -11,6 +11,7 @@ The self-hosting workflow lives in [docs/self_hosting.md](C:\Users\luckydiss\Doc
 The agent workflow playbook lives in [docs/agent_playbook.md](C:\Users\luckydiss\Documents\grace_framework\docs\agent_playbook.md).
 The language integration architecture lives in [docs/language_integration.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_integration.md).
 The frozen adapter contract lives in [docs/language_adapter_contract.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_adapter_contract.md).
+The adapter authoring workflow lives in [docs/adapter_authoring.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_authoring.md).
 The near-stable CLI/protocol freeze lives in [docs/protocol_freeze.md](C:\Users\luckydiss\Documents\grace_framework\docs\protocol_freeze.md).
 The TypeScript pilot adapter lives in [docs/typescript_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\typescript_adapter.md).
 The Go pilot adapter lives in [docs/go_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\go_adapter.md).
@@ -65,6 +66,7 @@ GRACE currently supports:
 - Go as a pilot adapter
 
 All three adapters normalize into the same `GraceFileModel` contract, so validator, linter, map, query, impact, read, planner, and patch layers remain unchanged.
+Adapter growth is now guided by a reusable authoring/test workflow rather than one-off per-language integration work.
 
 ## Protocol Status
 
