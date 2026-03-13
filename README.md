@@ -30,6 +30,9 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 - `validator`: enforces hard semantic and identity consistency on parsed GRACE objects.
 - `linter`: emits soft warnings for readability, maintainability, and machine-utility quality.
 - `map`: builds a derived semantic graph artifact from `GraceFileModel`, including repo-level cross-file anchor edges.
+- `query`: provides deterministic read-only graph navigation over derived maps.
+- `impact`: computes deterministic reverse-dependency impact sets over derived maps.
+- `read`: loads anchor-local context without reading whole files at the agent layer.
 - `patcher`: replaces a semantic block by `anchor_id`, supports dry-run and preview, and rolls back on parse or validation failure.
 - `plan`: loads a derived `PatchPlan` artifact and applies `replace_block` entries sequentially.
 - `cli`: thin command wrapper over the existing APIs.
@@ -127,6 +130,24 @@ Build a project JSON map:
 grace map repo/ --json
 ```
 
+Query project anchors:
+
+```bash
+grace query anchors repo/ --json
+```
+
+Inspect reverse-dependency impact:
+
+```bash
+grace impact repo/ billing.tax.apply_tax --json
+```
+
+Read anchor-local context:
+
+```bash
+grace read repo/ billing.tax.apply_tax --json
+```
+
 Patch a block by anchor:
 
 ```bash
@@ -210,6 +231,8 @@ GRACE v1 release scope includes:
 - soft lint warnings;
 - derived map generation;
 - repo-level cross-file semantic graph edges in project maps;
+- read-only graph queries and reverse-dependency impact analysis;
+- anchor-local context loading through the read layer;
 - semantic block patching by `anchor_id`;
 - patch dry-run, preview, and structured JSON patch results;
 - derived patch plans with sequential `apply-plan` execution, dry-run, preview, and stable failure taxonomy;

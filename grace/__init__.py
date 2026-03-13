@@ -80,7 +80,8 @@ from grace.validator import (
 
 
 # @grace.anchor grace.api._public_api
-# @grace.complexity 3
+# @grace.complexity 4
+# @grace.links grace.api.__getattr__
 def _public_api() -> tuple[str, ...]:
     return (
         "ApplyPlanFailure",
@@ -122,14 +123,19 @@ def _public_api() -> tuple[str, ...]:
         "PatchStepStatus",
         "PatchSuccess",
         "QueryLookupError",
+        "ReadAnchorContext",
+        "ReadLookupError",
         "ValidationFailure",
         "ValidationIssue",
         "ValidationIssueCode",
         "ValidationResult",
         "ValidationSuccess",
         "apply_patch_plan",
+        "build_anchor_neighbors",
         "build_file_map",
         "build_project_map",
+        "extract_anchor_annotations",
+        "extract_anchor_code",
         "impact_direct",
         "impact_summary",
         "impact_transitive",
@@ -146,10 +152,43 @@ def _public_api() -> tuple[str, ...]:
         "query_links",
         "query_modules",
         "query_neighbors",
+        "read_anchor_context",
         "try_parse_python_file",
         "validate_file",
         "validate_project",
     )
+
+
+# @grace.anchor grace.api.__getattr__
+# @grace.complexity 4
+def __getattr__(name: str) -> object:
+    if name in {
+        "ReadAnchorContext",
+        "ReadLookupError",
+        "build_anchor_neighbors",
+        "extract_anchor_annotations",
+        "extract_anchor_code",
+        "read_anchor_context",
+    }:
+        from grace.read import (
+            ReadAnchorContext,
+            ReadLookupError,
+            build_anchor_neighbors,
+            extract_anchor_annotations,
+            extract_anchor_code,
+            read_anchor_context,
+        )
+
+        exported = {
+            "ReadAnchorContext": ReadAnchorContext,
+            "ReadLookupError": ReadLookupError,
+            "build_anchor_neighbors": build_anchor_neighbors,
+            "extract_anchor_annotations": extract_anchor_annotations,
+            "extract_anchor_code": extract_anchor_code,
+            "read_anchor_context": read_anchor_context,
+        }
+        return exported[name]
+    raise AttributeError(f"module 'grace' has no attribute {name!r}")
 
 
 __all__ = list(_public_api())

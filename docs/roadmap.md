@@ -323,128 +323,201 @@ Explicit non-goals for this stage:
 - HTML/CSS/Kubernetes support all at once
 - sidecar expansion
 
-## v0.7 - Frontend Abstraction
+## v0.7 - Graph Query Layer
 
 Goal:
 
-Separate Core from Python-specific assumptions.
+Add a read-only derived query layer over `GraceMap` so agents can navigate the repo graph without manually decoding raw map output.
 
-Introduce:
+Required work:
 
-- `GraceFrontend`
+- deterministic query ordering
+- file/repo-scoped collection queries
+- anchor-scoped queries
+- explicit outgoing and incoming semantics
+- CLI-friendly incoming naming as `dependents`
+
+Representative commands:
+
+- `grace query modules <path> --json`
+- `grace query anchors <path> --json`
+- `grace query anchor <path> <anchor_id> --json`
+- `grace query links <path> <anchor_id> --json`
+- `grace query dependents <path> <anchor_id> --json`
+- `grace query neighbors <path> <anchor_id> --json`
+
+Explicit non-goals:
+
+- graph visualization
+- ranking
+- parser changes
+- patch semantics changes
+
+## v0.8 - Impact Analysis
+
+Goal:
+
+Let agents determine the consequences of changing an anchor through deterministic graph traversal.
+
+New derived layer:
+
+- impact layer
+
+New command:
+
+- `grace impact <path> <anchor_id> --json`
+
+Impact output should include:
+
+- direct dependents
+- transitive dependents
+- affected modules
+
+Constraints:
+
+- no new source of truth
+- no parser semantics changes
+- no AI inference
+- deterministic traversal only over derived graph data
+
+## v0.9 - Anchor Context Loading
+
+Goal:
+
+Let agents load usable anchor context without reading whole files.
+
+New command:
+
+- `grace read <path> <anchor_id> --json`
+
+Read output should include:
+
+- block annotations
+- block code
+- neighboring anchors
+- links
+- module id
+- file path
+- line range
+
+Canonical agent flow becomes:
+
+map -> query -> read -> impact -> patch
+
+## v0.10 - Agent Playbook
+
+Goal:
+
+Freeze the canonical workflow for shell-driven AI agents.
+
+New document:
+
+- `docs/agent_playbook.md`
+
+The playbook should standardize:
+
+- `map`
+- `query`
+- `impact`
+- `read`
+- `patch / apply-plan`
+- `validate`
+- `lint`
+
+It should include concrete examples for:
+
+- Codex
+- Claude Code
+- shell-driven agents
+
+## v0.11 - Self-Hosting Completion
+
+Goal:
+
+Complete the migration of GRACE development onto GRACE itself.
+
+All files in `grace/` should eventually carry:
+
+- anchors
+- invariants
+- complexity
+- belief where required
+
+Outcome:
+
+GRACE becomes a self-hosted development framework rather than only a framework that can annotate examples and selected core modules.
+
+## v0.12 - Frontend Abstraction
+
+Goal:
+
+Separate the language-specific parsing frontend from the stable GRACE core.
+
+Target structure:
+
+frontend/
+    python/
+    typescript/
+    go/
 
 Frontend responsibilities:
 
-- find annotations
-- bind annotations to semantic entities
-- determine block kind
-- compute block span
-- produce `GraceFileModel`-compatible output
+- parsing
+- block detection
+- annotation extraction
 
 Core remains responsible for:
 
 - validator
 - linter
 - map
+- graph
 - patch plans
 - agent contract
-- project graph
-- CLI JSON contract
+- query and impact layers
 
-Deferred:
-
-- rewriting everything into a universal parser immediately
-- deleting the Python frontend before a second stable frontend exists
-
-## v0.8 - Tree-sitter Frontends
+## v0.13 - Tree-sitter Integration (Optional)
 
 Goal:
 
-Use Tree-sitter as a parsing substrate for additional frontends.
+Introduce Tree-sitter as a reusable CST and block-detection substrate for new frontends.
 
-Tree-sitter is:
+Tree-sitter should be used for:
 
-- a parser substrate
-- a CST provider
-- a block/span detector
+- multi-language parsing
+- block detection
+- AST/CST traversal
 
-Tree-sitter is not:
+Candidate languages:
 
-- a replacement for GRACE architecture
-
-Recommended first new frontend:
-
+- Python
 - TypeScript
-
-Possible later frontends:
-
 - Go
-- Java
 - Rust
-- YAML/Kubernetes
-- Markdown/docs
+- SQL
+- YAML
 
 Explicit non-goals:
 
+- rewriting the architecture around Tree-sitter
+- claiming universal language support prematurely
 - supporting every language at once
-- rewriting the Python frontend before abstraction is stable
-- promising universal support prematurely
 
-## v0.9 - Domain Profiles
+## v1.0 - Stable Agent Development Platform
 
 Goal:
 
-Go beyond "code only" into docs, infra, and configs.
+Stabilize GRACE as an agent-driven development platform.
 
-Key idea:
+At this point GRACE should include:
 
-A GRACE block is an atomically and deterministically editable unit of meaning.
-
-Examples:
-
-- Python: function / class / method
-- TypeScript: function / class / method
-- YAML/Kubernetes: resource
-- Markdown: section
-- HTML: subtree
-- SQL: query block / migration unit
-
-Introduce:
-
-- frontend + domain profile
-
-Examples:
-
-- python + fastapi
-- typescript + react
-- yaml + kubernetes
-- markdown + docs
-
-At this stage sidecars may be introduced cautiously only as projection:
-
-inline annotations -> sidecar
-
-and only for:
-
-- read-only artifacts
-- external artifacts
-- generated artifacts
-- non-editable artifacts
-
-## v1.0 - Cross-Repo Semantic Layer
-
-Goal:
-
-Turn GRACE into a semantic coordination layer over repositories.
-
-At this point GRACE should support:
-
-- repo-wide graph
-- cross-artifact links
-- patch plans
-- stable agent contract
-- multi-frontend architecture
-- semantic navigation across docs/code/infra
+- deterministic semantic graph
+- graph queries
+- impact analysis
+- anchor context loading
+- patch orchestration
+- agent workflows
+- multi-language frontends
 
 ## Parallel Tracks
 
@@ -524,27 +597,23 @@ Domain Profiles define:
 
 First:
 
-- repo-level reliability
-- project JSON contracts
-- stronger patch workflow
+- graph query stability
+- impact analysis
+- anchor context loading
 
 Then:
 
-- patch plans
-- graph
-- cross-file semantics
+- agent playbook
+- self-hosting completion
 
 Then:
 
-- polyglot annotations
-- frontends
-- Tree-sitter
-- domain profiles
+- frontend abstraction
+- Tree-sitter-backed language expansion
 
 Then:
 
-- bootstrap / project generation
-- cross-repo semantic layer
+- broader agent platform stabilization
 
 ## Summary Formula
 

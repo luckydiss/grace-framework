@@ -44,16 +44,19 @@ If no GRACE-annotated Python files are found, the command fails with:
 2. `grace validate <path> --json`
 3. `grace lint <path> --json`
 4. `grace map <path> --json`
-5. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
-6. `grace patch <path> <anchor_id> <replacement_file> --json`
-7. `grace apply-plan <plan_file> --dry-run --json`
-8. `grace apply-plan <plan_file> --json`
-9. `grace validate <path> --json`
-10. `grace lint <path> --json`
+5. `grace query anchors <path> --json`
+6. `grace read <path> <anchor_id> --json`
+7. `grace impact <path> <anchor_id> --json`
+8. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
+9. `grace patch <path> <anchor_id> <replacement_file> --json`
+10. `grace apply-plan <plan_file> --dry-run --json`
+11. `grace apply-plan <plan_file> --json`
+12. `grace validate <path> --json`
+13. `grace lint <path> --json`
 
 ## Output Contract
 
-For `parse`, `validate`, `lint`, and `patch`:
+For `parse`, `validate`, `lint`, `patch`, `impact`, and `read`:
 
 - `--json` prints a single JSON object to stdout.
 - On `--json`, human-oriented multiline diagnostics are not emitted.
@@ -418,6 +421,78 @@ At minimum, `edges[]` includes:
 
 Cross-file `grace.links` are preserved as `anchor_links_to_anchor` edges when the target anchor exists somewhere in the parsed project.
 
+### `impact --json`
+
+Success:
+
+```json
+{
+  "ok": true,
+  "command": "impact",
+  "scope": "project",
+  "path": "repo/",
+  "target": "billing.tax.apply_tax",
+  "data": {
+    "direct_dependents": [],
+    "transitive_dependents": [],
+    "affected_modules": []
+  }
+}
+```
+
+Failure:
+
+```json
+{
+  "ok": false,
+  "command": "impact",
+  "scope": "project",
+  "stage": "impact",
+  "path": "repo/",
+  "target": "billing.unknown.anchor",
+  "message": "anchor_id ... does not exist in impact scope"
+}
+```
+
+### `read --json`
+
+Success:
+
+```json
+{
+  "ok": true,
+  "command": "read",
+  "scope": "project",
+  "path": "repo/",
+  "target": "billing.tax.apply_tax",
+  "data": {
+    "anchor_id": "billing.tax.apply_tax",
+    "module_id": "billing.tax",
+    "file_path": "repo/src/tax.py",
+    "line_start": 6,
+    "line_end": 9,
+    "annotations": [],
+    "code": "def apply_tax(amount: int) -> int:\n    return amount\n",
+    "links": [],
+    "neighbors": []
+  }
+}
+```
+
+Failure:
+
+```json
+{
+  "ok": false,
+  "command": "read",
+  "scope": "project",
+  "stage": "read",
+  "path": "repo/",
+  "target": "billing.unknown.anchor",
+  "message": "anchor_id ... does not exist in read scope"
+}
+```
+
 ## Notes For Agents
 
 - Prefer `--json` for machine workflows.
@@ -425,6 +500,8 @@ Cross-file `grace.links` are preserved as `anchor_links_to_anchor` edges when th
 - Treat `lint` warnings as advisory, not blocking.
 - Treat `patch --dry-run` as preflight, not as an applied change.
 - Treat `apply-plan --dry-run` as plan-level preflight, not as an applied change.
+- Use `read --json` to load one semantic block before patching instead of reading a whole file.
+- Use `impact --json` to inspect reverse dependents before touching a widely-linked anchor.
 - Prefer `apply-plan` when the intended change spans multiple anchors.
 - Treat `patch` success as provisional until a follow-up `validate --json` succeeds.
 - Do not infer semantic identity from line numbers or file offsets.

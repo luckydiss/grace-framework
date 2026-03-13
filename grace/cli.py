@@ -1201,6 +1201,84 @@ def impact_command(path: Path, anchor_id: str, as_json: bool) -> None:
         click.echo(f"- {dependent.anchor_id}")
 
 
+# @grace.anchor grace.cli.read_command
+# @grace.complexity 6
+# @grace.belief Read CLI should stay deterministic by reusing existing discovery and parse aggregation, then delegating anchor-local extraction to the derived read layer instead of inventing a second source-of-truth path.
+# @grace.links grace.cli._discover_grace_paths, grace.cli._parse_many, grace.read.read_anchor_context, grace.map.build_file_map, grace.map.build_project_map
+@app.command("read")
+@click.argument("path", type=_path_argument(dir_okay=True))
+@click.argument("anchor_id")
+@click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
+def read_command(path: Path, anchor_id: str, as_json: bool) -> None:
+    from grace.read import ReadLookupError, read_anchor_context
+
+    try:
+        scope, discovered_paths = _discover_grace_paths(path)
+    except DiscoveryError as error:
+        if as_json:
+            _emit_json(_discovery_failure_payload("read", error.path, error.message))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_discovery_failure(error.path, error.message)
+        raise click.exceptions.Exit(code=1) from error
+
+    if scope == "project":
+        parsed_files, parse_failures = _parse_many(discovered_paths)
+        if parse_failures:
+            if as_json:
+                _emit_json(_project_parse_failure_payload("read", path, parsed_files, parse_failures))
+                raise click.exceptions.Exit(code=1)
+            _emit_project_parse_failure(path, parse_failures)
+            raise click.exceptions.Exit(code=1)
+        grace_files = parsed_files
+        grace_map = build_project_map(parsed_files)
+    else:
+        try:
+            grace_file = parse_python_file(path)
+        except GraceParseError as error:
+            if as_json:
+                _emit_json(_parse_error_payload("read", error))
+                raise click.exceptions.Exit(code=1) from error
+            _emit_parse_errors(error)
+            raise click.exceptions.Exit(code=1) from error
+        grace_files = (grace_file,)
+        grace_map = build_file_map(grace_file)
+
+    try:
+        context = read_anchor_context(grace_files, grace_map, anchor_id)
+    except ReadLookupError as error:
+        if as_json:
+            _emit_json(
+                {
+                    "ok": False,
+                    "command": "read",
+                    "scope": scope,
+                    "stage": "read",
+                    "path": str(path),
+                    "target": anchor_id,
+                    "message": str(error),
+                }
+            )
+            raise click.exceptions.Exit(code=1) from error
+        click.echo(str(error), err=True)
+        raise click.exceptions.Exit(code=1) from error
+
+    if as_json:
+        _emit_json(
+            {
+                "ok": True,
+                "command": "read",
+                "scope": scope,
+                "path": str(path),
+                "target": anchor_id,
+                "data": context.model_dump(mode="json"),
+            }
+        )
+        return
+
+    click.echo(f"Read {anchor_id} from {context.file_path}:{context.line_start}-{context.line_end}")
+    click.echo(context.code.rstrip())
+
+
 # @grace.anchor grace.cli.patch_command
 # @grace.complexity 4
 # @grace.links grace.patcher.patch_block

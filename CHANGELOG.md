@@ -24,6 +24,9 @@
 - Added derived impact analysis over `GraceMap` with direct, transitive, and module-level summaries.
 - Added `grace impact <path> <anchor_id> --json` for deterministic reverse-dependency analysis.
 - Added `docs/impact_layer.md` and impact coverage tests.
+- Added derived anchor read layer over parsed files and `GraceMap`.
+- Added `grace read <path> <anchor_id> --json` for deterministic anchor-local context loading.
+- Added `docs/read_layer.md` and read-layer coverage tests.
 
 ## v0.1.0
 
