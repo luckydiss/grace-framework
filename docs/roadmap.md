@@ -263,11 +263,39 @@ Explicit non-goals for this stage:
 - fancy analytics
 - semantic ranking heuristics
 
-## v0.6 - Polyglot Annotation Syntax
+## v0.6 - Strong Execution Contract
 
 Goal:
 
-Prepare GRACE for multiple languages and file types.
+Strengthen execution semantics so GRACE is reliable not just for planning, but for deterministic agent execution.
+
+Required work:
+
+- `patch --dry-run`
+- `apply-plan --dry-run`
+- patch preview
+- apply-plan preview
+- structured JSON results for patch and apply-plan
+- stable failure taxonomy
+
+Execution priorities:
+
+- keep `patch -> parse -> validate -> rollback` discipline intact
+- keep lint warnings non-blocking unless explicitly elevated in a future version
+- make execution results maximally machine-readable for shell-driven agents
+
+Explicit non-goals for this stage:
+
+- multi-file all-or-nothing transaction
+- graph-aware execution planning
+- IDE/editor integrations
+- AST micro-edit systems
+
+## v0.6-docs - Polyglot Annotation Contract
+
+Goal:
+
+Prepare GRACE for multiple languages and file types at the specification level, without delaying execution semantics.
 
 Key principle:
 
@@ -283,10 +311,11 @@ Examples of acceptable comment-hosted forms to document:
 
 Required work:
 
-- document polyglot annotation forms
-- define canonical escaping rules
-- define whitespace rules
-- define supported comment styles for frontends
+- `docs/polyglot_annotations.md`
+- vocabulary invariants
+- comment-host syntax policy
+- whitespace and payload rules
+- frontend-readiness constraints
 
 Explicit non-goals for this stage:
 

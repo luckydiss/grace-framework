@@ -50,11 +50,17 @@ class AppliedPatchEntry(BaseModel):
     result: PatchResult
 
 
+class ApplyPlanFailureStage(str, Enum):
+    ENTRY_FAILURE = "entry_failure"
+
+
 class ApplyPlanSuccess(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     ok: Literal[True] = True
     plan: PatchPlan
+    dry_run: bool = False
+    preview: bool = False
     applied_count: int = Field(ge=0)
     entry_count: int = Field(ge=1)
     entries: tuple[AppliedPatchEntry, ...]
@@ -65,9 +71,14 @@ class ApplyPlanFailure(BaseModel):
 
     ok: Literal[False] = False
     plan: PatchPlan
+    dry_run: bool = False
+    preview: bool = False
+    stage: ApplyPlanFailureStage
     applied_count: int = Field(ge=0)
     entry_count: int = Field(ge=1)
     failed_index: int = Field(ge=0)
+    failed_path: Path
+    failed_anchor_id: str = Field(min_length=1)
     message: str = Field(min_length=1)
     entries: tuple[AppliedPatchEntry, ...] = Field(min_length=1)
 
@@ -82,13 +93,14 @@ def load_patch_plan(path: str | Path) -> PatchPlan:
     return _resolve_plan_paths(plan, base_dir=plan_path.parent)
 
 
-def apply_patch_plan(plan: PatchPlan) -> ApplyPlanResult:
+def apply_patch_plan(plan: PatchPlan, *, dry_run: bool = False, preview: bool = False) -> ApplyPlanResult:
     applied_entries: list[AppliedPatchEntry] = []
     applied_count = 0
+    effective_dry_run = dry_run or preview
 
     for index, entry in enumerate(plan.entries):
         replacement_source = _load_replacement_source(entry)
-        patch_result = patch_block(entry.path, entry.anchor_id, replacement_source)
+        patch_result = patch_block(entry.path, entry.anchor_id, replacement_source, dry_run=effective_dry_run)
         applied_entries.append(
             AppliedPatchEntry(
                 index=index,
@@ -101,9 +113,14 @@ def apply_patch_plan(plan: PatchPlan) -> ApplyPlanResult:
         if isinstance(patch_result, PatchFailure):
             return ApplyPlanFailure(
                 plan=plan.model_dump(mode="python"),
+                dry_run=effective_dry_run,
+                preview=preview,
+                stage=ApplyPlanFailureStage.ENTRY_FAILURE,
                 applied_count=applied_count,
                 entry_count=len(plan.entries),
                 failed_index=index,
+                failed_path=entry.path,
+                failed_anchor_id=entry.anchor_id,
                 message=f"patch plan failed at entry {index}",
                 entries=tuple(applied_entries),
             )
@@ -111,6 +128,8 @@ def apply_patch_plan(plan: PatchPlan) -> ApplyPlanResult:
 
     return ApplyPlanSuccess(
         plan=plan.model_dump(mode="python"),
+        dry_run=effective_dry_run,
+        preview=preview,
         applied_count=applied_count,
         entry_count=len(plan.entries),
         entries=tuple(applied_entries),
@@ -152,6 +171,7 @@ def _load_replacement_source(entry: PatchPlanEntry) -> str:
 
 __all__ = [
     "ApplyPlanFailure",
+    "ApplyPlanFailureStage",
     "ApplyPlanResult",
     "ApplyPlanSuccess",
     "AppliedPatchEntry",

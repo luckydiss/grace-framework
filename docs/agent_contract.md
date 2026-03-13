@@ -1,6 +1,6 @@
 # Agent Contract
 
-GRACE v0.4 development is aimed at shell-driven coding agents.
+GRACE v0.6 development is aimed at shell-driven coding agents.
 
 The intended consumer is a non-interactive agent that can run commands, read JSON, and then decide whether to navigate, patch, validate, or stop.
 
@@ -46,9 +46,10 @@ If no GRACE-annotated Python files are found, the command fails with:
 4. `grace map <path> --json`
 5. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
 6. `grace patch <path> <anchor_id> <replacement_file> --json`
-7. `grace apply-plan <plan_file> --json`
-8. `grace validate <path> --json`
-9. `grace lint <path> --json`
+7. `grace apply-plan <plan_file> --dry-run --json`
+8. `grace apply-plan <plan_file> --json`
+9. `grace validate <path> --json`
+10. `grace lint <path> --json`
 
 ## Output Contract
 
@@ -342,6 +343,8 @@ Success:
   "command": "apply-plan",
   "scope": "project",
   "plan_path": "examples/basic/apply_discount.plan.json",
+  "dry_run": false,
+  "preview": false,
   "entry_count": 1,
   "applied_count": 1,
   "entries": [
@@ -365,11 +368,15 @@ Failure:
   "ok": false,
   "command": "apply-plan",
   "scope": "project",
-  "stage": "apply_plan",
+  "stage": "entry_failure",
   "plan_path": "plan.json",
+  "dry_run": false,
+  "preview": false,
   "entry_count": 2,
   "applied_count": 1,
   "failed_index": 1,
+  "failed_path": "repo/src/tax.py",
+  "failed_anchor_id": "billing.tax.missing_anchor",
   "message": "patch plan failed at entry 1",
   "entries": []
 }
@@ -379,10 +386,20 @@ Patch plan semantics:
 
 - `PatchPlan` is a derived artifact, never source of truth.
 - Current operation set contains only `replace_block`.
+- `--dry-run` preflights the full plan without writing to disk.
+- `--preview` produces entry-level semantic diffs without writing to disk.
 - Entries are applied sequentially in plan order.
 - Execution stops on the first failing entry.
 - Current baseline is not transactional:
   already-applied earlier entries are not rolled back automatically.
+
+Failure taxonomy for current execution baseline:
+
+- `patch` stages:
+  `target_lookup`, `identity`, `parse`, `validate`
+- `apply-plan` stages:
+  `plan_load`, `entry_failure`
+- `apply-plan entry_failure` always includes the nested patch result for the failing entry
 
 ### `map --json`
 
@@ -407,6 +424,7 @@ Cross-file `grace.links` are preserved as `anchor_links_to_anchor` edges when th
 - For directory inputs, agents should treat discovered-file ordering as stable.
 - Treat `lint` warnings as advisory, not blocking.
 - Treat `patch --dry-run` as preflight, not as an applied change.
+- Treat `apply-plan --dry-run` as plan-level preflight, not as an applied change.
 - Prefer `apply-plan` when the intended change spans multiple anchors.
 - Treat `patch` success as provisional until a follow-up `validate --json` succeeds.
 - Do not infer semantic identity from line numbers or file offsets.

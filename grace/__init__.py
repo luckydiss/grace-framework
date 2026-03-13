@@ -21,6 +21,7 @@ from grace.map import (
 from grace.plan import (
     PATCH_PLAN_VERSION,
     ApplyPlanFailure,
+    ApplyPlanFailureStage,
     ApplyPlanResult,
     ApplyPlanSuccess,
     AppliedPatchEntry,
@@ -95,6 +96,7 @@ __all__ = [
     "PatchStepStatus",
     "PatchSuccess",
     "ApplyPlanFailure",
+    "ApplyPlanFailureStage",
     "ApplyPlanResult",
     "ApplyPlanSuccess",
     "AppliedPatchEntry",

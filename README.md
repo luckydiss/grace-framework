@@ -6,6 +6,7 @@ GRACE v1 is a code-first framework/spec for LLM-oriented development where code 
 
 Canonical behavioral guarantees for the baseline live in [docs/v1_invariants.md](C:\Users\luckydiss\Documents\grace_framework\docs\v1_invariants.md).
 The shell-oriented agent contract lives in [docs/agent_contract.md](C:\Users\luckydiss\Documents\grace_framework\docs\agent_contract.md).
+The polyglot annotation spec track lives in [docs/polyglot_annotations.md](C:\Users\luckydiss\Documents\grace_framework\docs\polyglot_annotations.md).
 The longer-term development plan lives in [docs/roadmap.md](C:\Users\luckydiss\Documents\grace_framework\docs\roadmap.md).
 
 ## Source Of Truth
@@ -162,6 +163,18 @@ Apply a patch plan for an agent:
 grace apply-plan examples/basic/apply_discount.plan.json --json
 ```
 
+Dry-run a patch plan without writing to disk:
+
+```bash
+grace apply-plan examples/basic/apply_discount.plan.json --dry-run --json
+```
+
+Preview all patch plan entries without writing to disk:
+
+```bash
+grace apply-plan examples/basic/apply_discount.plan.json --preview --json
+```
+
 ## Scope
 
 GRACE v1 release scope includes:
@@ -173,7 +186,7 @@ GRACE v1 release scope includes:
 - repo-level cross-file semantic graph edges in project maps;
 - semantic block patching by `anchor_id`;
 - patch dry-run, preview, and structured JSON patch results;
-- derived patch plans with sequential `apply-plan` execution;
+- derived patch plans with sequential `apply-plan` execution, dry-run, preview, and stable failure taxonomy;
 - a minimal CLI.
 
 Deferred beyond v1:

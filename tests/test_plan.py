@@ -202,6 +202,70 @@ def test_apply_patch_plan_successfully_applies_multiple_entries(tmp_path: Path) 
     assert "return amount + 1" in tax_path.read_text(encoding="utf-8")
 
 
+def test_apply_patch_plan_dry_run_does_not_modify_files(tmp_path: Path) -> None:
+    pricing_path = write_temp_file(
+        tmp_path,
+        make_file(function_block(anchor="billing.pricing.apply_discount")),
+        "pricing.py",
+    )
+    original_text = pricing_path.read_text(encoding="utf-8")
+    plan = PLAN.PatchPlan(
+        entries=(
+            PLAN.PatchPlanEntry(
+                path=pricing_path,
+                anchor_id="billing.pricing.apply_discount",
+                replacement_source=(
+                    "# @grace.anchor billing.pricing.apply_discount\n"
+                    "# @grace.complexity 2\n"
+                    "def apply_discount(price: int, percent: int) -> int:\n"
+                    "    return 42\n"
+                ),
+            ),
+        )
+    )
+
+    result = PLAN.apply_patch_plan(plan, dry_run=True)
+
+    assert isinstance(result, PLAN.ApplyPlanSuccess)
+    assert result.dry_run is True
+    assert result.preview is False
+    assert result.entries[0].result.ok is True
+    assert result.entries[0].result.dry_run is True
+    assert pricing_path.read_text(encoding="utf-8") == original_text
+
+
+def test_apply_patch_plan_preview_returns_diff_without_modifying_files(tmp_path: Path) -> None:
+    pricing_path = write_temp_file(
+        tmp_path,
+        make_file(function_block(anchor="billing.pricing.apply_discount")),
+        "pricing.py",
+    )
+    original_text = pricing_path.read_text(encoding="utf-8")
+    plan = PLAN.PatchPlan(
+        entries=(
+            PLAN.PatchPlanEntry(
+                path=pricing_path,
+                anchor_id="billing.pricing.apply_discount",
+                replacement_source=(
+                    "# @grace.anchor billing.pricing.apply_discount\n"
+                    "# @grace.complexity 2\n"
+                    "def apply_discount(price: int, percent: int) -> int:\n"
+                    "    return 42\n"
+                ),
+            ),
+        )
+    )
+
+    result = PLAN.apply_patch_plan(plan, preview=True)
+
+    assert isinstance(result, PLAN.ApplyPlanSuccess)
+    assert result.dry_run is True
+    assert result.preview is True
+    assert "---" in result.entries[0].result.preview
+    assert "return 42" in result.entries[0].result.preview
+    assert pricing_path.read_text(encoding="utf-8") == original_text
+
+
 def test_apply_patch_plan_stops_on_first_failure_without_transactional_rollback(tmp_path: Path) -> None:
     pricing_path = write_temp_file(
         tmp_path,
@@ -263,8 +327,11 @@ def test_apply_patch_plan_stops_on_first_failure_without_transactional_rollback(
     result = PLAN.apply_patch_plan(plan)
 
     assert isinstance(result, PLAN.ApplyPlanFailure)
+    assert result.stage is PLAN.ApplyPlanFailureStage.ENTRY_FAILURE
     assert result.applied_count == 1
     assert result.failed_index == 1
+    assert result.failed_path == tax_path
+    assert result.failed_anchor_id == "billing.tax.missing_anchor"
     assert len(result.entries) == 2
     assert result.entries[0].result.ok is True
     assert result.entries[1].result.ok is False
@@ -276,14 +343,14 @@ def test_apply_patch_plan_stops_on_first_failure_without_transactional_rollback(
 def test_apply_patch_plan_is_thin_wrapper_over_patch_block(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     path = write_temp_file(tmp_path, make_file(function_block()), "pricing.py")
     stub_file = PARSER.parse_python_file(path)
-    calls: list[tuple[Path, str, str]] = []
+    calls: list[tuple[Path, str, str, bool]] = []
 
-    def fake_patch_block(target_path: Path, anchor_id: str, replacement_source: str):
-        calls.append((target_path, anchor_id, replacement_source))
+    def fake_patch_block(target_path: Path, anchor_id: str, replacement_source: str, *, dry_run: bool = False):
+        calls.append((target_path, anchor_id, replacement_source, dry_run))
         return PATCHER.PatchSuccess(
             path=target_path,
             anchor_id=anchor_id,
-            dry_run=False,
+            dry_run=dry_run,
             parse=PATCHER.PatchStepResult(status=PATCHER.PatchStepStatus.PASSED),
             validation=PATCHER.PatchStepResult(status=PATCHER.PatchStepStatus.PASSED),
             rollback_performed=False,
@@ -321,5 +388,26 @@ def test_apply_patch_plan_is_thin_wrapper_over_patch_block(tmp_path: Path, monke
             "# @grace.complexity 2\n"
             "def apply_discount(price: int, percent: int) -> int:\n"
             "    return 42\n",
+            False,
         )
     ]
+
+    preview_result = PLAN.apply_patch_plan(plan, preview=True)
+
+    assert isinstance(preview_result, PLAN.ApplyPlanSuccess)
+    assert calls[-1] == (
+        path,
+        "billing.pricing.apply_discount",
+        "# @grace.anchor billing.pricing.apply_discount\n"
+        "# @grace.complexity 2\n"
+        "def apply_discount(price: int, percent: int) -> int:\n"
+        "    return 42\n",
+        True,
+    )
+
+
+def test_apply_patch_plan_load_failure_taxonomy_stays_in_cli_layer(tmp_path: Path) -> None:
+    invalid_plan_path = write_temp_file(tmp_path, "{not-json", "broken_plan.json")
+
+    with pytest.raises(json.JSONDecodeError):
+        PLAN.load_patch_plan(invalid_plan_path)

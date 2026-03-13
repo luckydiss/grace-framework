@@ -15,6 +15,9 @@
 - Added machine-readable `apply-plan --json` output for agent workflows.
 - Moved `grace.links` target existence checks out of parser and into validator/project scope.
 - Made repo `map --json` the canonical cross-file semantic graph contract for agents.
+- Added `apply-plan --dry-run` and `apply-plan --preview`.
+- Added stable execution-stage taxonomy for patch and apply-plan JSON results.
+- Added `docs/polyglot_annotations.md` as the parallel spec track for future frontends.
 
 ## v0.1.0
 

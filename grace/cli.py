@@ -194,6 +194,8 @@ def _apply_plan_success_payload(plan_path: Path, result: ApplyPlanSuccess) -> di
         "command": "apply-plan",
         "scope": "project",
         "plan_path": str(plan_path),
+        "dry_run": result.dry_run,
+        "preview": result.preview,
         "entry_count": result.entry_count,
         "applied_count": result.applied_count,
         "entries": [_serialize_applied_patch_entry(entry) for entry in result.entries],
@@ -205,11 +207,15 @@ def _apply_plan_failure_payload(plan_path: Path, result: ApplyPlanFailure) -> di
         "ok": False,
         "command": "apply-plan",
         "scope": "project",
-        "stage": "apply_plan",
+        "stage": result.stage.value,
         "plan_path": str(plan_path),
+        "dry_run": result.dry_run,
+        "preview": result.preview,
         "entry_count": result.entry_count,
         "applied_count": result.applied_count,
         "failed_index": result.failed_index,
+        "failed_path": str(result.failed_path),
+        "failed_anchor_id": result.failed_anchor_id,
         "message": result.message,
         "entries": [_serialize_applied_patch_entry(entry) for entry in result.entries],
     }
@@ -430,18 +436,29 @@ def _emit_patch_success(result) -> None:
 
 
 def _emit_apply_plan_success(plan_path: Path, result: ApplyPlanSuccess) -> None:
-    click.echo(f"Applied patch plan {plan_path}: {result.applied_count}/{result.entry_count} entry(s) succeeded")
+    if result.dry_run:
+        click.echo(f"Dry-run succeeded for patch plan {plan_path}: {result.applied_count}/{result.entry_count} entry(s)")
+    else:
+        click.echo(f"Applied patch plan {plan_path}: {result.applied_count}/{result.entry_count} entry(s) succeeded")
 
 
 def _emit_apply_plan_failure(plan_path: Path, result: ApplyPlanFailure) -> None:
     click.echo(
-        f"Patch plan failed at entry {result.failed_index} in {plan_path}: {result.message}",
+        f"Patch plan failed at stage {result.stage.value} for entry {result.failed_index} in {plan_path}: {result.message}",
         err=True,
     )
     failed_entry = result.entries[-1]
     failed_result = failed_entry.result
     if isinstance(failed_result, PatchFailure):
         _emit_patch_failure(failed_result)
+
+
+def _emit_apply_plan_preview(result: ApplyPlanSuccess | ApplyPlanFailure) -> None:
+    click.echo("Patch plan preview:")
+    for entry in result.entries:
+        click.echo(f"Entry {entry.index}: {entry.anchor_id} in {entry.path}")
+        preview = entry.result.preview if hasattr(entry.result, "preview") else None
+        click.echo(preview if preview else "(no diff)")
 
 
 @click.group(help="GRACE v1 CLI")
@@ -728,8 +745,10 @@ def patch_command(path: Path, anchor_id: str, replacement_file: Path, dry_run: b
 
 @app.command("apply-plan")
 @click.argument("plan_file", type=_path_argument(dir_okay=False))
+@click.option("--dry-run", is_flag=True, help="Simulate the full patch plan without writing to disk.")
+@click.option("--preview", is_flag=True, help="Show semantic block diff previews for all plan entries without writing to disk.")
 @click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
-def apply_plan_command(plan_file: Path, as_json: bool) -> None:
+def apply_plan_command(plan_file: Path, dry_run: bool, preview: bool, as_json: bool) -> None:
     try:
         plan = load_patch_plan(plan_file)
     except (json.JSONDecodeError, ValueError) as error:
@@ -740,6 +759,8 @@ def apply_plan_command(plan_file: Path, as_json: bool) -> None:
                     "command": "apply-plan",
                     "scope": "project",
                     "stage": "plan_load",
+                    "dry_run": dry_run or preview,
+                    "preview": preview,
                     "plan_path": str(plan_file),
                     "message": str(error),
                 }
@@ -748,11 +769,13 @@ def apply_plan_command(plan_file: Path, as_json: bool) -> None:
         click.echo(f"Failed to load patch plan {plan_file}: {error}", err=True)
         raise click.exceptions.Exit(code=1) from error
 
-    result = apply_patch_plan(plan)
+    result = apply_patch_plan(plan, dry_run=dry_run, preview=preview)
     if isinstance(result, ApplyPlanFailure):
         if as_json:
             _emit_json(_apply_plan_failure_payload(plan_file, result))
             raise click.exceptions.Exit(code=1)
+        if preview:
+            _emit_apply_plan_preview(result)
         _emit_apply_plan_failure(plan_file, result)
         raise click.exceptions.Exit(code=1)
 
@@ -760,6 +783,8 @@ def apply_plan_command(plan_file: Path, as_json: bool) -> None:
         _emit_json(_apply_plan_success_payload(plan_file, result))
         return
 
+    if preview:
+        _emit_apply_plan_preview(result)
     _emit_apply_plan_success(plan_file, result)
 
 

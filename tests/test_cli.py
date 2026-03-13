@@ -559,10 +559,168 @@ def test_cli_apply_plan_success_json_output(tmp_path: Path) -> None:
     assert payload["ok"] is True
     assert payload["command"] == "apply-plan"
     assert payload["scope"] == "project"
+    assert payload["dry_run"] is False
+    assert payload["preview"] is False
     assert payload["entry_count"] == 1
     assert payload["applied_count"] == 1
     assert payload["entries"][0]["result"]["ok"] is True
     assert "return 42" in pricing_path.read_text(encoding="utf-8")
+
+
+def test_cli_apply_plan_dry_run_json_output_does_not_modify_file(tmp_path: Path) -> None:
+    pricing_path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    original_text = pricing_path.read_text(encoding="utf-8")
+    replacement_path = write_temp_python_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.pricing.apply_discount\n"
+            "# @grace.complexity 2\n"
+            "def apply_discount(price: int, percent: int) -> int:\n"
+            "    return 42\n"
+        ),
+        name="replacement.py",
+    )
+    plan_path = write_temp_json_file(
+        tmp_path,
+        {
+            "grace_version": "v1",
+            "entries": [
+                {
+                    "path": str(pricing_path),
+                    "anchor_id": "billing.pricing.apply_discount",
+                    "operation": "replace_block",
+                    "replacement_file": str(replacement_path),
+                }
+            ],
+        },
+        name="plan.json",
+    )
+
+    result = runner().invoke(CLI.app, ["apply-plan", "--dry-run", "--json", str(plan_path)])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is True
+    assert payload["dry_run"] is True
+    assert payload["preview"] is False
+    assert payload["entries"][0]["result"]["dry_run"] is True
+    assert pricing_path.read_text(encoding="utf-8") == original_text
+
+
+def test_cli_apply_plan_dry_run_text_output_does_not_modify_file(tmp_path: Path) -> None:
+    pricing_path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    original_text = pricing_path.read_text(encoding="utf-8")
+    replacement_path = write_temp_python_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.pricing.apply_discount\n"
+            "# @grace.complexity 2\n"
+            "def apply_discount(price: int, percent: int) -> int:\n"
+            "    return 42\n"
+        ),
+        name="replacement.py",
+    )
+    plan_path = write_temp_json_file(
+        tmp_path,
+        {
+            "grace_version": "v1",
+            "entries": [
+                {
+                    "path": str(pricing_path),
+                    "anchor_id": "billing.pricing.apply_discount",
+                    "operation": "replace_block",
+                    "replacement_file": str(replacement_path),
+                }
+            ],
+        },
+        name="plan.json",
+    )
+
+    result = runner().invoke(CLI.app, ["apply-plan", "--dry-run", str(plan_path)])
+
+    assert result.exit_code == 0
+    assert "Dry-run succeeded for patch plan" in result.output
+    assert pricing_path.read_text(encoding="utf-8") == original_text
+
+
+def test_cli_apply_plan_preview_json_output_shows_previews_without_modifying_file(tmp_path: Path) -> None:
+    pricing_path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    original_text = pricing_path.read_text(encoding="utf-8")
+    replacement_path = write_temp_python_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.pricing.apply_discount\n"
+            "# @grace.complexity 2\n"
+            "def apply_discount(price: int, percent: int) -> int:\n"
+            "    return 42\n"
+        ),
+        name="replacement.py",
+    )
+    plan_path = write_temp_json_file(
+        tmp_path,
+        {
+            "grace_version": "v1",
+            "entries": [
+                {
+                    "path": str(pricing_path),
+                    "anchor_id": "billing.pricing.apply_discount",
+                    "operation": "replace_block",
+                    "replacement_file": str(replacement_path),
+                }
+            ],
+        },
+        name="plan.json",
+    )
+
+    result = runner().invoke(CLI.app, ["apply-plan", "--preview", "--json", str(plan_path)])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is True
+    assert payload["dry_run"] is True
+    assert payload["preview"] is True
+    assert "---" in payload["entries"][0]["result"]["preview"]
+    assert "return 42" in payload["entries"][0]["result"]["preview"]
+    assert pricing_path.read_text(encoding="utf-8") == original_text
+
+
+def test_cli_apply_plan_preview_text_output_shows_previews_without_modifying_file(tmp_path: Path) -> None:
+    pricing_path = write_temp_python_file(tmp_path, make_file(function_block()), name="pricing.py")
+    original_text = pricing_path.read_text(encoding="utf-8")
+    replacement_path = write_temp_python_file(
+        tmp_path,
+        (
+            "# @grace.anchor billing.pricing.apply_discount\n"
+            "# @grace.complexity 2\n"
+            "def apply_discount(price: int, percent: int) -> int:\n"
+            "    return 42\n"
+        ),
+        name="replacement.py",
+    )
+    plan_path = write_temp_json_file(
+        tmp_path,
+        {
+            "grace_version": "v1",
+            "entries": [
+                {
+                    "path": str(pricing_path),
+                    "anchor_id": "billing.pricing.apply_discount",
+                    "operation": "replace_block",
+                    "replacement_file": str(replacement_path),
+                }
+            ],
+        },
+        name="plan.json",
+    )
+
+    result = runner().invoke(CLI.app, ["apply-plan", "--preview", str(plan_path)])
+
+    assert result.exit_code == 0
+    assert "Patch plan preview:" in result.output
+    assert "Entry 0: billing.pricing.apply_discount" in result.output
+    assert "---" in result.output
+    assert "return 42" in result.output
+    assert pricing_path.read_text(encoding="utf-8") == original_text
 
 
 def test_cli_apply_plan_failure_stops_on_first_failure_json_output(tmp_path: Path) -> None:
@@ -623,13 +781,31 @@ def test_cli_apply_plan_failure_stops_on_first_failure_json_output(tmp_path: Pat
     payload = json.loads(result.output)
     assert payload["ok"] is False
     assert payload["command"] == "apply-plan"
-    assert payload["stage"] == "apply_plan"
+    assert payload["stage"] == "entry_failure"
+    assert payload["dry_run"] is False
+    assert payload["preview"] is False
     assert payload["applied_count"] == 1
     assert payload["failed_index"] == 1
+    assert payload["failed_path"] == str(tax_path)
+    assert payload["failed_anchor_id"] == "billing.tax.missing_anchor"
     assert payload["entries"][0]["result"]["ok"] is True
     assert payload["entries"][1]["result"]["ok"] is False
     assert "return 42" in pricing_path.read_text(encoding="utf-8")
     assert "return amount + 1" not in tax_path.read_text(encoding="utf-8")
+
+
+def test_cli_apply_plan_plan_load_failure_has_stable_taxonomy(tmp_path: Path) -> None:
+    plan_path = write_temp_python_file(tmp_path, "{not-json", name="broken_plan.json")
+
+    result = runner().invoke(CLI.app, ["apply-plan", "--json", str(plan_path)])
+
+    assert result.exit_code != 0
+    payload = json.loads(result.output)
+    assert payload["ok"] is False
+    assert payload["command"] == "apply-plan"
+    assert payload["stage"] == "plan_load"
+    assert payload["dry_run"] is False
+    assert payload["preview"] is False
 
 
 def test_cli_validate_command_is_thin_wrapper_over_core_apis(tmp_path: Path, monkeypatch) -> None:

@@ -8,6 +8,7 @@
 - Patcher is single-file and single-block only.
 - Apply-plan is sequential only; it does not provide transactional all-or-nothing execution.
 - Repo graph is currently exposed through the existing map contract; there is no separate graph module or richer graph schema yet.
+- Polyglot annotation syntax is specified, but runtime frontends beyond Python do not exist yet.
 
 ## Non-Goals
 

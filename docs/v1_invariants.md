@@ -63,6 +63,15 @@ Derived artifacts must not invent new `module_id` or `anchor_id`.
 - Rolls back to original file contents if parse or validation fails.
 - Allows successful patch completion with lint warnings.
 
+## Plan Guarantees
+
+- `PatchPlan` is a derived artifact, never source of truth.
+- `apply-plan` executes entries sequentially in plan order.
+- `apply-plan --dry-run` does not write plan changes to disk.
+- `apply-plan --preview` exposes entry-level semantic diffs without writing to disk.
+- `apply-plan` stops on the first failing entry.
+- Current baseline is not transactional across already-applied earlier entries.
+
 ## CLI Guarantees
 
 - CLI is a thin wrapper over core APIs.
@@ -73,6 +82,7 @@ Derived artifacts must not invent new `module_id` or `anchor_id`.
 - `parse`, `validate`, `lint`, and `patch` support `--json` for machine-readable agent workflows.
 - `apply-plan` supports `--json` for machine-readable multi-anchor execution results.
 - `patch` also supports `--dry-run` and `--preview` for agent-safe preflight and review.
+- `apply-plan` also supports `--dry-run` and `--preview` for agent-safe plan execution preflight and review.
 - `map --json` emits the raw derived GRACE map payload.
 - Project `map --json` is the canonical cross-file semantic graph contract in the current baseline.
 - Exit code behavior is stable:
