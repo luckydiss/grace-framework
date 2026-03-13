@@ -1279,6 +1279,76 @@ def read_command(path: Path, anchor_id: str, as_json: bool) -> None:
     click.echo(context.code.rstrip())
 
 
+# @grace.anchor grace.cli.plan_group
+# @grace.complexity 1
+@app.group("plan", help="Build derived patch-planning proposals without changing repository state.")
+def plan_group() -> None:
+    pass
+
+
+# @grace.anchor grace.cli.plan_impact_command
+# @grace.complexity 5
+# @grace.links grace.cli._load_grace_map_for_query, grace.planner.plan_from_impact
+@plan_group.command("impact")
+@click.argument("path", type=_path_argument(dir_okay=True))
+@click.argument("anchor_id")
+@click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
+def plan_impact_command(path: Path, anchor_id: str, as_json: bool) -> None:
+    from grace.planner import PlannerLookupError, plan_from_impact
+
+    try:
+        scope, grace_map = _load_grace_map_for_query(path)
+        proposal = plan_from_impact(grace_map, anchor_id)
+    except DiscoveryError as error:
+        if as_json:
+            _emit_json(_discovery_failure_payload("plan", error.path, error.message))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_discovery_failure(error.path, error.message)
+        raise click.exceptions.Exit(code=1) from error
+    except GraceParseError as error:
+        if as_json:
+            _emit_json(_parse_error_payload("plan", error))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_parse_errors(error)
+        raise click.exceptions.Exit(code=1) from error
+    except PlannerLookupError as error:
+        if as_json:
+            _emit_json(
+                {
+                    "ok": False,
+                    "command": "plan",
+                    "mode": "impact",
+                    "scope": scope,
+                    "stage": "plan",
+                    "path": str(path),
+                    "target": anchor_id,
+                    "message": str(error),
+                }
+            )
+            raise click.exceptions.Exit(code=1) from error
+        click.echo(str(error), err=True)
+        raise click.exceptions.Exit(code=1) from error
+
+    payload = {"suggested_operations": [operation.model_dump(mode="json") for operation in proposal.suggested_operations]}
+    if as_json:
+        _emit_json(
+            {
+                "ok": True,
+                "command": "plan",
+                "mode": "impact",
+                "scope": scope,
+                "path": str(path),
+                "target": anchor_id,
+                "data": payload,
+            }
+        )
+        return
+
+    click.echo(f"Plan proposal for {anchor_id}: {len(proposal.suggested_operations)} suggested operation(s)")
+    for operation in proposal.suggested_operations:
+        click.echo(f"- {operation.operation}: {operation.anchor_id}")
+
+
 # @grace.anchor grace.cli.patch_command
 # @grace.complexity 4
 # @grace.links grace.patcher.patch_block

@@ -404,7 +404,35 @@ Canonical agent flow becomes:
 
 map -> query -> read -> impact -> patch
 
-## v0.10 - Agent Playbook
+## v0.10 - Patch Planning Layer
+
+Goal:
+
+Add a deterministic planning layer that turns semantic graph impact into patch-plan proposals for agents.
+
+New derived layer:
+
+- planner layer
+
+New command:
+
+- `grace plan impact <path> <anchor_id> --json`
+
+Planning output should include:
+
+- suggested `replace_block` operations
+- deterministic ordering
+
+Constraints:
+
+- no AI
+- no heuristics
+- no parser semantics changes
+- no new source of truth
+
+This layer proposes targets only and never executes patches.
+
+## v0.11 - Agent Playbook
 
 Goal:
 
@@ -419,6 +447,7 @@ The playbook should standardize:
 - `map`
 - `query`
 - `impact`
+- `plan`
 - `read`
 - `patch / apply-plan`
 - `validate`
@@ -430,7 +459,7 @@ It should include concrete examples for:
 - Claude Code
 - shell-driven agents
 
-## v0.11 - Self-Hosting Completion
+## v0.12 - Self-Hosting Completion
 
 Goal:
 
@@ -447,7 +476,7 @@ Outcome:
 
 GRACE becomes a self-hosted development framework rather than only a framework that can annotate examples and selected core modules.
 
-## v0.12 - Frontend Abstraction
+## v0.13 - Frontend Abstraction
 
 Goal:
 
@@ -476,7 +505,7 @@ Core remains responsible for:
 - agent contract
 - query and impact layers
 
-## v0.13 - Tree-sitter Integration (Optional)
+## v0.14 - Tree-sitter Integration (Optional)
 
 Goal:
 

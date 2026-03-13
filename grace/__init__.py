@@ -118,13 +118,16 @@ def _public_api() -> tuple[str, ...]:
         "PatchPlan",
         "PatchPlanEntry",
         "PatchPlanOperation",
+        "PatchPlanProposal",
         "PatchResult",
         "PatchStepResult",
         "PatchStepStatus",
         "PatchSuccess",
+        "PlannerLookupError",
         "QueryLookupError",
         "ReadAnchorContext",
         "ReadLookupError",
+        "SuggestedPatchOperation",
         "ValidationFailure",
         "ValidationIssue",
         "ValidationIssueCode",
@@ -133,9 +136,12 @@ def _public_api() -> tuple[str, ...]:
         "apply_patch_plan",
         "build_anchor_neighbors",
         "build_file_map",
+        "build_plan_skeleton",
         "build_project_map",
+        "collect_patch_targets",
         "extract_anchor_annotations",
         "extract_anchor_code",
+        "filter_self_anchor",
         "impact_direct",
         "impact_summary",
         "impact_transitive",
@@ -145,6 +151,7 @@ def _public_api() -> tuple[str, ...]:
         "map_to_dict",
         "parse_python_file",
         "patch_block",
+        "plan_from_impact",
         "plan_to_dict",
         "query_anchor",
         "query_anchors",
@@ -160,7 +167,7 @@ def _public_api() -> tuple[str, ...]:
 
 
 # @grace.anchor grace.api.__getattr__
-# @grace.complexity 4
+# @grace.complexity 5
 def __getattr__(name: str) -> object:
     if name in {
         "ReadAnchorContext",
@@ -186,6 +193,35 @@ def __getattr__(name: str) -> object:
             "extract_anchor_annotations": extract_anchor_annotations,
             "extract_anchor_code": extract_anchor_code,
             "read_anchor_context": read_anchor_context,
+        }
+        return exported[name]
+    if name in {
+        "PatchPlanProposal",
+        "PlannerLookupError",
+        "SuggestedPatchOperation",
+        "build_plan_skeleton",
+        "collect_patch_targets",
+        "filter_self_anchor",
+        "plan_from_impact",
+    }:
+        from grace.planner import (
+            PatchPlanProposal,
+            PlannerLookupError,
+            SuggestedPatchOperation,
+            build_plan_skeleton,
+            collect_patch_targets,
+            filter_self_anchor,
+            plan_from_impact,
+        )
+
+        exported = {
+            "PatchPlanProposal": PatchPlanProposal,
+            "PlannerLookupError": PlannerLookupError,
+            "SuggestedPatchOperation": SuggestedPatchOperation,
+            "build_plan_skeleton": build_plan_skeleton,
+            "collect_patch_targets": collect_patch_targets,
+            "filter_self_anchor": filter_self_anchor,
+            "plan_from_impact": plan_from_impact,
         }
         return exported[name]
     raise AttributeError(f"module 'grace' has no attribute {name!r}")

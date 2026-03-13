@@ -78,9 +78,9 @@ def impact_summary(grace_map: GraceMap, anchor_id: str) -> ImpactSummary:
         if module_id in module_index
     )
     return ImpactSummary(
-        direct_dependents=direct_dependents,
-        transitive_dependents=transitive_dependents,
-        affected_modules=affected_modules,
+        direct_dependents=tuple(anchor.model_dump(mode="python") for anchor in direct_dependents),
+        transitive_dependents=tuple(anchor.model_dump(mode="python") for anchor in transitive_dependents),
+        affected_modules=tuple(module.model_dump(mode="python") for module in affected_modules),
     )
 
 

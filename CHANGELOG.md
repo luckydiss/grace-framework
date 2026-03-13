@@ -27,6 +27,9 @@
 - Added derived anchor read layer over parsed files and `GraceMap`.
 - Added `grace read <path> <anchor_id> --json` for deterministic anchor-local context loading.
 - Added `docs/read_layer.md` and read-layer coverage tests.
+- Added derived planning layer for deterministic impact-based patch proposals.
+- Added `grace plan impact <path> <anchor_id> --json` for machine-readable patch target suggestions.
+- Added `docs/planning_layer.md` and planning-layer coverage tests.
 
 ## v0.1.0
 

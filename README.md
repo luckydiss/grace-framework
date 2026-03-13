@@ -33,6 +33,7 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 - `query`: provides deterministic read-only graph navigation over derived maps.
 - `impact`: computes deterministic reverse-dependency impact sets over derived maps.
 - `read`: loads anchor-local context without reading whole files at the agent layer.
+- `planner`: builds deterministic patch-plan proposals from semantic graph impact without executing changes.
 - `patcher`: replaces a semantic block by `anchor_id`, supports dry-run and preview, and rolls back on parse or validation failure.
 - `plan`: loads a derived `PatchPlan` artifact and applies `replace_block` entries sequentially.
 - `cli`: thin command wrapper over the existing APIs.
@@ -148,6 +149,12 @@ Read anchor-local context:
 grace read repo/ billing.tax.apply_tax --json
 ```
 
+Build a deterministic impact-based patch proposal:
+
+```bash
+grace plan impact repo/ billing.tax.apply_tax --json
+```
+
 Patch a block by anchor:
 
 ```bash
@@ -233,6 +240,7 @@ GRACE v1 release scope includes:
 - repo-level cross-file semantic graph edges in project maps;
 - read-only graph queries and reverse-dependency impact analysis;
 - anchor-local context loading through the read layer;
+- deterministic patch-plan proposal generation from impact data;
 - semantic block patching by `anchor_id`;
 - patch dry-run, preview, and structured JSON patch results;
 - derived patch plans with sequential `apply-plan` execution, dry-run, preview, and stable failure taxonomy;

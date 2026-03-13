@@ -47,16 +47,17 @@ If no GRACE-annotated Python files are found, the command fails with:
 5. `grace query anchors <path> --json`
 6. `grace read <path> <anchor_id> --json`
 7. `grace impact <path> <anchor_id> --json`
-8. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
-9. `grace patch <path> <anchor_id> <replacement_file> --json`
-10. `grace apply-plan <plan_file> --dry-run --json`
-11. `grace apply-plan <plan_file> --json`
-12. `grace validate <path> --json`
-13. `grace lint <path> --json`
+8. `grace plan impact <path> <anchor_id> --json`
+9. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
+10. `grace patch <path> <anchor_id> <replacement_file> --json`
+11. `grace apply-plan <plan_file> --dry-run --json`
+12. `grace apply-plan <plan_file> --json`
+13. `grace validate <path> --json`
+14. `grace lint <path> --json`
 
 ## Output Contract
 
-For `parse`, `validate`, `lint`, `patch`, `impact`, and `read`:
+For `parse`, `validate`, `lint`, `patch`, `impact`, `read`, and `plan`:
 
 - `--json` prints a single JSON object to stdout.
 - On `--json`, human-oriented multiline diagnostics are not emitted.
@@ -479,6 +480,44 @@ Success:
 }
 ```
 
+### `plan impact --json`
+
+Success:
+
+```json
+{
+  "ok": true,
+  "command": "plan",
+  "mode": "impact",
+  "scope": "project",
+  "path": "repo/",
+  "target": "billing.tax.apply_tax",
+  "data": {
+    "suggested_operations": [
+      {
+        "operation": "replace_block",
+        "anchor_id": "billing.pricing.choose_discount_strategy"
+      }
+    ]
+  }
+}
+```
+
+Failure:
+
+```json
+{
+  "ok": false,
+  "command": "plan",
+  "mode": "impact",
+  "scope": "project",
+  "stage": "plan",
+  "path": "repo/",
+  "target": "billing.unknown.anchor",
+  "message": "anchor_id ... does not exist in planning scope"
+}
+```
+
 Failure:
 
 ```json
@@ -502,6 +541,7 @@ Failure:
 - Treat `apply-plan --dry-run` as plan-level preflight, not as an applied change.
 - Use `read --json` to load one semantic block before patching instead of reading a whole file.
 - Use `impact --json` to inspect reverse dependents before touching a widely-linked anchor.
+- Use `plan impact --json` to turn direct dependents into a deterministic patch proposal before writing a real plan file.
 - Prefer `apply-plan` when the intended change spans multiple anchors.
 - Treat `patch` success as provisional until a follow-up `validate --json` succeeds.
 - Do not infer semantic identity from line numbers or file offsets.
