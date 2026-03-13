@@ -432,6 +432,21 @@ Constraints:
 
 This layer proposes targets only and never executes patches.
 
+## v0.10.2 - Self-Hosting Consolidation
+
+Goal:
+
+Stabilize GRACE as a self-hosted development system.
+
+Required work:
+
+- document the canonical self-hosting loop
+- capture dogfooding lessons from real GRACE-on-GRACE development
+- verify that `map -> query -> read -> impact -> plan -> apply-plan -> validate -> lint` works on the annotated `grace/` scope
+- confirm at least one real GRACE-native patch on the self-hosted core
+
+This is not a new semantic layer. It is a consolidation step that makes the existing workflow explicit and repeatable.
+
 ## v0.11 - Agent Playbook
 
 Goal:

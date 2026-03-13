@@ -31,6 +31,9 @@
 - Added `grace plan impact <path> <anchor_id> --json` for machine-readable patch target suggestions.
 - Added `docs/planning_layer.md` and planning-layer coverage tests.
 - Fixed patch path handling so `patch_block` and `apply-plan` canonicalize relative, absolute, and `Path` inputs consistently across dry-run, preview, and post-write validation.
+- Added `docs/self_hosting.md` to document the canonical GRACE-on-GRACE development workflow.
+- Verified the self-hosted loop over `grace/`: `map -> query -> read -> impact -> plan -> apply-plan -> validate -> lint`.
+- Confirmed a real GRACE-native patch on `grace.map.build_file_map` as the first consolidated self-hosting baseline.
 
 ## v0.1.0
 

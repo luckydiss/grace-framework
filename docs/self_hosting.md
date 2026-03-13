@@ -1,78 +1,115 @@
-# GRACE Self-Hosting
+# Self-Hosting GRACE
 
-GRACE self-hosting means developing the GRACE repository through GRACE-native operations rather than treating the framework as a tool that only works on examples.
+GRACE is now developed through GRACE itself.
 
-The current self-hosting baseline covers these annotated core modules:
-
-- `grace/parser.py`
-- `grace/patcher.py`
-- `grace/cli.py`
-- `grace/plan.py`
-- `grace/validator.py`
-- `grace/map.py`
-- `grace/linter.py`
-
-This scope is sufficient to dogfood the core execution loop:
-
-- `parse`
-- `validate`
-- `lint`
-- `map`
-- `patch`
-- `apply-plan`
-
-## Invariants
-
-- Inline GRACE annotations remain the only source of truth.
-- Self-hosting does not permit sidecar-first editing.
-- Patch operations stay anchor-driven and identity-preserving.
-- Parse or validation failure after a write remains rollback-blocking.
-- Lint warnings are acceptable dogfood output and should be interpreted as guidance, not silent success.
+This document records the canonical self-hosting workflow for the `grace/` package and the practical lessons learned while dogfooding the framework on its own core.
 
 ## Canonical Workflow
 
-For development inside the annotated `grace/` scope:
-
-1. Build the repo map:
+1. Build the repo graph:
 
 ```bash
 grace map grace --json
 ```
 
-2. Choose a target `anchor_id`.
-
-3. Prepare a full replacement semantic block for that anchor.
-
-4. Run a preflight patch:
+2. Discover candidate anchors:
 
 ```bash
-grace patch <file> <anchor_id> <replacement_file> --dry-run --preview --json
+grace query anchors grace --json
 ```
 
-5. If the preflight passes, apply the patch:
+3. Read local anchor context:
 
 ```bash
-grace patch <file> <anchor_id> <replacement_file> --json
+grace read grace <anchor_id> --json
 ```
 
-6. Re-run validation and lint on the self-hosted scope:
+4. Inspect reverse dependency impact:
+
+```bash
+grace impact grace <anchor_id> --json
+```
+
+5. Generate a deterministic proposal:
+
+```bash
+grace plan impact grace <anchor_id> --json
+```
+
+6. Prepare a concrete patch plan or replacement block.
+
+7. Preflight before writing:
+
+```bash
+grace apply-plan plan.json --dry-run --preview --json
+```
+
+8. Apply the change:
+
+```bash
+grace apply-plan plan.json --json
+```
+
+9. Re-check the self-hosted scope:
 
 ```bash
 grace validate grace --json
 grace lint grace --json
 ```
 
-The same pattern applies to `apply-plan` for derived patch plans.
+The canonical loop is therefore:
 
-## Current Limits
+`map -> query -> read -> impact -> plan -> apply-plan -> validate -> lint`
 
-- The current linter emits expected `large_block` warnings on several orchestration-heavy functions.
-- Discovery on the repository root is still noisy because tests contain literal `@grace.*` strings in fixtures.
-- The practical self-hosting scope is therefore the annotated `grace/` package, not the entire repository root.
+## Scope Discipline
 
-## Rollout Status
+Self-hosting currently targets the annotated `grace/` package.
 
-- Wave 1: `parser`, `patcher`, `cli`
-- Wave 2: `plan`, `validator`, `map`, `linter`
+The canonical scope for development commands is:
 
-This establishes the first complete GRACE-native execution loop on the GRACE codebase itself.
+```bash
+grace map grace --json
+grace validate grace --json
+grace lint grace --json
+```
+
+Using the repository root as discovery scope is possible, but `grace/` remains the curated self-hosting surface.
+
+## Dogfooding Lessons
+
+### Annotation overhead
+
+Inline semantic coordinates are workable on real framework code, but helper-heavy modules accumulate noticeable annotation overhead. This is acceptable because the overhead buys stable patch targets and machine-readable navigation.
+
+### Large block warnings
+
+The linter consistently flags orchestration-heavy anchors such as CLI commands, parser state-machine blocks, and patch pipeline blocks. This is useful pressure: it reveals where GRACE-friendly semantic granularity is weaker than ideal even when the code is still functionally correct.
+
+### Curated discovery scope
+
+The most reliable self-hosting scope is the annotated `grace/` package itself. Running discovery over the whole repository introduces unnecessary noise from tests, fixtures, and other files that are not part of the active dogfood surface.
+
+### Cross-file links behavior
+
+Cross-file `grace.links` are real in the self-hosted core. That forced patch preflight to become project-aware instead of file-only. Self-hosting surfaced this requirement before it would have been obvious from isolated examples.
+
+### Patcher path bug
+
+Self-hosting also exposed a path-handling execution bug: relative-path patches failed in post-write validation while absolute-path patches succeeded. This led to the `v0.10.1` canonical-path fix, and it is a concrete example of GRACE improving itself through its own workflow.
+
+## Current Status
+
+The self-hosted core now covers the full execution loop:
+
+- parse
+- validate
+- lint
+- map
+- query
+- impact
+- read
+- planner
+- patcher
+- apply-plan
+
+New feature work in the annotated core should continue to prefer GRACE-native editing rather than direct manual edits.

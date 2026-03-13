@@ -7,6 +7,7 @@ GRACE v1 is a code-first framework/spec for LLM-oriented development where code 
 Canonical behavioral guarantees for the baseline live in [docs/v1_invariants.md](C:\Users\luckydiss\Documents\grace_framework\docs\v1_invariants.md).
 The shell-oriented agent contract lives in [docs/agent_contract.md](C:\Users\luckydiss\Documents\grace_framework\docs\agent_contract.md).
 The polyglot annotation spec track lives in [docs/polyglot_annotations.md](C:\Users\luckydiss\Documents\grace_framework\docs\polyglot_annotations.md).
+The self-hosting workflow lives in [docs/self_hosting.md](C:\Users\luckydiss\Documents\grace_framework\docs\self_hosting.md).
 The longer-term development plan lives in [docs/roadmap.md](C:\Users\luckydiss\Documents\grace_framework\docs\roadmap.md).
 
 ## Source Of Truth
@@ -218,6 +219,26 @@ POSIX shell:
 ```
 
 Both scripts run the same safe loop against the repository:
+
+## Self-Hosted Development
+
+The canonical GRACE dogfood scope is the annotated `grace/` package itself.
+
+Typical self-hosting loop:
+
+```bash
+grace map grace --json
+grace query anchors grace --json
+grace read grace grace.map.build_file_map --json
+grace impact grace grace.map.build_file_map --json
+grace plan impact grace grace.map.build_file_map --json
+grace apply-plan plan.json --dry-run --preview --json
+grace apply-plan plan.json --json
+grace validate grace --json
+grace lint grace --json
+```
+
+The longer workflow notes and dogfooding lessons are documented in [docs/self_hosting.md](C:\Users\luckydiss\Documents\grace_framework\docs\self_hosting.md).
 
 - `pytest`
 - `parse`

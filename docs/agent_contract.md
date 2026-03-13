@@ -55,6 +55,20 @@ If no GRACE-annotated Python files are found, the command fails with:
 13. `grace validate <path> --json`
 14. `grace lint <path> --json`
 
+For self-hosted GRACE development, the preferred scope is the annotated `grace/` package:
+
+1. `grace map grace --json`
+2. `grace query anchors grace --json`
+3. `grace read grace <anchor_id> --json`
+4. `grace impact grace <anchor_id> --json`
+5. `grace plan impact grace <anchor_id> --json`
+6. `grace apply-plan <plan_file> --dry-run --preview --json`
+7. `grace apply-plan <plan_file> --json`
+8. `grace validate grace --json`
+9. `grace lint grace --json`
+
+This self-hosting loop is described in more detail in `docs/self_hosting.md`.
+
 ## Output Contract
 
 For `parse`, `validate`, `lint`, `patch`, `impact`, `read`, and `plan`:
