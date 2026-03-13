@@ -41,6 +41,7 @@ class LintIssueCode(str, Enum):
     DUPLICATE_LINK = "duplicate_link"
     TOO_FEW_INVARIANTS = "too_few_invariants"
     UNTRACKED_ARTIFACT = "untracked_artifact"
+    ORPHAN_ANCHOR = "orphan_anchor"
 
 
 # @grace.anchor grace.linter.LintIssue
@@ -89,21 +90,65 @@ def lint_file(grace_file: GraceFileModel) -> LintResult:
 
 
 # @grace.anchor grace.linter.lint_project
-# @grace.complexity 4
-# @grace.links grace.linter._lint_file, grace.artifact_hygiene.discover_unignored_artifact_paths
+# @grace.complexity 5
+# @grace.links grace.linter._lint_file, grace.artifact_hygiene.discover_unignored_artifact_paths, grace.map.build_project_map
 def lint_project(grace_files: list[GraceFileModel] | tuple[GraceFileModel, ...]) -> LintResult:
     import os
 
     from grace.artifact_hygiene import discover_unignored_artifact_paths
+    from grace.map import build_project_map
 
     if not grace_files:
         return LintSuccess(scope="project")
 
+    project_files = tuple(grace_files)
     issues: list[LintIssue] = []
-    for grace_file in grace_files:
+    for grace_file in project_files:
         issues.extend(_lint_file(grace_file))
 
-    scope_root = Path(os.path.commonpath([str(grace_file.path.parent) for grace_file in grace_files]))
+    grace_map = build_project_map(project_files)
+    anchor_lookup = {
+        block.anchor_id: (grace_file, block)
+        for grace_file in project_files
+        for block in grace_file.blocks
+    }
+    incoming_counts = {anchor.anchor_id: 0 for anchor in grace_map.anchors}
+    for edge in grace_map.edges:
+        if edge.type == "anchor_links_to_anchor" and edge.target in incoming_counts:
+            incoming_counts[edge.target] += 1
+
+    public_anchor_ids: set[str] = set()
+    for grace_file in project_files:
+        interface_text = _normalize_text(grace_file.module.interfaces).lower()
+        for block in grace_file.blocks:
+            public_names = {
+                block.anchor_id.lower(),
+                block.qualified_name.lower(),
+                block.symbol_name.lower(),
+            }
+            if any(name in interface_text for name in public_names):
+                public_anchor_ids.add(block.anchor_id)
+
+    for anchor in grace_map.anchors:
+        if incoming_counts.get(anchor.anchor_id, 0) > 0 or anchor.anchor_id in public_anchor_ids:
+            continue
+
+        grace_file, block = anchor_lookup[anchor.anchor_id]
+        issues.append(
+            LintIssue(
+                code=LintIssueCode.ORPHAN_ANCHOR,
+                severity=LintSeverity.WARNING,
+                message=(
+                    f"block {anchor.anchor_id!r} has no incoming semantic dependents and is not exposed via "
+                    "module interfaces; consider whether it is orphaned"
+                ),
+                path=grace_file.path,
+                module_id=grace_file.module.module_id,
+                anchor_id=block.anchor_id,
+            )
+        )
+
+    scope_root = Path(os.path.commonpath([str(grace_file.path.parent) for grace_file in project_files]))
     for artifact_path in discover_unignored_artifact_paths(scope_root):
         issues.append(
             LintIssue(

@@ -8,6 +8,7 @@
 - Added deterministic artifact hygiene helpers plus `grace clean` for removing GRACE temp artifacts without touching committed example plans or replacement fragments.
 - Added `untracked_artifact` lint warnings for project scopes that contain derived artifacts not ignored by `.gitignore`.
 - Taught CLI and patcher discovery to ignore `.grace_plan_*` directories so temporary mirrors do not pollute later discovery or graph export.
+- Added `orphan_anchor` project-level lint warnings based on derived incoming semantic links and module interface exposure.
 
 ## v1.0.0 - 2026-03-13
 
