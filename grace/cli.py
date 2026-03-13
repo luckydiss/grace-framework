@@ -469,8 +469,15 @@ def _query_anchor_collection_payload(
 
 # @grace.anchor grace.cli._discover_grace_paths
 # @grace.complexity 5
+# @grace.links grace.language_adapter.get_language_adapter_for_path
 def _discover_grace_paths(path: Path) -> tuple[str, tuple[Path, ...]]:
+    from grace.language_adapter import get_language_adapter_for_path
+
     if path.is_file():
+        try:
+            get_language_adapter_for_path(path)
+        except ValueError as exc:
+            raise DiscoveryError(path, str(exc)) from exc
         return "file", (path,)
 
     discovered_paths: list[Path] = []
@@ -483,19 +490,22 @@ def _discover_grace_paths(path: Path) -> tuple[str, tuple[Path, ...]]:
 
         root_path = Path(current_root)
         for file_name in sorted(file_names):
-            if not file_name.endswith(".py"):
-                continue
             candidate_path = root_path / file_name
             try:
                 source_text = candidate_path.read_text(encoding="utf-8")
             except (OSError, UnicodeDecodeError):
                 continue
-            if "@grace." in source_text:
-                discovered_paths.append(candidate_path)
+            if "@grace." not in source_text:
+                continue
+            try:
+                get_language_adapter_for_path(candidate_path)
+            except ValueError:
+                continue
+            discovered_paths.append(candidate_path)
 
     discovered_paths.sort(key=lambda candidate: candidate.relative_to(path).as_posix())
     if not discovered_paths:
-        raise DiscoveryError(path, f"no GRACE-annotated Python files found under {path}")
+        raise DiscoveryError(path, f"no GRACE-annotated files supported by installed adapters found under {path}")
     return "project", tuple(discovered_paths)
 
 

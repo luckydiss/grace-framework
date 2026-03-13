@@ -512,51 +512,44 @@ Normative reference:
 - `docs/language_integration.md`
 - `docs/language_adapter_contract.md`
 
-## v0.13 - Frontend Abstraction
+## v0.13 - Tree-sitter Pilot Adapter (TypeScript)
 
 Goal:
 
-Generalize the adapter boundary so future language integrations can live in dedicated frontend packages without changing core semantics.
+Prove that a second runtime language can integrate through the adapter boundary without changing GRACE core semantics.
 
-Target structure:
+Delivered scope:
 
-frontend/
-    python/
-    typescript/
-    go/
+- `GraceLanguageAdapter` remains the stable boundary
+- Tree-sitter is used only as parsing substrate
+- `.ts` files route through a dedicated `TypeScriptAdapter`
+- supported constructs stay intentionally small:
+  - module annotations
+  - function declarations
+  - async function declarations
+  - class declarations
+  - class methods
 
-Frontend responsibilities:
+Explicit non-goals:
 
-- parsing
-- block detection
-- annotation extraction
+- full TypeScript coverage
+- JSX / TSX support
+- framework semantics
+- changing validator, linter, map, query, impact, read, planner, or patch contracts
 
-Core remains responsible for:
+Normative references:
 
-- validator
-- linter
-- map
-- graph
-- patch plans
-- agent contract
-- query and impact layers
+- `docs/language_adapter_contract.md`
+- `docs/typescript_adapter.md`
 
-## v0.14 - Tree-sitter Integration (Optional)
+## v0.14 - Broader Tree-sitter Expansion (Optional)
 
 Goal:
 
-Introduce Tree-sitter as a reusable CST and block-detection substrate for new frontends.
+Extend the proven adapter pattern to additional languages only after the TypeScript pilot stays stable.
 
-Tree-sitter should be used for:
+Possible next candidates:
 
-- multi-language parsing
-- block detection
-- AST/CST traversal
-
-Candidate languages:
-
-- Python
-- TypeScript
 - Go
 - Rust
 - SQL

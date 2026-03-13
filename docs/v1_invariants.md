@@ -4,7 +4,7 @@
 
 GRACE v1 is code-first.
 
-- The only source of truth is inline GRACE annotations in Python source files.
+- The only source of truth is inline GRACE annotations in supported source files.
 - Semantic identity is defined by inline `@grace.module` and `@grace.anchor`.
 - Sidecars are not part of the v1 source-of-truth model.
 
@@ -24,7 +24,7 @@ Derived artifacts must not invent new `module_id` or `anchor_id`.
 ## Parser Guarantees
 
 - Parses only inline GRACE annotations.
-- Binds block annotations to the nearest following `def`, `async def`, `class`, or method.
+- Binds block annotations to the nearest supported semantic entity exposed by the active language adapter.
 - Produces a typed `GraceFileModel` on success.
 - Produces hard parse failure with structured issues on grammar or binding violations.
 - Enforces required module header fields and block annotation structure.

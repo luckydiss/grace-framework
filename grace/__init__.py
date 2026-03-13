@@ -130,6 +130,7 @@ def _public_api() -> tuple[str, ...]:
         "ReadAnchorContext",
         "ReadLookupError",
         "SuggestedPatchOperation",
+        "TypeScriptAdapter",
         "ValidationFailure",
         "ValidationIssue",
         "ValidationIssueCode",
@@ -175,14 +176,17 @@ def __getattr__(name: str) -> object:
     if name in {
         "GraceLanguageAdapter",
         "PythonAdapter",
+        "TypeScriptAdapter",
         "get_language_adapter_for_path",
     }:
         from grace.language_adapter import GraceLanguageAdapter, get_language_adapter_for_path
         from grace.python_adapter import PythonAdapter
+        from grace.typescript_adapter import TypeScriptAdapter
 
         exported = {
             "GraceLanguageAdapter": GraceLanguageAdapter,
             "PythonAdapter": PythonAdapter,
+            "TypeScriptAdapter": TypeScriptAdapter,
             "get_language_adapter_for_path": get_language_adapter_for_path,
         }
         return exported[name]

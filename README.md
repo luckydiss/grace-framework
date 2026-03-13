@@ -2,7 +2,7 @@
 
 GRACE stands for Graph-RAG Anchored Code Engineering.
 
-GRACE v1 is a code-first framework/spec for LLM-oriented development where code is addressed by semantic anchors instead of line numbers. The source of truth is inline GRACE annotations in Python files.
+GRACE v1 is a code-first framework/spec for LLM-oriented development where code is addressed by semantic anchors instead of line numbers. The source of truth is inline GRACE annotations in supported source files.
 
 Canonical behavioral guarantees for the baseline live in [docs/v1_invariants.md](C:\Users\luckydiss\Documents\grace_framework\docs\v1_invariants.md).
 The shell-oriented agent contract lives in [docs/agent_contract.md](C:\Users\luckydiss\Documents\grace_framework\docs\agent_contract.md).
@@ -11,6 +11,7 @@ The self-hosting workflow lives in [docs/self_hosting.md](C:\Users\luckydiss\Doc
 The agent workflow playbook lives in [docs/agent_playbook.md](C:\Users\luckydiss\Documents\grace_framework\docs\agent_playbook.md).
 The language integration architecture lives in [docs/language_integration.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_integration.md).
 The frozen adapter contract lives in [docs/language_adapter_contract.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_adapter_contract.md).
+The TypeScript pilot adapter lives in [docs/typescript_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\typescript_adapter.md).
 The longer-term development plan lives in [docs/roadmap.md](C:\Users\luckydiss\Documents\grace_framework\docs\roadmap.md).
 
 ## Source Of Truth
@@ -32,7 +33,9 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 
 - `parser`: parses inline annotations and binds them to `def`, `async def`, `class`, and methods.
 - `language_adapter`: defines the language integration contract that feeds `GraceFileModel` into the core.
+- `tree_sitter_adapter`: provides substrate helpers for non-Python pilot adapters without changing core semantics.
 - `python_adapter`: reference adapter that preserves the existing Python parsing behavior behind the language adapter layer.
+- `typescript_adapter`: pilot Tree-sitter-backed adapter for `.ts` files with module annotations, function declarations, async functions, classes, and methods.
 - `validator`: enforces hard semantic and identity consistency on parsed GRACE objects.
 - `linter`: emits soft warnings for readability, maintainability, and machine-utility quality.
 - `map`: builds a derived semantic graph artifact from `GraceFileModel`, including repo-level cross-file anchor edges.
@@ -45,6 +48,7 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 - `cli`: thin command wrapper over the existing APIs.
 
 The normative adapter-freeze reference for future language integrations is [docs/language_adapter_contract.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_adapter_contract.md).
+Python remains the reference implementation; `.ts` support is a deliberately small Tree-sitter-backed pilot.
 
 ## Install
 
@@ -137,6 +141,13 @@ Build a project JSON map:
 
 ```bash
 grace map repo/ --json
+```
+
+Pilot TypeScript support:
+
+```bash
+grace parse examples/typescript/basic.ts --json
+grace validate examples/typescript --json
 ```
 
 Query project anchors:

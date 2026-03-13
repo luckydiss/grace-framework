@@ -39,6 +39,8 @@
 - Added a language adapter contract and reference Python adapter so parser entrypoints can stay language-agnostic without changing core GRACE semantics.
 - Added `docs/language_integration.md` and compatibility coverage for adapter-backed parsing.
 - Added `docs/language_adapter_contract.md` to freeze adapter responsibilities, output requirements, and core invariants before adding a second language runtime.
+- Added a Tree-sitter-backed TypeScript pilot adapter with `.ts` adapter selection, deterministic block spans, and coverage for module annotations, functions, async functions, classes, and methods.
+- Added `docs/typescript_adapter.md` and a small TypeScript pilot example.
 
 ## v0.1.0
 

@@ -43,11 +43,12 @@ A language adapter is responsible for:
 
 The output must be compatible with `GraceFileModel`.
 
-## Python Reference Implementation
+## Current Runtime Implementations
 
-`grace/python_adapter.py` is the reference adapter.
+- `grace/python_adapter.py` is the reference adapter.
+- `grace/typescript_adapter.py` is the first non-Python pilot adapter.
 
-At `v0.12`, Python remains the only runtime language, but parser entry is routed through the adapter layer so future languages can integrate without changing the core consumers.
+Python remains the normative reference implementation. The TypeScript adapter proves the boundary with intentionally narrow construct coverage.
 
 ## Adding A New Language
 
@@ -61,7 +62,7 @@ To add a new language later:
 6. emit `GraceFileModel`
 7. register the adapter in language dispatch
 
-This stage does not add a second runtime language yet.
+Current runtime support includes Python plus a limited `.ts` pilot.
 
 ## Important Non-Goals
 
@@ -70,5 +71,5 @@ This layer does not:
 - change inline annotations as source of truth
 - change patch semantics
 - change map/query/impact/read/planner contracts
-- add Tree-sitter
-- add multi-language runtime support yet
+- claim broad multi-language runtime support
+- promise full framework-aware language coverage
