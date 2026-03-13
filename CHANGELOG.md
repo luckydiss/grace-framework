@@ -38,6 +38,7 @@
 - Added a small self-hosted eval suite over `grace/` with baseline metrics for anchor selection accuracy, patch/apply-plan success rate, rollback rate, and unnecessary file touch rate.
 - Added a language adapter contract and reference Python adapter so parser entrypoints can stay language-agnostic without changing core GRACE semantics.
 - Added `docs/language_integration.md` and compatibility coverage for adapter-backed parsing.
+- Added `docs/language_adapter_contract.md` to freeze adapter responsibilities, output requirements, and core invariants before adding a second language runtime.
 
 ## v0.1.0
 

@@ -507,6 +507,11 @@ Outcome:
 
 Core stays language-agnostic while Python remains the reference implementation behind an explicit adapter boundary.
 
+Normative reference:
+
+- `docs/language_integration.md`
+- `docs/language_adapter_contract.md`
+
 ## v0.13 - Frontend Abstraction
 
 Goal:
