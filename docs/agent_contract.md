@@ -40,8 +40,10 @@ When a directory path is provided, GRACE:
 
 - recursively scans for files supported by installed adapters
 - ignores common non-source directories such as `.git`, `__pycache__`, `.venv`, `venv`, `node_modules`, build caches, and `*.egg-info`
-- considers a file a GRACE candidate only if its source contains `@grace.`
+- considers a file a GRACE candidate only if its top-level comment preamble contains `@grace.module`
 - sorts discovered files deterministically by relative path
+
+This prevents test fixtures or embedded strings containing `@grace.*` from being treated as real GRACE modules.
 
 If no GRACE-annotated supported files are found, the command fails with:
 
@@ -79,6 +81,12 @@ For self-hosted GRACE development, the preferred scope is the annotated `grace/`
 
 This self-hosting loop is described in more detail in `docs/self_hosting.md`.
 The workflow guidance and eval framing for agents are documented in `docs/agent_playbook.md`.
+
+Repository-root policy:
+
+- `parse . --json` and `map . --json` are valid repository export and inspection commands
+- `validate . --json` and `lint . --json` are not guaranteed to succeed when parity fixtures intentionally mirror the same semantic identities across languages
+- use curated subdirectories for project-level validation when parity fixtures are present
 
 ## Multi-Language Behavior Guarantees
 

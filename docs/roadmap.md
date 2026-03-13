@@ -138,6 +138,28 @@ Its canonical mode is anchor-driven atomic editing.
 
 ## Detailed Roadmap
 
+## v0.17 - Release Hardening + Protocol Freeze
+
+Goal:
+
+Treat the current GRACE surface as a near-stable agent protocol and harden it through docs, regression coverage, and self-hosted reliability work instead of adding new capability layers.
+
+Focus:
+
+- freeze CLI and JSON result envelopes as normative references
+- stabilize repository-root discovery and export behavior
+- expand repo-scale eval and regression coverage
+- document curated validation scopes versus inspection/export scopes
+- define derived artifact policy for committed vs local-only outputs
+
+Explicit non-goals for this stage:
+
+- new adapters
+- new patch semantics
+- heuristics or ranking layers
+- UI / IDE work
+- source-of-truth expansion
+
 ## v0.3 - Strong Patch Workflow
 
 Goal:

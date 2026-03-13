@@ -11,6 +11,7 @@ The self-hosting workflow lives in [docs/self_hosting.md](C:\Users\luckydiss\Doc
 The agent workflow playbook lives in [docs/agent_playbook.md](C:\Users\luckydiss\Documents\grace_framework\docs\agent_playbook.md).
 The language integration architecture lives in [docs/language_integration.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_integration.md).
 The frozen adapter contract lives in [docs/language_adapter_contract.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_adapter_contract.md).
+The near-stable CLI/protocol freeze lives in [docs/protocol_freeze.md](C:\Users\luckydiss\Documents\grace_framework\docs\protocol_freeze.md).
 The TypeScript pilot adapter lives in [docs/typescript_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\typescript_adapter.md).
 The Go pilot adapter lives in [docs/go_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\go_adapter.md).
 The adapter compatibility matrix lives in [docs/adapter_compatibility.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_compatibility.md).
@@ -64,6 +65,22 @@ GRACE currently supports:
 - Go as a pilot adapter
 
 All three adapters normalize into the same `GraceFileModel` contract, so validator, linter, map, query, impact, read, planner, and patch layers remain unchanged.
+
+## Protocol Status
+
+GRACE is now in a hardening phase where the preferred work is:
+
+- deterministic behavior fixes
+- contract clarification
+- regression coverage
+- self-hosted workflow stabilization
+
+Repository-root behavior is intentionally split:
+
+- `grace parse . --json` and `grace map . --json` are supported repository export surfaces
+- `grace validate . --json` and `grace lint . --json` may fail because parity fixtures intentionally reuse the same semantic identities across languages
+
+For agent workflows, use curated validation scopes such as `grace/`, `examples/parity/python`, `examples/parity/typescript`, or `examples/parity/go`.
 
 ## Install
 

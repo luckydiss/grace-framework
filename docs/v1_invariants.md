@@ -80,6 +80,7 @@ Derived artifacts must not invent new `module_id` or `anchor_id`.
 - Commands included in v1:
   `parse`, `validate`, `lint`, `map`, `patch`, `apply-plan`.
 - `parse`, `validate`, `lint`, and `map` accept either a file path or a directory path.
+- directory discovery selects only files whose top-level comment preamble contains `@grace.module`, so fixture strings alone do not create discovery candidates.
 - `parse`, `validate`, `lint`, and `patch` support `--json` for machine-readable agent workflows.
 - `apply-plan` supports `--json` for machine-readable multi-anchor execution results.
 - `patch` also supports `--dry-run` and `--preview` for agent-safe preflight and review.

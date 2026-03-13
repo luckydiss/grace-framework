@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Hardened repo discovery so only files with a real top-level `@grace.module` preamble become directory parse/map candidates.
+- Restored successful `grace parse . --json` and `grace map . --json` on the repository root without weakening parser semantics.
+- Added protocol freeze documentation for CLI/JSON envelopes, curated validation scopes, and derived artifact policy.
+- Added regression coverage for self-hosted JSON envelope stability and repository-root parse/map behavior.
 - Removed legacy sidecar-first implementation remnants and obsolete spec/schema files.
 - Added GitHub Actions CI for editable install and test execution.
 - Kept the published GRACE v1 surface aligned with the code-first baseline.
