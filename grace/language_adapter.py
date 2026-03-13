@@ -55,7 +55,7 @@ class GraceLanguageAdapter(ABC):
 
 # @grace.anchor grace.language_adapter.get_language_adapter_for_path
 # @grace.complexity 3
-# @grace.belief Adapter dispatch should remain intentionally simple even with a second runtime language; suffix-based routing keeps parser entrypoints language-agnostic without introducing speculative auto-detection.
+# @grace.belief Adapter dispatch should remain intentionally simple even with a third runtime language; suffix-based routing keeps parser entrypoints language-agnostic without introducing speculative auto-detection.
 def get_language_adapter_for_path(path: str | Path) -> GraceLanguageAdapter:
     source_path = Path(path)
     suffix = source_path.suffix.lower()
@@ -73,6 +73,11 @@ def get_language_adapter_for_path(path: str | Path) -> GraceLanguageAdapter:
         from grace.typescript_adapter import TypeScriptAdapter
 
         return TypeScriptAdapter()
+
+    if suffix == ".go":
+        from grace.go_adapter import GoAdapter
+
+        return GoAdapter()
 
     raise ValueError(f"no GRACE language adapter is registered for {suffix or '<no suffix>'}")
 

@@ -12,6 +12,7 @@ The agent workflow playbook lives in [docs/agent_playbook.md](C:\Users\luckydiss
 The language integration architecture lives in [docs/language_integration.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_integration.md).
 The frozen adapter contract lives in [docs/language_adapter_contract.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_adapter_contract.md).
 The TypeScript pilot adapter lives in [docs/typescript_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\typescript_adapter.md).
+The Go pilot adapter lives in [docs/go_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\go_adapter.md).
 The adapter compatibility matrix lives in [docs/adapter_compatibility.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_compatibility.md).
 The longer-term development plan lives in [docs/roadmap.md](C:\Users\luckydiss\Documents\grace_framework\docs\roadmap.md).
 
@@ -37,6 +38,7 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 - `tree_sitter_adapter`: provides substrate helpers for non-Python pilot adapters without changing core semantics.
 - `python_adapter`: reference adapter that preserves the existing Python parsing behavior behind the language adapter layer.
 - `typescript_adapter`: pilot Tree-sitter-backed adapter for `.ts` files with module annotations, function declarations, async functions, classes, and methods.
+- `go_adapter`: pilot Go adapter for `.go` files with module annotations, function declarations, receiver methods, and simple struct type declarations.
 - `validator`: enforces hard semantic and identity consistency on parsed GRACE objects.
 - `linter`: emits soft warnings for readability, maintainability, and machine-utility quality.
 - `map`: builds a derived semantic graph artifact from `GraceFileModel`, including repo-level cross-file anchor edges.
@@ -49,7 +51,7 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 - `cli`: thin command wrapper over the existing APIs.
 
 The normative adapter-freeze reference for future language integrations is [docs/language_adapter_contract.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_adapter_contract.md).
-Python remains the reference implementation; `.ts` support is a deliberately small Tree-sitter-backed pilot.
+Python remains the reference implementation; `.ts` and `.go` support are deliberately small pilot adapters.
 Cross-language parity fixtures and adapter conformance tests live under [examples/parity](C:\Users\luckydiss\Documents\grace_framework\examples\parity) and [tests/test_adapter_conformance.py](C:\Users\luckydiss\Documents\grace_framework\tests\test_adapter_conformance.py).
 The parity root is intended for cross-language comparison; project-level validation should be run per language subdirectory because the mirrored fixtures intentionally reuse the same `module_id`.
 
@@ -151,6 +153,13 @@ Pilot TypeScript support:
 ```bash
 grace parse examples/typescript/basic.ts --json
 grace validate examples/typescript --json
+```
+
+Pilot Go support:
+
+```bash
+grace parse examples/go/basic.go --json
+grace validate examples/go --json
 ```
 
 Query project anchors:

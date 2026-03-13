@@ -47,8 +47,9 @@ The output must be compatible with `GraceFileModel`.
 
 - `grace/python_adapter.py` is the reference adapter.
 - `grace/typescript_adapter.py` is the first non-Python pilot adapter.
+- `grace/go_adapter.py` is the second pilot adapter and keeps scope intentionally narrow.
 
-Python remains the normative reference implementation. The TypeScript adapter proves the boundary with intentionally narrow construct coverage.
+Python remains the normative reference implementation. The TypeScript and Go adapters prove the boundary with intentionally narrow construct coverage.
 
 ## Adding A New Language
 
@@ -62,7 +63,7 @@ To add a new language later:
 6. emit `GraceFileModel`
 7. register the adapter in language dispatch
 
-Current runtime support includes Python plus a limited `.ts` pilot.
+Current runtime support includes Python plus limited `.ts` and `.go` pilots.
 
 ## Important Non-Goals
 

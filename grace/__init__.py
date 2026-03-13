@@ -90,6 +90,7 @@ def _public_api() -> tuple[str, ...]:
         "ApplyPlanSuccess",
         "AppliedPatchEntry",
         "BlockKind",
+        "GoAdapter",
         "GRACE_MAP_VERSION",
         "GraceBlockMetadata",
         "GraceFileModel",
@@ -174,16 +175,19 @@ def _public_api() -> tuple[str, ...]:
 # @grace.complexity 5
 def __getattr__(name: str) -> object:
     if name in {
+        "GoAdapter",
         "GraceLanguageAdapter",
         "PythonAdapter",
         "TypeScriptAdapter",
         "get_language_adapter_for_path",
     }:
+        from grace.go_adapter import GoAdapter
         from grace.language_adapter import GraceLanguageAdapter, get_language_adapter_for_path
         from grace.python_adapter import PythonAdapter
         from grace.typescript_adapter import TypeScriptAdapter
 
         exported = {
+            "GoAdapter": GoAdapter,
             "GraceLanguageAdapter": GraceLanguageAdapter,
             "PythonAdapter": PythonAdapter,
             "TypeScriptAdapter": TypeScriptAdapter,

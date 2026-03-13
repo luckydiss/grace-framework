@@ -43,6 +43,9 @@
 - Added `docs/typescript_adapter.md` and a small TypeScript pilot example.
 - Added cross-language parity fixtures for Python and TypeScript plus adapter conformance coverage for the current adapter boundary.
 - Added `docs/adapter_compatibility.md` and explicit unsupported-syntax policy guidance for adapters.
+- Added a third pilot language adapter for Go with support for module annotations, function declarations, receiver methods, and simple struct type declarations.
+- Added Go basic and parity fixtures plus adapter-specific tests and parity/conformance coverage.
+- Expanded the adapter compatibility matrix to cover Go alongside Python and TypeScript.
 
 ## v0.1.0
 

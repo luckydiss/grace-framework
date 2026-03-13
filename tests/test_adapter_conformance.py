@@ -21,6 +21,7 @@ def load_modules():
         "grace.parser",
         "grace.language_adapter",
         "grace.python_adapter",
+        "grace.go_adapter",
         "grace.tree_sitter_adapter",
         "grace.typescript_adapter",
     ):
@@ -36,6 +37,7 @@ def load_modules():
         "parser",
         "language_adapter",
         "python_adapter",
+        "go_adapter",
         "tree_sitter_adapter",
         "typescript_adapter",
     ):
@@ -51,18 +53,19 @@ def load_modules():
         loaded["parser"],
         loaded["language_adapter"],
         loaded["python_adapter"],
+        loaded["go_adapter"],
         loaded["typescript_adapter"],
     )
 
 
-MODELS, PARSER, LANGUAGE_ADAPTER, PYTHON_ADAPTER, TYPESCRIPT_ADAPTER = load_modules()
+MODELS, PARSER, LANGUAGE_ADAPTER, PYTHON_ADAPTER, GO_ADAPTER, TYPESCRIPT_ADAPTER = load_modules()
 
 
 @pytest.fixture(autouse=True)
 def _reload_modules():
-    global MODELS, PARSER, LANGUAGE_ADAPTER, PYTHON_ADAPTER, TYPESCRIPT_ADAPTER
+    global MODELS, PARSER, LANGUAGE_ADAPTER, PYTHON_ADAPTER, GO_ADAPTER, TYPESCRIPT_ADAPTER
     load_modules.cache_clear()
-    MODELS, PARSER, LANGUAGE_ADAPTER, PYTHON_ADAPTER, TYPESCRIPT_ADAPTER = load_modules()
+    MODELS, PARSER, LANGUAGE_ADAPTER, PYTHON_ADAPTER, GO_ADAPTER, TYPESCRIPT_ADAPTER = load_modules()
 
 
 def write_fixture_file(tmp_path: Path, name: str, content: str) -> Path:
@@ -82,11 +85,17 @@ def write_fixture_file(tmp_path: Path, name: str, content: str) -> Path:
     [
         (ROOT / "examples" / "parity" / "python" / "basic.py", "python_adapter", "PythonAdapter"),
         (ROOT / "examples" / "parity" / "typescript" / "basic.ts", "typescript_adapter", "TypeScriptAdapter"),
+        (ROOT / "examples" / "parity" / "go" / "basic.go", "go_adapter", "GoAdapter"),
     ],
 )
 def test_adapter_registry_detects_supported_file_types(path: Path, module_name: str, class_name: str) -> None:
     adapter = LANGUAGE_ADAPTER.get_language_adapter_for_path(path)
-    adapter_type = getattr(PYTHON_ADAPTER if module_name == "python_adapter" else TYPESCRIPT_ADAPTER, class_name)
+    adapter_module = {
+        "python_adapter": PYTHON_ADAPTER,
+        "typescript_adapter": TYPESCRIPT_ADAPTER,
+        "go_adapter": GO_ADAPTER,
+    }[module_name]
+    adapter_type = getattr(adapter_module, class_name)
     assert isinstance(adapter, adapter_type)
 
 
@@ -95,6 +104,7 @@ def test_adapter_registry_detects_supported_file_types(path: Path, module_name: 
     [
         ROOT / "examples" / "parity" / "python" / "basic.py",
         ROOT / "examples" / "parity" / "typescript" / "basic.ts",
+        ROOT / "examples" / "parity" / "go" / "basic.go",
     ],
 )
 def test_adapter_build_grace_file_model_returns_grace_file_model(path: Path) -> None:
@@ -110,6 +120,7 @@ def test_adapter_build_grace_file_model_returns_grace_file_model(path: Path) -> 
     [
         ROOT / "examples" / "parity" / "python" / "basic.py",
         ROOT / "examples" / "parity" / "typescript" / "basic.ts",
+        ROOT / "examples" / "parity" / "go" / "basic.go",
     ],
 )
 def test_adapter_output_is_deterministic(path: Path) -> None:
@@ -125,6 +136,7 @@ def test_adapter_output_is_deterministic(path: Path) -> None:
     [
         ROOT / "examples" / "parity" / "python" / "basic.py",
         ROOT / "examples" / "parity" / "typescript" / "basic.ts",
+        ROOT / "examples" / "parity" / "go" / "basic.go",
     ],
 )
 def test_adapter_block_spans_are_valid_and_monotonic(path: Path) -> None:
@@ -146,6 +158,7 @@ def test_adapter_block_spans_are_valid_and_monotonic(path: Path) -> None:
     [
         (ROOT / "examples" / "parity" / "python" / "basic.py", "Verify semantic parity for the reference Python adapter."),
         (ROOT / "examples" / "parity" / "typescript" / "basic.ts", "Verify semantic parity for the pilot TypeScript adapter."),
+        (ROOT / "examples" / "parity" / "go" / "basic.go", "Verify semantic parity for the pilot Go adapter."),
     ],
 )
 def test_adapter_extracts_module_metadata(path: Path, expected_purpose: str) -> None:
@@ -184,6 +197,21 @@ def test_adapter_extracts_module_metadata(path: Path, expected_purpose: str) -> 
             // @grace.anchor demo.invalid.broken
             // @grace.complexity 1
             const broken = () => 1;
+            """,
+        ),
+        (
+            "invalid.go",
+            """
+            // @grace.module demo.invalid
+            // @grace.purpose Invalid go fixture.
+            // @grace.interfaces broken()
+            // @grace.invariant Invalid bindings must fail predictably.
+
+            // @grace.anchor demo.invalid.broken
+            // @grace.complexity 1
+            type broken interface {
+                Run() int
+            }
             """,
         ),
     ],

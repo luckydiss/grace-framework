@@ -559,15 +559,30 @@ Outcome:
 
 Python remains the reference adapter, TypeScript remains the pilot adapter, and the adapter boundary now has parity and conformance coverage before any additional language is considered.
 
-## v0.15 - Broader Tree-sitter Expansion (Optional)
+## v0.15 - Third Language Adapter (Go)
 
 Goal:
 
-Extend the proven adapter pattern to additional languages only after the TypeScript pilot stays stable.
+Prove that the language adapter architecture scales past Python and TypeScript to a third language without changing GRACE core semantics.
 
-Possible next candidates:
+Delivered scope:
 
-- Go
+- `.go` files route through a dedicated `GoAdapter`
+- supported constructs stay intentionally small:
+  - module annotations
+  - function declarations
+  - receiver methods
+  - simple struct type declarations
+
+Explicit non-goals:
+
+- full Go coverage
+- interface declarations as semantic blocks
+- framework-specific semantics
+- changing validator, linter, map, query, impact, read, planner, or patch contracts
+
+Possible later candidates after Go hardening:
+
 - Rust
 - SQL
 - YAML

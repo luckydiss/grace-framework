@@ -22,6 +22,7 @@ def load_cli_modules():
         "grace.parser",
         "grace.language_adapter",
         "grace.python_adapter",
+        "grace.go_adapter",
         "grace.tree_sitter_adapter",
         "grace.typescript_adapter",
         "grace.validator",
@@ -47,6 +48,7 @@ def load_cli_modules():
         "parser",
         "language_adapter",
         "python_adapter",
+        "go_adapter",
         "tree_sitter_adapter",
         "typescript_adapter",
         "validator",
@@ -91,7 +93,7 @@ def test_cli_parse_works_for_parity_fixture_root() -> None:
     payload = json.loads(result.output)
     assert payload["ok"] is True
     assert payload["scope"] == "project"
-    assert payload["file_count"] == 2
+    assert payload["file_count"] == 3
 
 
 def test_cli_parse_validate_and_map_work_for_python_parity_fixture() -> None:
@@ -116,6 +118,26 @@ def test_cli_parse_validate_and_map_work_for_python_parity_fixture() -> None:
 
 def test_cli_parse_validate_and_map_work_for_typescript_parity_fixture() -> None:
     parity_path = str(ROOT / "examples" / "parity" / "typescript")
+
+    parse_result = runner().invoke(CLI.app, ["parse", parity_path, "--json"])
+    validate_result = runner().invoke(CLI.app, ["validate", parity_path, "--json"])
+    map_result = runner().invoke(CLI.app, ["map", parity_path, "--json"])
+
+    assert parse_result.exit_code == 0
+    assert validate_result.exit_code == 0
+    assert map_result.exit_code == 0
+
+    parse_payload = json.loads(parse_result.output)
+    validate_payload = json.loads(validate_result.output)
+    map_payload = json.loads(map_result.output)
+
+    assert parse_payload["ok"] is True
+    assert validate_payload["ok"] is True
+    assert map_payload["grace_version"] == "v1"
+
+
+def test_cli_parse_validate_and_map_work_for_go_parity_fixture() -> None:
+    parity_path = str(ROOT / "examples" / "parity" / "go")
 
     parse_result = runner().invoke(CLI.app, ["parse", parity_path, "--json"])
     validate_result = runner().invoke(CLI.app, ["validate", parity_path, "--json"])
