@@ -61,7 +61,7 @@ class GraceMap(BaseModel):
 # @grace.complexity 1
 # @grace.links grace.map.build_project_map
 def build_file_map(grace_file: GraceFileModel) -> GraceMap:
-    return build_project_map([grace_file])
+    return build_project_map((grace_file,))
 
 
 # @grace.anchor grace.map.build_project_map
