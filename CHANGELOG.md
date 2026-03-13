@@ -41,6 +41,8 @@
 - Added `docs/language_adapter_contract.md` to freeze adapter responsibilities, output requirements, and core invariants before adding a second language runtime.
 - Added a Tree-sitter-backed TypeScript pilot adapter with `.ts` adapter selection, deterministic block spans, and coverage for module annotations, functions, async functions, classes, and methods.
 - Added `docs/typescript_adapter.md` and a small TypeScript pilot example.
+- Added cross-language parity fixtures for Python and TypeScript plus adapter conformance coverage for the current adapter boundary.
+- Added `docs/adapter_compatibility.md` and explicit unsupported-syntax policy guidance for adapters.
 
 ## v0.1.0
 

@@ -542,7 +542,24 @@ Normative references:
 - `docs/language_adapter_contract.md`
 - `docs/typescript_adapter.md`
 
-## v0.14 - Broader Tree-sitter Expansion (Optional)
+## v0.14 - Adapter Hardening + Cross-Language Parity
+
+Goal:
+
+Harden the adapter boundary after the TypeScript pilot without changing GRACE core semantics.
+
+Delivered hardening scope:
+
+- cross-language parity fixtures for Python and TypeScript
+- adapter conformance tests
+- compatibility matrix for supported and unsupported constructs
+- explicit unsupported-syntax policy
+
+Outcome:
+
+Python remains the reference adapter, TypeScript remains the pilot adapter, and the adapter boundary now has parity and conformance coverage before any additional language is considered.
+
+## v0.15 - Broader Tree-sitter Expansion (Optional)
 
 Goal:
 

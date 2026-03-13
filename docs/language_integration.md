@@ -73,3 +73,14 @@ This layer does not:
 - change map/query/impact/read/planner contracts
 - claim broad multi-language runtime support
 - promise full framework-aware language coverage
+
+## Unsupported Syntax Behavior
+
+Unsupported syntax follows these rules:
+
+- unsupported constructs must not break parsing when they do not carry GRACE annotations
+- unsupported constructs may remain in the file as inert language syntax outside GRACE-managed binding
+- if GRACE annotations appear before an unsupported construct and no supported semantic entity can bind them, parsing must fail predictably
+- adapters must not invent heuristic bindings for unsupported constructs just to avoid a parse error
+
+This keeps adapter behavior deterministic across languages.

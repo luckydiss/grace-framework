@@ -13,6 +13,13 @@ Agents should treat the CLI as the stable integration surface.
 - Semantic patch targets are always `anchor_id`, never line numbers.
 - Parser entrypoints may dispatch through a language adapter, but CLI contracts and `GraceFileModel` semantics stay unchanged.
 
+Current adapter baseline:
+
+- Python reference adapter
+- TypeScript pilot adapter
+- cross-language parity fixtures
+- adapter conformance coverage
+
 ## Scope
 
 For `parse`, `validate`, `lint`, and `map`, `<path>` may be either:
@@ -29,12 +36,12 @@ Result payloads declare their scope explicitly:
 
 When a directory path is provided, GRACE:
 
-- recursively scans for `.py` files
+- recursively scans for files supported by installed adapters
 - ignores common non-source directories such as `.git`, `__pycache__`, `.venv`, `venv`, `node_modules`, build caches, and `*.egg-info`
 - considers a file a GRACE candidate only if its source contains `@grace.`
 - sorts discovered files deterministically by relative path
 
-If no GRACE-annotated Python files are found, the command fails with:
+If no GRACE-annotated supported files are found, the command fails with:
 
 - `"stage": "discovery"`
 - non-zero exit code
