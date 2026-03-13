@@ -21,6 +21,9 @@
 - Made patch preflight and post-write validation project-aware for cross-file `grace.links`.
 - Made patch linting run against the temporary project snapshot instead of file-only scope.
 - Added `docs/patch_semantics.md` to document anchor-driven patch execution guarantees.
+- Added derived impact analysis over `GraceMap` with direct, transitive, and module-level summaries.
+- Added `grace impact <path> <anchor_id> --json` for deterministic reverse-dependency analysis.
+- Added `docs/impact_layer.md` and impact coverage tests.
 
 ## v0.1.0
 

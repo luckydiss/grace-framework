@@ -1135,6 +1135,72 @@ def query_neighbors_command(path: Path, anchor_id: str, as_json: bool) -> None:
         click.echo(f"- {neighbor['anchor_id']}")
 
 
+# @grace.anchor grace.cli.impact_command
+# @grace.complexity 6
+# @grace.belief Impact CLI should stay thin and deterministic by reusing the existing map-loading path and delegating all reverse-dependency traversal to the derived impact layer.
+# @grace.links grace.cli._load_grace_map_for_query, grace.impact.impact_summary
+@app.command("impact")
+@click.argument("path", type=_path_argument(dir_okay=True))
+@click.argument("anchor_id")
+@click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
+def impact_command(path: Path, anchor_id: str, as_json: bool) -> None:
+    from grace.impact import ImpactLookupError, impact_summary
+
+    try:
+        scope, grace_map = _load_grace_map_for_query(path)
+        summary = impact_summary(grace_map, anchor_id)
+    except DiscoveryError as error:
+        if as_json:
+            _emit_json(_discovery_failure_payload("impact", error.path, error.message))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_discovery_failure(error.path, error.message)
+        raise click.exceptions.Exit(code=1) from error
+    except GraceParseError as error:
+        if as_json:
+            _emit_json(_parse_error_payload("impact", error))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_parse_errors(error)
+        raise click.exceptions.Exit(code=1) from error
+    except ImpactLookupError as error:
+        if as_json:
+            _emit_json(
+                {
+                    "ok": False,
+                    "command": "impact",
+                    "scope": scope,
+                    "stage": "impact",
+                    "path": str(path),
+                    "target": anchor_id,
+                    "message": str(error),
+                }
+            )
+            raise click.exceptions.Exit(code=1) from error
+        click.echo(str(error), err=True)
+        raise click.exceptions.Exit(code=1) from error
+
+    if as_json:
+        _emit_json(
+            {
+                "ok": True,
+                "command": "impact",
+                "scope": scope,
+                "path": str(path),
+                "target": anchor_id,
+                "data": summary.model_dump(mode="json"),
+            }
+        )
+        return
+
+    click.echo(
+        f"Impact for {anchor_id}: "
+        f"{len(summary.direct_dependents)} direct dependent(s), "
+        f"{len(summary.transitive_dependents)} transitive dependent(s), "
+        f"{len(summary.affected_modules)} affected module(s)"
+    )
+    for dependent in summary.transitive_dependents:
+        click.echo(f"- {dependent.anchor_id}")
+
+
 # @grace.anchor grace.cli.patch_command
 # @grace.complexity 4
 # @grace.links grace.patcher.patch_block
