@@ -22,3 +22,22 @@ This matrix records current GRACE adapter coverage after the TypeScript pilot, t
 - Go remains a pilot adapter with deliberately narrow function/method plus struct-type coverage.
 - Unsupported constructs must not break parsing if they do not contain GRACE annotations.
 - If GRACE annotations target an unsupported construct and no supported semantic entity can bind them, parsing must fail predictably.
+
+## Adapter Quality Matrix
+
+| Adapter | Status | Parity Coverage | Conformance | Notes |
+| --- | --- | --- | --- | --- |
+| Python | Reference | Basic + async-shape + service-shape + links-shape | Stable | Normative baseline for adapter behavior. |
+| TypeScript | Pilot | Basic + async-shape + service-shape + links-shape | Stable | Narrow runtime coverage; unsupported arrow/function-expression bindings fail predictably. |
+| Go | Pilot | Basic + async-shape equivalent + service-shape + links-shape | Stable | Async parity is represented by a regular-function equivalent; interface blocks remain unsupported. |
+
+## Multi-Language Behavior Guarantees
+
+Across Python, TypeScript, and Go adapters, GRACE guarantees:
+
+- inline GRACE annotations remain the only source of truth
+- adapters emit `GraceFileModel`-compatible normalized output
+- deterministic block ordering for equivalent file contents
+- stable parse behavior on unsupported syntax:
+  - inert when unsupported constructs are unannotated
+  - predictable parse failure when annotations target unsupported constructs

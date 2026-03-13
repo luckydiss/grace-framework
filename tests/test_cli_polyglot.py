@@ -86,7 +86,7 @@ def runner() -> CliRunner:
     return CliRunner()
 
 
-def test_cli_parse_works_for_parity_fixture_root() -> None:
+def test_cli_parse_works_for_polyglot_parity_root() -> None:
     result = runner().invoke(CLI.app, ["parse", str(ROOT / "examples" / "parity"), "--json"])
 
     assert result.exit_code == 0
@@ -97,61 +97,19 @@ def test_cli_parse_works_for_parity_fixture_root() -> None:
     assert payload["block_count"] == 30
 
 
-def test_cli_parse_validate_and_map_work_for_python_parity_fixture() -> None:
-    parity_path = str(ROOT / "examples" / "parity" / "python")
+@pytest.mark.parametrize("language", ["python", "typescript", "go"])
+def test_cli_validate_and_map_work_for_each_polyglot_parity_subdir(language: str) -> None:
+    parity_path = str(ROOT / "examples" / "parity" / language)
 
-    parse_result = runner().invoke(CLI.app, ["parse", parity_path, "--json"])
     validate_result = runner().invoke(CLI.app, ["validate", parity_path, "--json"])
     map_result = runner().invoke(CLI.app, ["map", parity_path, "--json"])
 
-    assert parse_result.exit_code == 0
     assert validate_result.exit_code == 0
     assert map_result.exit_code == 0
 
-    parse_payload = json.loads(parse_result.output)
     validate_payload = json.loads(validate_result.output)
     map_payload = json.loads(map_result.output)
 
-    assert parse_payload["ok"] is True
     assert validate_payload["ok"] is True
     assert map_payload["grace_version"] == "v1"
-
-
-def test_cli_parse_validate_and_map_work_for_typescript_parity_fixture() -> None:
-    parity_path = str(ROOT / "examples" / "parity" / "typescript")
-
-    parse_result = runner().invoke(CLI.app, ["parse", parity_path, "--json"])
-    validate_result = runner().invoke(CLI.app, ["validate", parity_path, "--json"])
-    map_result = runner().invoke(CLI.app, ["map", parity_path, "--json"])
-
-    assert parse_result.exit_code == 0
-    assert validate_result.exit_code == 0
-    assert map_result.exit_code == 0
-
-    parse_payload = json.loads(parse_result.output)
-    validate_payload = json.loads(validate_result.output)
-    map_payload = json.loads(map_result.output)
-
-    assert parse_payload["ok"] is True
-    assert validate_payload["ok"] is True
-    assert map_payload["grace_version"] == "v1"
-
-
-def test_cli_parse_validate_and_map_work_for_go_parity_fixture() -> None:
-    parity_path = str(ROOT / "examples" / "parity" / "go")
-
-    parse_result = runner().invoke(CLI.app, ["parse", parity_path, "--json"])
-    validate_result = runner().invoke(CLI.app, ["validate", parity_path, "--json"])
-    map_result = runner().invoke(CLI.app, ["map", parity_path, "--json"])
-
-    assert parse_result.exit_code == 0
-    assert validate_result.exit_code == 0
-    assert map_result.exit_code == 0
-
-    parse_payload = json.loads(parse_result.output)
-    validate_payload = json.loads(validate_result.output)
-    map_payload = json.loads(map_result.output)
-
-    assert parse_payload["ok"] is True
-    assert validate_payload["ok"] is True
-    assert map_payload["grace_version"] == "v1"
+    assert len(map_payload["modules"]) == 4

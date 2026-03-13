@@ -55,6 +55,16 @@ Python remains the reference implementation; `.ts` and `.go` support are deliber
 Cross-language parity fixtures and adapter conformance tests live under [examples/parity](C:\Users\luckydiss\Documents\grace_framework\examples\parity) and [tests/test_adapter_conformance.py](C:\Users\luckydiss\Documents\grace_framework\tests\test_adapter_conformance.py).
 The parity root is intended for cross-language comparison; project-level validation should be run per language subdirectory because the mirrored fixtures intentionally reuse the same `module_id`.
 
+## Multi-Language Behavior Guarantees
+
+GRACE currently supports:
+
+- Python as the reference adapter
+- TypeScript as a pilot adapter
+- Go as a pilot adapter
+
+All three adapters normalize into the same `GraceFileModel` contract, so validator, linter, map, query, impact, read, planner, and patch layers remain unchanged.
+
 ## Install
 
 ```bash
@@ -160,6 +170,15 @@ Pilot Go support:
 ```bash
 grace parse examples/go/basic.go --json
 grace validate examples/go --json
+```
+
+Polyglot parity verification:
+
+```bash
+grace parse examples/parity --json
+grace validate examples/parity/python --json
+grace validate examples/parity/typescript --json
+grace validate examples/parity/go --json
 ```
 
 Query project anchors:

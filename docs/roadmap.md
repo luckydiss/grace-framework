@@ -593,6 +593,26 @@ Explicit non-goals:
 - claiming universal language support prematurely
 - supporting every language at once
 
+## v0.16 - Adapter Evals + Multi-Language Parity Hardening
+
+Goal:
+
+Harden the polyglot adapter architecture after Python, TypeScript, and Go without changing GRACE core semantics.
+
+Delivered scope:
+
+- adapter eval suite with stable metrics
+- expanded cross-language parity fixtures
+- unsupported-syntax behavior verification
+- CLI polyglot verification over parity fixtures
+- adapter quality matrix and explicit multi-language behavior guarantees
+
+Explicit non-goals:
+
+- no new language runtime
+- no broader TypeScript or Go syntax coverage
+- no changes to parser, patch, map, query, impact, read, planner, or CLI contracts
+
 ## v1.0 - Stable Agent Development Platform
 
 Goal:

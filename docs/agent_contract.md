@@ -17,15 +17,17 @@ Current adapter baseline:
 
 - Python reference adapter
 - TypeScript pilot adapter
+- Go pilot adapter
 - cross-language parity fixtures
 - adapter conformance coverage
+- adapter evaluation coverage
 
 ## Scope
 
 For `parse`, `validate`, `lint`, and `map`, `<path>` may be either:
 
-- a single Python file
-- a directory containing GRACE-annotated Python files
+- a single file supported by an installed adapter
+- a directory containing GRACE-annotated files supported by installed adapters
 
 Result payloads declare their scope explicitly:
 
@@ -77,6 +79,16 @@ For self-hosted GRACE development, the preferred scope is the annotated `grace/`
 
 This self-hosting loop is described in more detail in `docs/self_hosting.md`.
 The workflow guidance and eval framing for agents are documented in `docs/agent_playbook.md`.
+
+## Multi-Language Behavior Guarantees
+
+GRACE currently supports:
+
+- Python as the reference adapter
+- TypeScript as a pilot adapter
+- Go as a pilot adapter
+
+Across these adapters, the CLI contract remains stable because all runtime parsing normalizes into `GraceFileModel` before core layers run.
 
 ## Output Contract
 

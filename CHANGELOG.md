@@ -46,6 +46,9 @@
 - Added a third pilot language adapter for Go with support for module annotations, function declarations, receiver methods, and simple struct type declarations.
 - Added Go basic and parity fixtures plus adapter-specific tests and parity/conformance coverage.
 - Expanded the adapter compatibility matrix to cover Go alongside Python and TypeScript.
+- Expanded parity fixtures across Python, TypeScript, and Go with dedicated async-shape, service-shape, and links-shape scenarios.
+- Added adapter evaluation coverage for semantic parity, deterministic parse output, conformance stability, and unsupported syntax behavior.
+- Added CLI polyglot verification for parsing and validating language-specific parity subdirectories.
 
 ## v0.1.0
 

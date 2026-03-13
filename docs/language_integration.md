@@ -21,6 +21,16 @@ The GRACE Core remains responsible for:
 
 Core layers consume `GraceFileModel` and do not need to know which language adapter produced it.
 
+## Multi-Language Behavior Guarantees
+
+The adapter boundary guarantees that Python, TypeScript, and Go all normalize into the same semantic model:
+
+- `GraceFileModel` remains the canonical normalized representation
+- module annotations carry the same semantics across adapters
+- supported block kinds map into the existing GRACE `BlockKind` set
+- deterministic spans and anchor ordering remain adapter responsibilities
+- unsupported syntax must stay inert unless GRACE annotations attempt to bind to it
+
 ## Adapter Responsibilities
 
 A language adapter is responsible for:
