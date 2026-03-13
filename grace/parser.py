@@ -1,3 +1,8 @@
+# @grace.module grace.parser
+# @grace.purpose Parse inline GRACE annotations from Python source into typed file models.
+# @grace.interfaces parse_python_file(path)->GraceFileModel; try_parse_python_file(path)->GraceParseResult; parse_python_module(path)->GraceFileModel
+# @grace.invariant Inline annotations remain the only parsing source of truth; parser never consults sidecars or exports.
+# @grace.invariant Block annotations bind only to the nearest next class, def, or async def accepted by the grammar.
 from __future__ import annotations
 
 import ast
@@ -27,12 +32,18 @@ MODULE_ANNOTATIONS = {"module", "purpose", "interfaces", "invariant"}
 BLOCK_ANNOTATIONS = {"anchor", "complexity", "belief", "links"}
 
 
+# @grace.anchor grace.parser.GraceParseError
+# @grace.complexity 2
 class GraceParseError(ValueError):
+    # @grace.anchor grace.parser.GraceParseError.__init__
+    # @grace.complexity 1
     def __init__(self, path: Path, errors: list[GraceParseIssue]) -> None:
         self.path = path
         self.errors = tuple(errors)
         super().__init__(self._build_message())
 
+    # @grace.anchor grace.parser.GraceParseError._build_message
+    # @grace.complexity 2
     def _build_message(self) -> str:
         summary = f"{self.path} failed GRACE parsing with {len(self.errors)} error(s)"
         details = "; ".join(
@@ -42,6 +53,8 @@ class GraceParseError(ValueError):
         return f"{summary}: {details}"
 
 
+# @grace.anchor grace.parser._DefinitionTarget
+# @grace.complexity 1
 @dataclass(slots=True)
 class _DefinitionTarget:
     kind: BlockKind
@@ -52,6 +65,8 @@ class _DefinitionTarget:
     line_end: int
 
 
+# @grace.anchor grace.parser._PendingBlock
+# @grace.complexity 2
 @dataclass(slots=True)
 class _PendingBlock:
     anchor_id: str
@@ -62,6 +77,8 @@ class _PendingBlock:
     seen_annotations: set[str] = field(default_factory=lambda: {"anchor"})
 
 
+# @grace.anchor grace.parser._ModuleAccumulator
+# @grace.complexity 1
 @dataclass(slots=True)
 class _ModuleAccumulator:
     module_id: str | None = None
@@ -70,6 +87,10 @@ class _ModuleAccumulator:
     invariants: list[str] = field(default_factory=list)
 
 
+# @grace.anchor grace.parser.parse_python_file
+# @grace.complexity 7
+# @grace.belief The parser must keep a single left-to-right pass over source lines while delegating block-span detection to the Python AST so semantic binding stays deterministic without line-number patch coordinates.
+# @grace.links grace.parser._collect_definition_targets, grace.parser._consume_module_annotation, grace.parser._consume_block_annotation, grace.parser._build_block_model, grace.parser._finalize_module_annotations
 def parse_python_file(path: str | Path) -> GraceFileModel:
     source_path = Path(path)
     source_text = source_path.read_text(encoding="utf-8")
@@ -209,6 +230,9 @@ def parse_python_file(path: str | Path) -> GraceFileModel:
     )
 
 
+# @grace.anchor grace.parser.try_parse_python_file
+# @grace.complexity 2
+# @grace.links grace.parser.parse_python_file
 def try_parse_python_file(path: str | Path) -> GraceParseResult:
     source_path = Path(path)
     try:
@@ -218,10 +242,15 @@ def try_parse_python_file(path: str | Path) -> GraceParseResult:
     return GraceParseSuccess(file=parsed_file)
 
 
+# @grace.anchor grace.parser.parse_python_module
+# @grace.complexity 1
+# @grace.links grace.parser.parse_python_file
 def parse_python_module(path: str | Path) -> GraceFileModel:
     return parse_python_file(path)
 
 
+# @grace.anchor grace.parser._consume_module_annotation
+# @grace.complexity 5
 def _consume_module_annotation(
     module: _ModuleAccumulator,
     annotation_name: str,
@@ -318,6 +347,9 @@ def _consume_module_annotation(
         module.invariants.append(payload)
 
 
+# @grace.anchor grace.parser._consume_block_annotation
+# @grace.complexity 6
+# @grace.belief Block-annotation parsing is a strict state machine: preserving order and single-occurrence constraints here is simpler and more deterministic than deferring malformed sequences to later validation passes.
 def _consume_block_annotation(
     pending: _PendingBlock | None,
     annotation_name: str,
@@ -449,6 +481,8 @@ def _consume_block_annotation(
     return pending
 
 
+# @grace.anchor grace.parser._build_block_model
+# @grace.complexity 5
 def _build_block_model(
     pending: _PendingBlock,
     target: _DefinitionTarget,
@@ -495,6 +529,8 @@ def _build_block_model(
         return None
 
 
+# @grace.anchor grace.parser._finalize_module_annotations
+# @grace.complexity 2
 def _finalize_module_annotations(module: _ModuleAccumulator, errors: list[GraceParseIssue]) -> None:
     if module.module_id is None:
         errors.append(
@@ -523,15 +559,22 @@ def _finalize_module_annotations(module: _ModuleAccumulator, errors: list[GraceP
                 code=ParseErrorCode.MISSING_REQUIRED_MODULE_ANNOTATION,
                 message="missing required @grace.invariant",
             )
-        )
+            )
 
 
+# @grace.anchor grace.parser._collect_definition_targets
+# @grace.complexity 3
+# @grace.links grace.parser._walk_statement_list
 def _collect_definition_targets(tree: ast.AST) -> dict[int, _DefinitionTarget]:
     targets: dict[int, _DefinitionTarget] = {}
     _walk_statement_list(getattr(tree, "body", []), targets, scope=(), direct_class=None)
     return targets
 
 
+# @grace.anchor grace.parser._walk_statement_list
+# @grace.complexity 6
+# @grace.belief AST traversal must distinguish top-level functions from methods without inventing new semantic kinds; carrying scope and direct_class explicitly keeps method namespace derivation deterministic.
+# @grace.links grace.parser._walk_nested_bodies
 def _walk_statement_list(
     statements: list[ast.stmt],
     targets: dict[int, _DefinitionTarget],
@@ -581,6 +624,8 @@ def _walk_statement_list(
         _walk_nested_bodies(statement, targets, scope=scope)
 
 
+# @grace.anchor grace.parser._walk_nested_bodies
+# @grace.complexity 4
 def _walk_nested_bodies(node: ast.AST, targets: dict[int, _DefinitionTarget], scope: tuple[str, ...]) -> None:
     for field_name in ("body", "orelse", "finalbody"):
         value = getattr(node, field_name, None)

@@ -1,3 +1,8 @@
+# @grace.module grace.cli
+# @grace.purpose Expose a thin CLI over GRACE core APIs for file-level and repo-level agent workflows.
+# @grace.interfaces main(argv)->int; commands: parse(path), validate(path), lint(path), map(path), patch(path, anchor_id, replacement_file), apply-plan(plan_file)
+# @grace.invariant The CLI must not introduce a new source of truth or line-based addressing semantics.
+# @grace.invariant Machine-readable JSON output should mirror core API results closely enough for shell-driven agents to compose deterministic workflows.
 from __future__ import annotations
 
 import json
@@ -34,25 +39,37 @@ IGNORED_DISCOVERY_DIR_NAMES = {
 }
 
 
+# @grace.anchor grace.cli.DiscoveryError
+# @grace.complexity 1
 class DiscoveryError(ValueError):
+    # @grace.anchor grace.cli.DiscoveryError.__init__
+    # @grace.complexity 1
     def __init__(self, path: Path, message: str) -> None:
         self.path = path
         self.message = message
         super().__init__(message)
 
 
+# @grace.anchor grace.cli._path_argument
+# @grace.complexity 1
 def _path_argument(*, dir_okay: bool) -> click.Path:
     return click.Path(exists=True, file_okay=True, dir_okay=dir_okay, path_type=Path)
 
 
+# @grace.anchor grace.cli._emit_json
+# @grace.complexity 1
 def _emit_json(payload: dict) -> None:
     click.echo(json.dumps(payload, indent=2))
 
 
+# @grace.anchor grace.cli._serialize_file
+# @grace.complexity 1
 def _serialize_file(grace_file: GraceFileModel) -> dict:
     return grace_file.model_dump(mode="json")
 
 
+# @grace.anchor grace.cli._serialize_parse_failure
+# @grace.complexity 1
 def _serialize_parse_failure(result: GraceParseFailure) -> dict:
     return {
         "path": str(result.path),
@@ -60,6 +77,8 @@ def _serialize_parse_failure(result: GraceParseFailure) -> dict:
     }
 
 
+# @grace.anchor grace.cli._parse_error_payload
+# @grace.complexity 2
 def _parse_error_payload(command: str, error: GraceParseError) -> dict:
     return {
         "ok": False,
@@ -71,6 +90,8 @@ def _parse_error_payload(command: str, error: GraceParseError) -> dict:
     }
 
 
+# @grace.anchor grace.cli._parse_success_payload
+# @grace.complexity 2
 def _parse_success_payload(command: str, grace_file: GraceFileModel) -> dict:
     return {
         "ok": True,
@@ -83,6 +104,8 @@ def _parse_success_payload(command: str, grace_file: GraceFileModel) -> dict:
     }
 
 
+# @grace.anchor grace.cli._validation_failure_payload
+# @grace.complexity 2
 def _validation_failure_payload(path: Path, result: ValidationFailure) -> dict:
     return {
         "ok": False,
@@ -94,6 +117,8 @@ def _validation_failure_payload(path: Path, result: ValidationFailure) -> dict:
     }
 
 
+# @grace.anchor grace.cli._validation_success_payload
+# @grace.complexity 2
 def _validation_success_payload(grace_file: GraceFileModel) -> dict:
     return {
         "ok": True,
@@ -109,6 +134,8 @@ def _validation_success_payload(grace_file: GraceFileModel) -> dict:
     }
 
 
+# @grace.anchor grace.cli._lint_success_payload
+# @grace.complexity 2
 def _lint_success_payload(grace_file: GraceFileModel) -> dict:
     return {
         "ok": True,
@@ -122,6 +149,8 @@ def _lint_success_payload(grace_file: GraceFileModel) -> dict:
     }
 
 
+# @grace.anchor grace.cli._lint_warning_payload
+# @grace.complexity 2
 def _lint_warning_payload(grace_file: GraceFileModel, result: LintFailure) -> dict:
     return {
         "ok": True,
@@ -135,6 +164,8 @@ def _lint_warning_payload(grace_file: GraceFileModel, result: LintFailure) -> di
     }
 
 
+# @grace.anchor grace.cli._patch_failure_payload
+# @grace.complexity 3
 def _patch_failure_payload(result: PatchFailure) -> dict:
     return {
         "ok": False,
@@ -163,6 +194,8 @@ def _patch_failure_payload(result: PatchFailure) -> dict:
     }
 
 
+# @grace.anchor grace.cli._patch_success_payload
+# @grace.complexity 3
 def _patch_success_payload(result) -> dict:
     return {
         "ok": True,
@@ -188,6 +221,8 @@ def _patch_success_payload(result) -> dict:
     }
 
 
+# @grace.anchor grace.cli._apply_plan_success_payload
+# @grace.complexity 2
 def _apply_plan_success_payload(plan_path: Path, result: ApplyPlanSuccess) -> dict:
     return {
         "ok": True,
@@ -202,6 +237,8 @@ def _apply_plan_success_payload(plan_path: Path, result: ApplyPlanSuccess) -> di
     }
 
 
+# @grace.anchor grace.cli._apply_plan_failure_payload
+# @grace.complexity 3
 def _apply_plan_failure_payload(plan_path: Path, result: ApplyPlanFailure) -> dict:
     return {
         "ok": False,
@@ -221,6 +258,8 @@ def _apply_plan_failure_payload(plan_path: Path, result: ApplyPlanFailure) -> di
     }
 
 
+# @grace.anchor grace.cli._serialize_patch_step
+# @grace.complexity 1
 def _serialize_patch_step(step: PatchStepResult) -> dict:
     return {
         "status": step.status.value,
@@ -229,6 +268,8 @@ def _serialize_patch_step(step: PatchStepResult) -> dict:
     }
 
 
+# @grace.anchor grace.cli._serialize_applied_patch_entry
+# @grace.complexity 1
 def _serialize_applied_patch_entry(entry) -> dict:
     return {
         "index": entry.index,
@@ -239,6 +280,8 @@ def _serialize_applied_patch_entry(entry) -> dict:
     }
 
 
+# @grace.anchor grace.cli._serialize_patch_result
+# @grace.complexity 2
 def _serialize_patch_result(result) -> dict:
     if isinstance(result, PatchFailure):
         payload = _patch_failure_payload(result)
@@ -249,6 +292,8 @@ def _serialize_patch_result(result) -> dict:
     return payload
 
 
+# @grace.anchor grace.cli._project_parse_success_payload
+# @grace.complexity 2
 def _project_parse_success_payload(command: str, root_path: Path, grace_files: tuple[GraceFileModel, ...]) -> dict:
     return {
         "ok": True,
@@ -262,6 +307,8 @@ def _project_parse_success_payload(command: str, root_path: Path, grace_files: t
     }
 
 
+# @grace.anchor grace.cli._project_parse_failure_payload
+# @grace.complexity 2
 def _project_parse_failure_payload(
     command: str,
     root_path: Path,
@@ -281,6 +328,8 @@ def _project_parse_failure_payload(
     }
 
 
+# @grace.anchor grace.cli._discovery_failure_payload
+# @grace.complexity 1
 def _discovery_failure_payload(command: str, path: Path, message: str) -> dict:
     return {
         "ok": False,
@@ -292,6 +341,8 @@ def _discovery_failure_payload(command: str, path: Path, message: str) -> dict:
     }
 
 
+# @grace.anchor grace.cli._project_validation_success_payload
+# @grace.complexity 2
 def _project_validation_success_payload(root_path: Path, grace_files: tuple[GraceFileModel, ...]) -> dict:
     return {
         "ok": True,
@@ -308,6 +359,8 @@ def _project_validation_success_payload(root_path: Path, grace_files: tuple[Grac
     }
 
 
+# @grace.anchor grace.cli._project_lint_success_payload
+# @grace.complexity 2
 def _project_lint_success_payload(root_path: Path, grace_files: tuple[GraceFileModel, ...]) -> dict:
     return {
         "ok": True,
@@ -322,6 +375,8 @@ def _project_lint_success_payload(root_path: Path, grace_files: tuple[GraceFileM
     }
 
 
+# @grace.anchor grace.cli._project_lint_warning_payload
+# @grace.complexity 2
 def _project_lint_warning_payload(root_path: Path, grace_files: tuple[GraceFileModel, ...], result: LintFailure) -> dict:
     return {
         "ok": True,
@@ -336,6 +391,8 @@ def _project_lint_warning_payload(root_path: Path, grace_files: tuple[GraceFileM
     }
 
 
+# @grace.anchor grace.cli._discover_grace_paths
+# @grace.complexity 5
 def _discover_grace_paths(path: Path) -> tuple[str, tuple[Path, ...]]:
     if path.is_file():
         return "file", (path,)
@@ -366,6 +423,9 @@ def _discover_grace_paths(path: Path) -> tuple[str, tuple[Path, ...]]:
     return "project", tuple(discovered_paths)
 
 
+# @grace.anchor grace.cli._parse_many
+# @grace.complexity 3
+# @grace.links grace.parser.try_parse_python_file
 def _parse_many(paths: tuple[Path, ...]) -> tuple[tuple[GraceFileModel, ...], tuple[GraceParseFailure, ...]]:
     parsed_files: list[GraceFileModel] = []
     parse_failures: list[GraceParseFailure] = []
@@ -378,6 +438,8 @@ def _parse_many(paths: tuple[Path, ...]) -> tuple[tuple[GraceFileModel, ...], tu
     return tuple(parsed_files), tuple(parse_failures)
 
 
+# @grace.anchor grace.cli._emit_project_parse_failure
+# @grace.complexity 2
 def _emit_project_parse_failure(path: Path, parse_failures: tuple[GraceParseFailure, ...]) -> None:
     click.echo(f"Parse failed for project {path}", err=True)
     for failure in parse_failures:
@@ -387,10 +449,14 @@ def _emit_project_parse_failure(path: Path, parse_failures: tuple[GraceParseFail
             click.echo(f"  - {issue.code.value}{location}: {issue.message}", err=True)
 
 
+# @grace.anchor grace.cli._emit_discovery_failure
+# @grace.complexity 1
 def _emit_discovery_failure(path: Path, message: str) -> None:
     click.echo(f"Discovery failed for {path}: {message}", err=True)
 
 
+# @grace.anchor grace.cli._emit_parse_errors
+# @grace.complexity 2
 def _emit_parse_errors(error: GraceParseError) -> None:
     click.echo(f"Parse failed for {error.path}", err=True)
     for issue in error.errors:
@@ -398,18 +464,24 @@ def _emit_parse_errors(error: GraceParseError) -> None:
         click.echo(f"- {issue.code.value}{location}: {issue.message}", err=True)
 
 
+# @grace.anchor grace.cli._emit_validation_failure
+# @grace.complexity 1
 def _emit_validation_failure(result: ValidationFailure) -> None:
     click.echo("Validation failed", err=True)
     for issue in result.issues:
         click.echo(f"- {issue.code.value}: {issue.message}", err=True)
 
 
+# @grace.anchor grace.cli._emit_lint_warnings
+# @grace.complexity 1
 def _emit_lint_warnings(result: LintFailure) -> None:
     click.echo(f"Lint warnings: {len(result.issues)}")
     for issue in result.issues:
         click.echo(f"- {issue.code.value}: {issue.message}")
 
 
+# @grace.anchor grace.cli._emit_patch_failure
+# @grace.complexity 2
 def _emit_patch_failure(result: PatchFailure) -> None:
     click.echo(f"Patch failed at stage {result.stage.value}: {result.message}", err=True)
     for issue in result.parse_errors:
@@ -419,11 +491,15 @@ def _emit_patch_failure(result: PatchFailure) -> None:
         click.echo(f"- {issue.code.value}: {issue.message}", err=True)
 
 
+# @grace.anchor grace.cli._emit_patch_preview
+# @grace.complexity 1
 def _emit_patch_preview(result) -> None:
     click.echo(f"Patch preview for {result.anchor_id} in {result.path}")
     click.echo(result.preview if result.preview else "(no diff)")
 
 
+# @grace.anchor grace.cli._emit_patch_success
+# @grace.complexity 2
 def _emit_patch_success(result) -> None:
     if result.dry_run:
         click.echo(f"Dry-run succeeded for {result.anchor_id} in {result.path}")
@@ -435,6 +511,8 @@ def _emit_patch_success(result) -> None:
             click.echo(f"- {issue.code.value}: {issue.message}")
 
 
+# @grace.anchor grace.cli._emit_apply_plan_success
+# @grace.complexity 1
 def _emit_apply_plan_success(plan_path: Path, result: ApplyPlanSuccess) -> None:
     if result.dry_run:
         click.echo(f"Dry-run succeeded for patch plan {plan_path}: {result.applied_count}/{result.entry_count} entry(s)")
@@ -442,6 +520,8 @@ def _emit_apply_plan_success(plan_path: Path, result: ApplyPlanSuccess) -> None:
         click.echo(f"Applied patch plan {plan_path}: {result.applied_count}/{result.entry_count} entry(s) succeeded")
 
 
+# @grace.anchor grace.cli._emit_apply_plan_failure
+# @grace.complexity 2
 def _emit_apply_plan_failure(plan_path: Path, result: ApplyPlanFailure) -> None:
     click.echo(
         f"Patch plan failed at stage {result.stage.value} for entry {result.failed_index} in {plan_path}: {result.message}",
@@ -453,6 +533,8 @@ def _emit_apply_plan_failure(plan_path: Path, result: ApplyPlanFailure) -> None:
         _emit_patch_failure(failed_result)
 
 
+# @grace.anchor grace.cli._emit_apply_plan_preview
+# @grace.complexity 2
 def _emit_apply_plan_preview(result: ApplyPlanSuccess | ApplyPlanFailure) -> None:
     click.echo("Patch plan preview:")
     for entry in result.entries:
@@ -461,11 +543,17 @@ def _emit_apply_plan_preview(result: ApplyPlanSuccess | ApplyPlanFailure) -> Non
         click.echo(preview if preview else "(no diff)")
 
 
+# @grace.anchor grace.cli.app
+# @grace.complexity 1
 @click.group(help="GRACE v1 CLI")
 def app() -> None:
     pass
 
 
+# @grace.anchor grace.cli.parse_command
+# @grace.complexity 6
+# @grace.belief Parse command orchestration stays deterministic by running discovery first, then switching cleanly between single-file and project aggregation paths without mixing partial success into the file-level contract.
+# @grace.links grace.cli._discover_grace_paths, grace.cli._parse_many, grace.parser.parse_python_file
 @app.command("parse")
 @click.argument("path", type=_path_argument(dir_okay=True))
 @click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
@@ -514,6 +602,10 @@ def parse_command(path: Path, as_json: bool) -> None:
     click.echo(f"Parsed module {grace_file.module.module_id} with {len(grace_file.blocks)} block(s)")
 
 
+# @grace.anchor grace.cli.validate_command
+# @grace.complexity 6
+# @grace.belief Validate command must stop on parse failures before invoking validation so agents never receive mixed parse-and-validate success signals for the same scope.
+# @grace.links grace.cli._discover_grace_paths, grace.cli._parse_many, grace.parser.parse_python_file
 @app.command("validate")
 @click.argument("path", type=_path_argument(dir_okay=True))
 @click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
@@ -575,6 +667,10 @@ def validate_command(path: Path, as_json: bool) -> None:
     click.echo(f"Validated module {grace_file.module.module_id} successfully")
 
 
+# @grace.anchor grace.cli.lint_command
+# @grace.complexity 6
+# @grace.belief Lint command preserves the core execution discipline by requiring successful parse and validation first, while still keeping lint warnings non-blocking for the exit-code contract.
+# @grace.links grace.cli._discover_grace_paths, grace.cli._parse_many, grace.parser.parse_python_file
 @app.command("lint")
 @click.argument("path", type=_path_argument(dir_okay=True))
 @click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
@@ -667,6 +763,9 @@ def lint_command(path: Path, as_json: bool) -> None:
     click.echo(f"Lint passed for module {grace_file.module.module_id}")
 
 
+# @grace.anchor grace.cli.map_command
+# @grace.complexity 5
+# @grace.links grace.cli._discover_grace_paths, grace.cli._parse_many, grace.parser.parse_python_file
 @app.command("map")
 @click.argument("path", type=_path_argument(dir_okay=True))
 @click.option("--json", "as_json", is_flag=True, help="Print a JSON-friendly GRACE map payload.")
@@ -717,6 +816,9 @@ def map_command(path: Path, as_json: bool) -> None:
     )
 
 
+# @grace.anchor grace.cli.patch_command
+# @grace.complexity 4
+# @grace.links grace.patcher.patch_block
 @app.command("patch")
 @click.argument("path", type=_path_argument(dir_okay=False))
 @click.argument("anchor_id")
@@ -743,6 +845,8 @@ def patch_command(path: Path, anchor_id: str, replacement_file: Path, dry_run: b
     _emit_patch_success(result)
 
 
+# @grace.anchor grace.cli.apply_plan_command
+# @grace.complexity 5
 @app.command("apply-plan")
 @click.argument("plan_file", type=_path_argument(dir_okay=False))
 @click.option("--dry-run", is_flag=True, help="Simulate the full patch plan without writing to disk.")
@@ -788,6 +892,8 @@ def apply_plan_command(plan_file: Path, dry_run: bool, preview: bool, as_json: b
     _emit_apply_plan_success(plan_file, result)
 
 
+# @grace.anchor grace.cli.main
+# @grace.complexity 2
 def main(argv: list[str] | None = None) -> int:
     try:
         app.main(args=argv, prog_name="grace", standalone_mode=False)

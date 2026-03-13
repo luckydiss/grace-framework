@@ -1,3 +1,8 @@
+# @grace.module grace.patcher
+# @grace.purpose Replace semantic blocks by anchor_id while preserving identity and enforcing parse-validate rollback discipline.
+# @grace.interfaces patch_block(path, anchor_id, replacement_source, *, dry_run=False)->PatchResult
+# @grace.invariant Patching is always addressed by anchor_id, never by line numbers as a user-facing coordinate system.
+# @grace.invariant Parse or validation failure after a write always rolls the file back to its original contents.
 from __future__ import annotations
 
 import difflib
@@ -19,6 +24,8 @@ from grace.validator import ValidationFailure, ValidationIssue, validate_file
 ANCHOR_ANNOTATION_RE = re.compile(r"^\s*#\s*@grace\.anchor\s+(?P<payload>.*\S)\s*$")
 
 
+ # @grace.anchor grace.patcher.PatchFailureStage
+ # @grace.complexity 1
 class PatchFailureStage(str, Enum):
     TARGET_LOOKUP = "target_lookup"
     IDENTITY = "identity"
@@ -26,12 +33,16 @@ class PatchFailureStage(str, Enum):
     VALIDATE = "validate"
 
 
+# @grace.anchor grace.patcher.PatchStepStatus
+# @grace.complexity 1
 class PatchStepStatus(str, Enum):
     NOT_RUN = "not_run"
     PASSED = "passed"
     FAILED = "failed"
 
 
+# @grace.anchor grace.patcher.PatchStepResult
+# @grace.complexity 1
 class PatchStepResult(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -39,6 +50,8 @@ class PatchStepResult(BaseModel):
     issue_count: int = Field(default=0, ge=0)
 
 
+# @grace.anchor grace.patcher.PatchSuccess
+# @grace.complexity 2
 class PatchSuccess(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -57,6 +70,8 @@ class PatchSuccess(BaseModel):
     lint_issues: tuple[LintIssue, ...] = Field(default_factory=tuple)
 
 
+# @grace.anchor grace.patcher.PatchFailure
+# @grace.complexity 2
 class PatchFailure(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -80,6 +95,10 @@ class PatchFailure(BaseModel):
 PatchResult = PatchSuccess | PatchFailure
 
 
+# @grace.anchor grace.patcher.patch_block
+# @grace.complexity 7
+# @grace.belief Safe semantic patching depends on preserving target identity up front, then reusing the existing parse and validation pipeline both before and after any write so rollback decisions remain deterministic.
+# @grace.links grace.patcher._find_anchor_annotation_line, grace.patcher._extract_replacement_anchor_id, grace.patcher._normalize_replacement_source, grace.patcher._build_preview_diff, grace.patcher._hash_text, grace.patcher._parse_candidate_text, grace.patcher._splice_block
 def patch_block(path: str | Path, anchor_id: str, replacement_source: str, *, dry_run: bool = False) -> PatchResult:
     source_path = Path(path)
     original_text = source_path.read_text(encoding="utf-8")
@@ -278,6 +297,8 @@ def patch_block(path: str | Path, anchor_id: str, replacement_source: str, *, dr
     )
 
 
+# @grace.anchor grace.patcher._find_anchor_annotation_line
+# @grace.complexity 2
 def _find_anchor_annotation_line(lines: list[str], anchor_id: str) -> int | None:
     for index, line in enumerate(lines):
         match = ANCHOR_ANNOTATION_RE.match(line)
@@ -286,6 +307,8 @@ def _find_anchor_annotation_line(lines: list[str], anchor_id: str) -> int | None
     return None
 
 
+# @grace.anchor grace.patcher._extract_replacement_anchor_id
+# @grace.complexity 2
 def _extract_replacement_anchor_id(replacement_source: str) -> str | None:
     for line in replacement_source.splitlines():
         match = ANCHOR_ANNOTATION_RE.match(line)
@@ -294,6 +317,8 @@ def _extract_replacement_anchor_id(replacement_source: str) -> str | None:
     return None
 
 
+# @grace.anchor grace.patcher._normalize_replacement_source
+# @grace.complexity 1
 def _normalize_replacement_source(replacement_source: str) -> str:
     normalized_replacement = replacement_source
     if normalized_replacement and not normalized_replacement.endswith("\n"):
@@ -301,6 +326,8 @@ def _normalize_replacement_source(replacement_source: str) -> str:
     return normalized_replacement
 
 
+# @grace.anchor grace.patcher._build_preview_diff
+# @grace.complexity 3
 def _build_preview_diff(path: Path, anchor_id: str, original_block_source: str, replacement_source: str) -> str:
     before_lines = original_block_source.splitlines()
     after_lines = replacement_source.splitlines()
@@ -315,10 +342,15 @@ def _build_preview_diff(path: Path, anchor_id: str, original_block_source: str, 
     )
 
 
+# @grace.anchor grace.patcher._hash_text
+# @grace.complexity 1
 def _hash_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+# @grace.anchor grace.patcher._parse_candidate_text
+# @grace.complexity 5
+# @grace.belief Candidate parsing should happen against a temporary sibling file so the parser sees a real file path and the patcher can reuse existing file-based contracts without mutating the target during preflight.
 def _parse_candidate_text(source_path: Path, patched_text: str) -> GraceFileModel:
     fd, temp_name = tempfile.mkstemp(prefix=".grace_patch_", suffix=source_path.suffix, dir=source_path.parent)
     temp_path = Path(temp_name)
@@ -334,6 +366,8 @@ def _parse_candidate_text(source_path: Path, patched_text: str) -> GraceFileMode
             pass
 
 
+# @grace.anchor grace.patcher._splice_block
+# @grace.complexity 2
 def _splice_block(
     *,
     original_lines: list[str],
