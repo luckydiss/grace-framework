@@ -128,3 +128,13 @@ Avoid during this phase:
 - heuristic planning features
 - UI / IDE work
 - source-of-truth expansion
+
+## Reliability Gates
+
+Protocol freeze is reinforced by repo-scale reliability gates defined in `docs/release_criteria.md`.
+
+Those gates intentionally distinguish:
+
+- repository-root export behavior
+- curated validation scopes
+- self-hosted agent workflow stability

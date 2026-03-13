@@ -180,6 +180,26 @@ Explicit non-goals for this stage:
 - core semantics changes
 - Tree-sitter refactors beyond current pilot needs
 
+## v0.19 - Repo-Scale Agent Reliability
+
+Goal:
+
+Measure GRACE as a repository-scale agent platform rather than only as a set of isolated fixture-level commands.
+
+Focus:
+
+- repo-scale reliability eval suite
+- curated-scope validation policy
+- deterministic CLI contract checks across export/navigation commands
+- release criteria and quality gates
+
+Explicit non-goals for this stage:
+
+- new runtime capabilities
+- new adapters
+- broader syntax coverage
+- graph or patch semantics changes
+
 ## v0.3 - Strong Patch Workflow
 
 Goal:

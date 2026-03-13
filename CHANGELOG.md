@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added repo-scale reliability coverage for deterministic root export, curated validation scopes, and self-hosted dry-run patch/apply-plan behavior.
+- Added `docs/release_criteria.md` to define hardening gates for protocol reliability before future releases.
 - Added `docs/adapter_authoring.md` to define a repeatable workflow for future language adapters.
 - Added reusable adapter harness helpers for parity, conformance, and eval tests.
 - Documented support tiers (`reference`, `pilot`, `experimental`) for adapter maturity.

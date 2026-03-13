@@ -16,6 +16,7 @@ The near-stable CLI/protocol freeze lives in [docs/protocol_freeze.md](C:\Users\
 The TypeScript pilot adapter lives in [docs/typescript_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\typescript_adapter.md).
 The Go pilot adapter lives in [docs/go_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\go_adapter.md).
 The adapter compatibility matrix lives in [docs/adapter_compatibility.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_compatibility.md).
+The release hardening gates live in [docs/release_criteria.md](C:\Users\luckydiss\Documents\grace_framework\docs\release_criteria.md).
 The longer-term development plan lives in [docs/roadmap.md](C:\Users\luckydiss\Documents\grace_framework\docs\roadmap.md).
 
 ## Source Of Truth
@@ -83,6 +84,17 @@ Repository-root behavior is intentionally split:
 - `grace validate . --json` and `grace lint . --json` may fail because parity fixtures intentionally reuse the same semantic identities across languages
 
 For agent workflows, use curated validation scopes such as `grace/`, `examples/parity/python`, `examples/parity/typescript`, or `examples/parity/go`.
+
+## Reliability Status
+
+GRACE now maintains explicit repo-scale reliability gates:
+
+- deterministic repo-root `parse` and `map`
+- curated-scope validation success
+- deterministic self-hosted `query/read/impact/plan`
+- dry-run patch/apply-plan reliability without unnecessary file touches
+
+These gates are described in [docs/release_criteria.md](C:\Users\luckydiss\Documents\grace_framework\docs\release_criteria.md).
 
 ## Install
 

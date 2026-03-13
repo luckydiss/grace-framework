@@ -76,3 +76,21 @@ The baseline expectation is:
 - patch/apply-plan success rate = `1.0`
 - rollback rate = `0.0`
 - unnecessary file touch rate = `0.0`
+
+## Repo-Scale Reliability
+
+Beyond the narrow self-hosted scenarios, GRACE also treats the following as reliability checks:
+
+- deterministic `parse . --json`
+- deterministic `map . --json`
+- deterministic `query/read/impact/plan` on curated self-hosted scope
+- successful validation on curated scopes:
+  - `grace/`
+  - `examples/basic`
+  - `examples/go`
+  - `examples/typescript`
+  - `examples/parity/python`
+  - `examples/parity/typescript`
+  - `examples/parity/go`
+
+Repository-root validation is intentionally not a success criterion because parity fixtures mirror the same semantic identities across languages by design.
