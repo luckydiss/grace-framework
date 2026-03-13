@@ -58,11 +58,11 @@ Current repo-root behavior is intentionally split:
 - `map . --json`
   expected to succeed
 - `validate . --json`
-  may fail because parity fixtures intentionally reuse semantic identities across languages
+  expected to succeed for the configured repository scope defined by `[tool.grace]`
 - `lint . --json`
-  may fail at validation stage for the same reason
+  expected to succeed for the configured repository scope defined by `[tool.grace]`
 
-Agents should use curated validation scopes when parity fixtures are present.
+Agents should still use curated validation scopes when they intentionally want to inspect parity fixtures that are excluded from the default repo-root scope.
 
 ## JSON Envelope Stability
 

@@ -37,3 +37,13 @@ include = ["grace*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.grace]
+include = [
+    "grace/**",
+]
+exclude = [
+    "examples/parity/**",
+    ".tmp_*/**",
+    ".tmp_probe_repo/**",
+]

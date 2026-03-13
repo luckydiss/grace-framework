@@ -104,16 +104,13 @@ def test_v1_readiness_current_green_surfaces_match_review() -> None:
     assert lint_payload["ok"] is True
 
 
-def test_v1_readiness_current_known_blockers_match_review() -> None:
-    validate_exit_code, validate_payload = invoke_json("validate", ".", "--json")
-    lint_exit_code, lint_payload = invoke_json("lint", ".", "--json")
+def test_v1_readiness_repo_root_validation_now_matches_configured_scope() -> None:
+    validate_payload = invoke_json_expect_success("validate", ".", "--json")
+    lint_payload = invoke_json_expect_success("lint", ".", "--json")
 
-    assert validate_exit_code != 0
-    assert validate_payload["ok"] is False
-    assert validate_payload["stage"] == "validate"
-    assert any(issue["code"] == "duplicate_module_id" for issue in validate_payload["issues"])
-    assert any(issue["code"] == "duplicate_anchor_id" for issue in validate_payload["issues"])
+    assert validate_payload["ok"] is True
+    assert validate_payload["scope"] == "project"
+    assert validate_payload["validation"] == {"ok": True, "scope": "project"}
 
-    assert lint_exit_code != 0
-    assert lint_payload["ok"] is False
-    assert lint_payload["stage"] == "validate"
+    assert lint_payload["ok"] is True
+    assert lint_payload["scope"] == "project"

@@ -196,21 +196,14 @@ def test_protocol_freeze_repo_root_parse_and_map_are_deterministic() -> None:
     assert first_map["edges"]
 
 
-def test_protocol_freeze_repo_root_validate_and_lint_fail_predictably_on_parity_duplicates() -> None:
-    validate_result = runner().invoke(CLI.app, ["validate", ".", "--json"])
-    lint_result = runner().invoke(CLI.app, ["lint", ".", "--json"])
+def test_protocol_freeze_repo_root_validate_and_lint_succeed_under_configured_scope() -> None:
+    validate_payload = invoke_json("validate", ".", "--json")
+    lint_payload = invoke_json("lint", ".", "--json")
 
-    assert validate_result.exit_code != 0
-    assert lint_result.exit_code != 0
+    assert validate_payload["ok"] is True
+    assert validate_payload["scope"] == "project"
+    assert validate_payload["validation"] == {"ok": True, "scope": "project"}
 
-    validate_payload = json.loads(validate_result.output)
-    lint_payload = json.loads(lint_result.output)
-
-    assert validate_payload["ok"] is False
-    assert validate_payload["stage"] == "validate"
-    assert any(issue["code"] == "duplicate_module_id" for issue in validate_payload["issues"])
-    assert any(issue["code"] == "duplicate_anchor_id" for issue in validate_payload["issues"])
-
-    assert lint_payload["ok"] is False
-    assert lint_payload["stage"] == "validate"
-    assert any(issue["code"] == "duplicate_module_id" for issue in lint_payload["issues"])
+    assert lint_payload["ok"] is True
+    assert lint_payload["scope"] == "project"
+    assert lint_payload["warning_count"] >= 0

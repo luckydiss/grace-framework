@@ -45,6 +45,8 @@ When a directory path is provided, GRACE:
 
 This prevents test fixtures or embedded strings containing `@grace.*` from being treated as real GRACE modules.
 
+If `[tool.grace]` exists in `pyproject.toml`, repo-root discovery also applies its `include` and `exclude` globs before candidate parsing. Explicit file and subdirectory targets override those repository-level filters so agents can still inspect excluded fixtures deliberately.
+
 If no GRACE-annotated supported files are found, the command fails with:
 
 - `"stage": "discovery"`
@@ -86,9 +88,9 @@ The workflow guidance and eval framing for agents are documented in `docs/agent_
 
 Repository-root policy:
 
-- `parse . --json` and `map . --json` are valid repository export and inspection commands
-- `validate . --json` and `lint . --json` are not guaranteed to succeed when parity fixtures intentionally mirror the same semantic identities across languages
-- use curated subdirectories for project-level validation when parity fixtures are present
+- `parse . --json`, `map . --json`, `validate . --json`, and `lint . --json` are expected to succeed for the configured repository-root scope resolved through `[tool.grace]`
+- parity fixtures may still intentionally reuse semantic identities, but they can be excluded from the default repo scope while remaining available through explicit subdirectory targets
+- use curated subdirectories when you intentionally want to inspect excluded parity fixtures directly
 
 ## Multi-Language Behavior Guarantees
 

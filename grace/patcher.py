@@ -426,9 +426,10 @@ def _load_project_state(source_path: Path, replacement_file: GraceFileModel | No
 
 # @grace.anchor grace.patcher._discover_project_paths
 # @grace.complexity 5
-# @grace.links grace.artifact_hygiene.is_ignored_artifact_dir_name
+# @grace.links grace.artifact_hygiene.is_ignored_artifact_dir_name, grace.repo_config.load_repo_config, grace.repo_config.candidate_in_repo_scope
 def _discover_project_paths(project_root: Path) -> tuple[Path, ...]:
     from grace.artifact_hygiene import is_ignored_artifact_dir_name
+    from grace.repo_config import candidate_in_repo_scope, load_repo_config
 
     def has_grace_module_header(source_text: str) -> bool:
         for raw_line in source_text.splitlines():
@@ -442,8 +443,10 @@ def _discover_project_paths(project_root: Path) -> tuple[Path, ...]:
             return False
         return False
 
+    resolved_root = project_root.expanduser().resolve()
+    repo_config = load_repo_config(resolved_root)
     discovered_paths: list[Path] = []
-    for current_root, dir_names, file_names in os.walk(project_root):
+    for current_root, dir_names, file_names in os.walk(resolved_root):
         dir_names[:] = [
             dir_name
             for dir_name in dir_names
@@ -454,7 +457,9 @@ def _discover_project_paths(project_root: Path) -> tuple[Path, ...]:
         for file_name in sorted(file_names):
             if not file_name.endswith(".py"):
                 continue
-            candidate_path = Path(current_root) / file_name
+            candidate_path = (Path(current_root) / file_name).resolve()
+            if not candidate_in_repo_scope(repo_config, resolved_root, candidate_path):
+                continue
             try:
                 source_text = candidate_path.read_text(encoding="utf-8")
             except (OSError, UnicodeDecodeError):

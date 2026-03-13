@@ -9,6 +9,8 @@
 - Added `untracked_artifact` lint warnings for project scopes that contain derived artifacts not ignored by `.gitignore`.
 - Taught CLI and patcher discovery to ignore `.grace_plan_*` directories so temporary mirrors do not pollute later discovery or graph export.
 - Added `orphan_anchor` project-level lint warnings based on derived incoming semantic links and module interface exposure.
+- Added `[tool.grace]` repository discovery config with `include` and `exclude` globs so repo-root parse, validate, lint, and map can use a stable default scope while explicit file or subdirectory targets still override filters.
+- Made repo-root `validate . --json` and `lint . --json` green-by-default for this repository by scoping discovery through `[tool.grace]`.
 
 ## v1.0.0 - 2026-03-13
 

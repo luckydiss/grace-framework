@@ -84,26 +84,13 @@ TypeScript and Go are intentionally narrow.
 
 That is acceptable for `0.x`, but `v1.0` should not overstate adapter maturity while two non-reference adapters are still explicitly pilot-tier.
 
-### 2. Repository-root validation is intentionally non-green
-
-`parse . --json` and `map . --json` are valid export surfaces.
-
-But:
-
-- `validate . --json`
-- `lint . --json`
-
-are intentionally not clean because parity fixtures reuse semantic identities across languages.
-
-This is documented and correct, but it means repository-root behavior still requires explanation rather than being trivially intuitive.
-
-### 3. Artifact policy is documented, but not enforced by tooling
+### 2. Artifact policy is documented, but not enforced by tooling
 
 We now document committed vs local-only derived artifacts, but GRACE itself does not yet enforce artifact hygiene.
 
 That is manageable, but it is still a process-level discipline rather than a fully encoded policy.
 
-### 4. Release messaging still needs a final pass
+### 3. Release messaging still needs a final pass
 
 The protocol is much more stable than before, but a final `v1.0` release would still need:
 
@@ -148,11 +135,11 @@ This should still avoid new runtime semantics.
 - self-hosted workflow
 - shell-driven agent contract
 - repo-scale export reliability
+- configured repo-root validation and lint reliability
 - adapter architecture
 
 ### Not yet release-final
 
 - pilot adapter maturity
-- repository-root validation expectations
 - artifact hygiene as a tooling-enforced policy
 - final `v1.0` release framing

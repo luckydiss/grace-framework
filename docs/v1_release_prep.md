@@ -64,14 +64,12 @@ Stable repository-root guarantees:
 
 - `grace parse . --json`
 - `grace map . --json`
-
-Repository-root validation behavior is intentionally narrower:
-
 - `grace validate . --json`
 - `grace lint . --json`
 
 Curated validation scopes remain the recommended validation/lint contract:
 
+- `.`
 - `grace/`
 - `examples/basic`
 - `examples/typescript`
@@ -80,7 +78,7 @@ Curated validation scopes remain the recommended validation/lint contract:
 - `examples/parity/typescript`
 - `examples/parity/go`
 
-Repository-root validation and lint are not currently release gates because parity fixtures intentionally reuse semantic identities across languages.
+The parity fixtures still intentionally mirror semantic identities across languages; they remain useful inspect-only subscopes even when excluded from the default repo-root configuration.
 
 ## Artifact Policy
 
@@ -116,5 +114,5 @@ Before cutting `v1.0`, confirm:
 4. `grace parse . --json` passes
 5. `grace map . --json` passes
 6. adapter tiers are stated consistently as `reference / pilot / pilot`
-7. repo-root validation policy is documented consistently
+7. repo-root validation policy is documented consistently as configured-scope green behavior
 8. release notes describe GRACE as a semantic editing protocol, not a code generator

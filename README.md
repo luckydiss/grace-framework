@@ -59,6 +59,7 @@ The normative adapter-freeze reference for future language integrations is [docs
 Python remains the reference implementation; `.ts` and `.go` support are deliberately small pilot adapters.
 Cross-language parity fixtures and adapter conformance tests live under [examples/parity](C:\Users\luckydiss\Documents\grace_framework\examples\parity) and [tests/test_adapter_conformance.py](C:\Users\luckydiss\Documents\grace_framework\tests\test_adapter_conformance.py).
 The parity root is intended for cross-language comparison; project-level validation should be run per language subdirectory because the mirrored fixtures intentionally reuse the same `module_id`.
+Repository-root discovery can be constrained through `[tool.grace]` in [pyproject.toml](C:\Users\luckydiss\Documents\grace_framework\pyproject.toml) with `include` and `exclude` globs. These filters apply to repo-root commands such as `grace validate . --json`, while explicit file and subdirectory targets remain authoritative.
 
 ## Multi-Language Behavior Guarantees
 
@@ -80,12 +81,12 @@ GRACE is now in a hardening phase where the preferred work is:
 - regression coverage
 - self-hosted workflow stabilization
 
-Repository-root behavior is intentionally split:
+Repository-root behavior is now configuration-aware:
 
-- `grace parse . --json` and `grace map . --json` are supported repository export surfaces
-- `grace validate . --json` and `grace lint . --json` may fail because parity fixtures intentionally reuse the same semantic identities across languages
+- `grace parse . --json`, `grace map . --json`, `grace validate . --json`, and `grace lint . --json` use the configured repo-root scope from `[tool.grace]`
+- explicit subdirectory targets such as `examples/parity/python` still override repo filters for deliberate parity inspection
 
-For agent workflows, use curated validation scopes such as `grace/`, `examples/parity/python`, `examples/parity/typescript`, or `examples/parity/go`.
+For agent workflows, the default root scope is stable, while curated subdirectories remain useful for language-specific verification.
 
 ## Reliability Status
 
@@ -103,7 +104,7 @@ Current readiness review:
 - the core and CLI protocol are close to a stable platform baseline
 - Python is the stable reference adapter
 - TypeScript and Go remain pilot adapters
-- repository-root export is stable, but repository-root validation is intentionally not a release gate because parity fixtures mirror identities across languages
+- repository-root export and validation are stable for the configured repository scope
 
 The release-prep framing for this phase is:
 

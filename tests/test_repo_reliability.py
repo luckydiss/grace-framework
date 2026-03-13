@@ -232,17 +232,16 @@ def test_repo_reliability_metrics_are_stable(tmp_path: Path) -> None:
 def test_repo_root_and_curated_scope_policy_behave_as_documented() -> None:
     parse_payload = invoke_json_expect_success("parse", ".", "--json")
     map_payload = invoke_json_expect_success("map", ".", "--json")
-    validate_exit_code, validate_payload = invoke_json("validate", ".", "--json")
-    lint_exit_code, lint_payload = invoke_json("lint", ".", "--json")
+    validate_payload = invoke_json_expect_success("validate", ".", "--json")
+    lint_payload = invoke_json_expect_success("lint", ".", "--json")
 
     assert parse_payload["ok"] is True
     assert parse_payload["scope"] == "project"
     assert map_payload["grace_version"] == "v1"
-    assert validate_exit_code != 0
-    assert validate_payload["stage"] == "validate"
-    assert any(issue["code"] == "duplicate_module_id" for issue in validate_payload["issues"])
-    assert lint_exit_code != 0
-    assert lint_payload["stage"] == "validate"
+    assert validate_payload["ok"] is True
+    assert validate_payload["validation"] == {"ok": True, "scope": "project"}
+    assert lint_payload["ok"] is True
+    assert lint_payload["scope"] == "project"
 
     for curated_scope in (
         "grace",

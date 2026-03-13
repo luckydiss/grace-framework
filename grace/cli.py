@@ -469,10 +469,11 @@ def _query_anchor_collection_payload(
 
 # @grace.anchor grace.cli._discover_grace_paths
 # @grace.complexity 5
-# @grace.links grace.language_adapter.get_language_adapter_for_path, grace.artifact_hygiene.is_ignored_artifact_dir_name
+# @grace.links grace.language_adapter.get_language_adapter_for_path, grace.artifact_hygiene.is_ignored_artifact_dir_name, grace.repo_config.load_repo_config, grace.repo_config.candidate_in_repo_scope
 def _discover_grace_paths(path: Path) -> tuple[str, tuple[Path, ...]]:
     from grace.artifact_hygiene import is_ignored_artifact_dir_name
     from grace.language_adapter import get_language_adapter_for_path
+    from grace.repo_config import candidate_in_repo_scope, load_repo_config
 
     def has_grace_module_header(source_text: str) -> bool:
         for raw_line in source_text.splitlines():
@@ -486,15 +487,21 @@ def _discover_grace_paths(path: Path) -> tuple[str, tuple[Path, ...]]:
             return False
         return False
 
-    if path.is_file():
+    resolved_path = path.expanduser().resolve()
+    try:
+        repo_config = load_repo_config(resolved_path)
+    except ValueError as exc:
+        raise DiscoveryError(resolved_path, str(exc)) from exc
+
+    if resolved_path.is_file():
         try:
-            get_language_adapter_for_path(path)
+            get_language_adapter_for_path(resolved_path)
         except ValueError as exc:
-            raise DiscoveryError(path, str(exc)) from exc
-        return "file", (path,)
+            raise DiscoveryError(resolved_path, str(exc)) from exc
+        return "file", (resolved_path,)
 
     discovered_paths: list[Path] = []
-    for current_root, dir_names, file_names in os.walk(path):
+    for current_root, dir_names, file_names in os.walk(resolved_path):
         dir_names[:] = [
             dir_name
             for dir_name in dir_names
@@ -505,7 +512,9 @@ def _discover_grace_paths(path: Path) -> tuple[str, tuple[Path, ...]]:
 
         root_path = Path(current_root)
         for file_name in sorted(file_names):
-            candidate_path = root_path / file_name
+            candidate_path = (root_path / file_name).resolve()
+            if not candidate_in_repo_scope(repo_config, resolved_path, candidate_path):
+                continue
             try:
                 source_text = candidate_path.read_text(encoding="utf-8")
             except (OSError, UnicodeDecodeError):
@@ -518,9 +527,9 @@ def _discover_grace_paths(path: Path) -> tuple[str, tuple[Path, ...]]:
                 continue
             discovered_paths.append(candidate_path)
 
-    discovered_paths.sort(key=lambda candidate: candidate.relative_to(path).as_posix())
+    discovered_paths.sort(key=lambda candidate: candidate.relative_to(resolved_path).as_posix())
     if not discovered_paths:
-        raise DiscoveryError(path, f"no GRACE-annotated files supported by installed adapters found under {path}")
+        raise DiscoveryError(resolved_path, f"no GRACE-annotated files supported by installed adapters found under {resolved_path}")
     return "project", tuple(discovered_paths)
 
 

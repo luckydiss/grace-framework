@@ -114,7 +114,7 @@ def try_parse_python_file(path: str | Path) -> GraceParseResult:
         parsed_file = parse_python_file(source_path)
     except GraceParseError as exc:
         return GraceParseFailure(path=source_path, errors=exc.errors)
-    return GraceParseSuccess(file=parsed_file)
+    return GraceParseSuccess(file=parsed_file.model_dump(mode="python"))
 
 
 # @grace.anchor grace.parser.parse_python_module

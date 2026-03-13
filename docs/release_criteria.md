@@ -35,6 +35,7 @@ The following gates must pass before a hardening milestone is treated as ready:
 
 The following scopes should validate cleanly:
 
+- `.`
 - `grace/`
 - `examples/basic`
 - `examples/go`
@@ -42,8 +43,6 @@ The following scopes should validate cleanly:
 - `examples/parity/python`
 - `examples/parity/typescript`
 - `examples/parity/go`
-
-Repository-root `validate . --json` is not currently a release gate because parity fixtures intentionally reuse semantic identities across languages.
 
 ### 5. Agent workflow reliability
 
