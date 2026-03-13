@@ -220,6 +220,27 @@ Explicit non-goals for this stage:
 - broader adapter coverage
 - semantic contract changes
 
+## v0.21 - v1.0 Release Prep
+
+Goal:
+
+Freeze release framing and public promises before any `v1.0` tag is considered.
+
+Focus:
+
+- final release-surface audit
+- stable-core versus pilot-adapter messaging
+- repository-root policy clarification
+- artifact policy clarification
+- release-prep regression checks on docs and public framing
+
+Explicit non-goals for this stage:
+
+- runtime feature expansion
+- new adapters
+- broader adapter coverage
+- semantic contract changes
+
 ## v0.3 - Strong Patch Workflow
 
 Goal:

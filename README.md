@@ -14,6 +14,7 @@ The frozen adapter contract lives in [docs/language_adapter_contract.md](C:\User
 The adapter authoring workflow lives in [docs/adapter_authoring.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_authoring.md).
 The near-stable CLI/protocol freeze lives in [docs/protocol_freeze.md](C:\Users\luckydiss\Documents\grace_framework\docs\protocol_freeze.md).
 The current v1 readiness review lives in [docs/v1_readiness_review.md](C:\Users\luckydiss\Documents\grace_framework\docs\v1_readiness_review.md).
+The v1 release-prep framing lives in [docs/v1_release_prep.md](C:\Users\luckydiss\Documents\grace_framework\docs\v1_release_prep.md).
 The TypeScript pilot adapter lives in [docs/typescript_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\typescript_adapter.md).
 The Go pilot adapter lives in [docs/go_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\go_adapter.md).
 The adapter compatibility matrix lives in [docs/adapter_compatibility.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_compatibility.md).
@@ -103,6 +104,13 @@ Current readiness review:
 - Python is the stable reference adapter
 - TypeScript and Go remain pilot adapters
 - repository-root export is stable, but repository-root validation is intentionally not a release gate because parity fixtures mirror identities across languages
+
+The release-prep framing for this phase is:
+
+- stable core and CLI protocol
+- Python as the reference adapter
+- TypeScript and Go as pilot adapters
+- a narrower `v1.0` promise than the full internal implementation surface
 
 ## Install
 

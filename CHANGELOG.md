@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added `docs/v1_release_prep.md` to freeze `v1.0` framing around stable core guarantees, pilot adapter messaging, and repository-root policy.
+- Added documentation-driven release-prep coverage so adapter tiers and repo-root validation policy stay aligned across readiness docs.
 - Added `docs/v1_readiness_review.md` to separate current release-ready surfaces from remaining `v1.0` blockers.
 - Added review-level regression coverage for current green surfaces (`parse/map .`, `validate/lint grace`) and current documented blockers (`validate/lint .`).
 - Added repo-scale reliability coverage for deterministic root export, curated validation scopes, and self-hosted dry-run patch/apply-plan behavior.
