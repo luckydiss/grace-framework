@@ -43,7 +43,7 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 - `language_adapter`: defines the language integration contract that feeds `GraceFileModel` into the core.
 - `tree_sitter_adapter`: provides substrate helpers for non-Python pilot adapters without changing core semantics.
 - `python_adapter`: reference adapter that preserves the existing Python parsing behavior behind the language adapter layer.
-- `typescript_adapter`: pilot Tree-sitter-backed adapter for `.ts` files with module annotations, function declarations, async functions, classes, and methods.
+- `typescript_adapter`: pilot Tree-sitter-backed adapter for `.ts` files with module annotations, function declarations, async functions, arrow functions, classes, and object literal methods.
 - `go_adapter`: pilot Go adapter for `.go` files with module annotations, function declarations, receiver methods, and simple struct type declarations.
 - `validator`: enforces hard semantic and identity consistency on parsed GRACE objects.
 - `linter`: emits soft warnings for readability, maintainability, and machine-utility quality.

@@ -13,8 +13,10 @@ The adapter uses Tree-sitter only as parsing substrate. GRACE core layers still 
 - module-level GRACE annotations
 - `function` declarations
 - `async function` declarations
+- arrow functions assigned to variable declarators
 - `class` declarations
 - class methods
+- object literal methods inside top-level object declarators
 
 ## Supported Comment Hosts
 
@@ -25,9 +27,7 @@ The pilot supports single-line block comments for GRACE annotations. It does not
 
 ## Unsupported Constructs
 
-- arrow functions
 - function expressions
-- object literal methods
 - JSX / TSX / React components
 - namespaces
 - overload-heavy TypeScript patterns
@@ -48,4 +48,5 @@ This pilot shows:
 
 - only `.ts` is supported
 - discovery is still annotation-driven, not project-config aware
+- supported object methods are limited to method definitions inside object literals assigned to variable declarators
 - unsupported TypeScript constructs fail by leaving annotations unbound instead of attempting heuristic recovery

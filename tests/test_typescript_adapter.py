@@ -167,6 +167,61 @@ def test_typescript_adapter_parses_module_header_and_supported_blocks(tmp_path: 
     assert grace_file.blocks[3].qualified_name == "StrategyRegistry.resolve"
 
 
+def test_typescript_adapter_parses_arrow_functions(tmp_path: Path) -> None:
+    path = write_temp_ts_file(
+        tmp_path,
+        make_file(
+            """
+            // @grace.anchor billing.pricing.applyDiscount
+            // @grace.complexity 1
+            const applyDiscount = (price: number, percent: number): number => {
+              return price - Math.floor((price * percent) / 100);
+            };
+            """,
+            """
+            // @grace.anchor billing.pricing.chooseDiscount
+            // @grace.complexity 6
+            // @grace.belief VIP remains the dominant signal in the TypeScript pilot adapter.
+            async const chooseDiscount = async (customerTier: string): Promise<number> => {
+              return customerTier === "vip" ? 15 : 0;
+            };
+            """.replace("async const", "const"),
+        ),
+    )
+
+    grace_file = PARSER.parse_python_file(path)
+
+    assert tuple(block.anchor_id for block in grace_file.blocks) == (
+        "billing.pricing.applyDiscount",
+        "billing.pricing.chooseDiscount",
+    )
+    assert grace_file.blocks[0].kind is MODELS.BlockKind.FUNCTION
+    assert grace_file.blocks[1].kind is MODELS.BlockKind.ASYNC_FUNCTION
+
+
+def test_typescript_adapter_parses_object_literal_methods(tmp_path: Path) -> None:
+    path = write_temp_ts_file(
+        tmp_path,
+        make_file(
+            """
+            const StrategyRegistry = {
+              // @grace.anchor billing.pricing.StrategyRegistry.resolve
+              // @grace.complexity 1
+              resolve(): number {
+                return 1;
+              },
+            };
+            """
+        ),
+    )
+
+    grace_file = PARSER.parse_python_file(path)
+
+    assert tuple(block.anchor_id for block in grace_file.blocks) == ("billing.pricing.StrategyRegistry.resolve",)
+    assert grace_file.blocks[0].kind is MODELS.BlockKind.METHOD
+    assert grace_file.blocks[0].qualified_name == "StrategyRegistry.resolve"
+
+
 def test_typescript_adapter_produces_deterministic_output(tmp_path: Path) -> None:
     path = write_temp_ts_file(
         tmp_path,
@@ -231,7 +286,7 @@ def test_typescript_adapter_rejects_invalid_binding_target(tmp_path: Path) -> No
             """
             // @grace.anchor billing.pricing.applyDiscount
             // @grace.complexity 1
-            const applyDiscount = (price: number, percent: number): number => {
+            const applyDiscount = function (price: number, percent: number): number {
               return price - Math.floor((price * percent) / 100);
             };
             """

@@ -166,7 +166,9 @@ def test_adapter_extracts_module_metadata(path: Path, expected_purpose: str) -> 
 
             // @grace.anchor demo.invalid.broken
             // @grace.complexity 1
-            const broken = () => 1;
+            const broken = function (): number {
+              return 1;
+            };
             """,
         ),
         (

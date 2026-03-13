@@ -13,6 +13,8 @@
 - Made repo-root `validate . --json` and `lint . --json` green-by-default for this repository by scoping discovery through `[tool.grace]`.
 - Added deterministic `grace query path <path> <source_anchor_id> <target_anchor_id> --json` over derived `anchor_links_to_anchor` edges.
 - Added the derived `grace.path_query` layer plus CLI/test coverage for shortest directed semantic-path lookup.
+- Extended the TypeScript pilot adapter to support arrow functions and object literal methods without changing GRACE core semantics.
+- Shifted TypeScript unsupported-syntax coverage from arrow functions to function expressions and documented the new pilot boundary.
 
 ## v1.0.0 - 2026-03-13
 

@@ -9,9 +9,9 @@ This matrix records current GRACE adapter coverage after the TypeScript pilot, t
 | Async functions | Supported | Supported | Not applicable |
 | Class declarations | Supported | Supported | Struct type declarations only |
 | Methods | Supported | Supported | Supported |
-| Arrow functions | Not applicable | Unsupported | Not applicable |
+| Arrow functions | Not applicable | Supported | Not applicable |
 | Function expressions | Unsupported | Unsupported | Unsupported |
-| Object methods | Unsupported | Unsupported | Not applicable |
+| Object methods | Unsupported | Supported | Not applicable |
 | JSX / TSX | Not applicable | Unsupported | Not applicable |
 | Interface declarations as semantic blocks | Not applicable | Not applicable | Unsupported |
 
@@ -28,7 +28,7 @@ This matrix records current GRACE adapter coverage after the TypeScript pilot, t
 | Adapter | Status | Parity Coverage | Conformance | Notes |
 | --- | --- | --- | --- | --- |
 | Python | Reference | Basic + async-shape + service-shape + links-shape | Stable | Normative baseline for adapter behavior. |
-| TypeScript | Pilot | Basic + async-shape + service-shape + links-shape | Stable | Narrow runtime coverage; unsupported arrow/function-expression bindings fail predictably. |
+| TypeScript | Pilot | Basic + async-shape + service-shape + links-shape | Stable | Supports function declarations, arrow functions, classes, and object literal methods; function expressions remain unsupported. |
 | Go | Pilot | Basic + async-shape equivalent + service-shape + links-shape | Stable | Async parity is represented by a regular-function equivalent; interface blocks remain unsupported. |
 
 ## Support Tier Policy

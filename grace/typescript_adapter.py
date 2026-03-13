@@ -185,7 +185,7 @@ class TypeScriptAdapter(GraceLanguageAdapter):
 
 # @grace.anchor grace.typescript_adapter._collect_definition_targets
 # @grace.complexity 5
-# @grace.links grace.tree_sitter_adapter.iter_tree_nodes
+# @grace.links grace.tree_sitter_adapter.iter_tree_nodes, grace.typescript_adapter._build_arrow_function_target, grace.typescript_adapter._build_object_method_target
 def _collect_definition_targets(parsed_source: TreeSitterSourceFile) -> dict[int, object]:
     from grace import parser as parser_module
 
@@ -194,6 +194,33 @@ def _collect_definition_targets(parsed_source: TreeSitterSourceFile) -> dict[int
         if node.type == "function_declaration":
             target = _build_function_target(parsed_source.source_bytes, node)
             targets.setdefault(target.line_start, target)
+            continue
+
+        if node.type == "variable_declarator":
+            name_node = node.child_by_field_name("name")
+            value_node = node.child_by_field_name("value")
+            if name_node is None or value_node is None:
+                continue
+
+            symbol_name = _node_text(parsed_source.source_bytes, name_node)
+            if value_node.type == "arrow_function":
+                target = _build_arrow_function_target(
+                    parsed_source.source_bytes,
+                    symbol_name,
+                    value_node,
+                    binding_line_start=node.start_point.row + 1,
+                )
+                targets.setdefault(target.line_start, target)
+                continue
+
+            if value_node.type != "object":
+                continue
+
+            for child in value_node.children:
+                if child.type != "method_definition":
+                    continue
+                target = _build_object_method_target(parsed_source.source_bytes, symbol_name, child)
+                targets.setdefault(target.line_start, target)
             continue
 
         if node.type != "class_declaration":
@@ -235,6 +262,23 @@ def _build_function_target(source_bytes: bytes, node: Node):
     )
 
 
+# @grace.anchor grace.typescript_adapter._build_arrow_function_target
+# @grace.complexity 3
+def _build_arrow_function_target(source_bytes: bytes, symbol_name: str, node: Node, *, binding_line_start: int):
+    from grace import parser as parser_module
+
+    is_async = any(child.type == "async" for child in node.children)
+    kind = BlockKind.ASYNC_FUNCTION if is_async else BlockKind.FUNCTION
+    return parser_module._DefinitionTarget(
+        kind=kind,
+        symbol_name=symbol_name,
+        qualified_name=symbol_name,
+        is_async=is_async,
+        line_start=binding_line_start,
+        line_end=node.end_point.row + 1,
+    )
+
+
 # @grace.anchor grace.typescript_adapter._build_class_target
 # @grace.complexity 2
 def _build_class_target(source_bytes: bytes, node: Node):
@@ -264,6 +308,24 @@ def _build_method_target(source_bytes: bytes, class_name: str, node: Node):
         kind=BlockKind.METHOD,
         symbol_name=method_name,
         qualified_name=f"{class_name}.{method_name}",
+        is_async=is_async,
+        line_start=node.start_point.row + 1,
+        line_end=node.end_point.row + 1,
+    )
+
+
+# @grace.anchor grace.typescript_adapter._build_object_method_target
+# @grace.complexity 3
+def _build_object_method_target(source_bytes: bytes, object_name: str, node: Node):
+    from grace import parser as parser_module
+
+    name_node = node.child_by_field_name("name")
+    method_name = _node_text(source_bytes, name_node)
+    is_async = any(child.type == "async" for child in node.children)
+    return parser_module._DefinitionTarget(
+        kind=BlockKind.METHOD,
+        symbol_name=method_name,
+        qualified_name=f"{object_name}.{method_name}",
         is_async=is_async,
         line_start=node.start_point.row + 1,
         line_end=node.end_point.row + 1,

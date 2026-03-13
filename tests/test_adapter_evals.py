@@ -85,7 +85,9 @@ def _adapter_eval_metrics(tmp_path: Path) -> dict[str, float]:
                 // @grace.interfaces stable(): number
                 // @grace.invariant Unsupported syntax without anchors must stay inert.
 
-                const helper = () => 1;
+                const helper = function (): number {
+                  return 1;
+                };
 
                 // @grace.anchor demo.eval.typescript_inert.stable
                 // @grace.complexity 1
@@ -108,7 +110,9 @@ def _adapter_eval_metrics(tmp_path: Path) -> dict[str, float]:
 
                 // @grace.anchor demo.eval.typescript_invalid.broken
                 // @grace.complexity 1
-                const broken = () => 1;
+                const broken = function (): number {
+                  return 1;
+                };
                 """,
             ),
             False,
