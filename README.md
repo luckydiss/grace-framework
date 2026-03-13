@@ -112,6 +112,8 @@ The release-prep framing for this phase is:
 - TypeScript and Go as pilot adapters
 - a narrower `v1.0` promise than the full internal implementation surface
 
+Draft release notes for that framing live in [docs/v1_release_notes_draft.md](C:\Users\luckydiss\Documents\grace_framework\docs\v1_release_notes_draft.md).
+
 ## Install
 
 ```bash

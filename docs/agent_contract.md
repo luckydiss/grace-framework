@@ -1,6 +1,6 @@
 # Agent Contract
 
-GRACE v0.6 development is aimed at shell-driven coding agents.
+GRACE is aimed at shell-driven coding agents that need a stable, machine-readable semantic editing protocol.
 
 The intended consumer is a non-interactive agent that can run commands, read JSON, and then decide whether to navigate, patch, validate, or stop.
 
