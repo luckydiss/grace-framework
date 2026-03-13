@@ -93,6 +93,13 @@ def make_file(*sections: str, header: str | None = None) -> str:
     return f"{active_header.rstrip()}\n\n{body}\n"
 
 
+def write_repo_python_file(repo_dir: Path, relative_path: str, content: str) -> Path:
+    path = repo_dir / relative_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(textwrap.dedent(content).lstrip(), encoding="utf-8")
+    return path
+
+
 def test_patch_block_successfully_replaces_function_block(tmp_path: Path) -> None:
     path = write_temp_python_file(
         tmp_path,
@@ -299,6 +306,108 @@ def test_patch_block_rolls_back_on_validator_failure(tmp_path: Path) -> None:
     assert result.rollback_performed is False
     assert result.validation_issues
     assert path.read_text(encoding="utf-8") == original_text
+
+
+def test_patch_block_uses_project_validation_for_cross_file_links(tmp_path: Path) -> None:
+    repo_dir = tmp_path.parent / f"{tmp_path.name}_patcher_repo"
+    pricing_path = write_repo_python_file(
+        repo_dir,
+        "pricing.py",
+        make_file(
+            function_block(
+                anchor="billing.pricing.apply_discount",
+                links="billing.tax.apply_tax",
+            ),
+            header=module_header(
+                module_id="billing.pricing",
+                interfaces="apply_discount(price:int, percent:int) -> int",
+            ),
+        ),
+    )
+    write_repo_python_file(
+        repo_dir,
+        "tax.py",
+        make_file(
+            function_block(
+                anchor="billing.tax.apply_tax",
+                signature="def apply_tax(amount: int) -> int:",
+                body="    return amount",
+            ),
+            header=module_header(
+                module_id="billing.tax",
+                interfaces="apply_tax(amount:int) -> int",
+            ),
+        ),
+    )
+    replacement = (
+        "# @grace.anchor billing.pricing.apply_discount\n"
+        "# @grace.complexity 2\n"
+        "# @grace.links billing.tax.apply_tax\n"
+        "def apply_discount(price: int, percent: int) -> int:\n"
+        "    discounted = price - ((price * percent) // 100)\n"
+        "    return max(discounted, 0)\n"
+    )
+
+    result = PATCHER.patch_block(pricing_path, "billing.pricing.apply_discount", replacement, dry_run=True)
+
+    assert isinstance(result, PATCHER.PatchSuccess)
+    assert result.validation.status is PATCHER.PatchStepStatus.PASSED
+    assert result.file.blocks[0].links == ("billing.tax.apply_tax",)
+
+
+def test_patch_block_rolls_back_on_project_validation_failure(tmp_path: Path) -> None:
+    repo_dir = tmp_path.parent / f"{tmp_path.name}_patcher_project_validation_repo"
+    pricing_path = write_repo_python_file(
+        repo_dir,
+        "pricing.py",
+        make_file(
+            function_block(
+                anchor="billing.pricing.apply_discount",
+                signature="def apply_discount(price: int, percent: int) -> int:",
+                body="    return price",
+            ),
+            header=module_header(
+                module_id="billing.pricing",
+                interfaces="apply_discount(price:int, percent:int) -> int",
+            ),
+        ),
+    )
+    write_repo_python_file(
+        repo_dir,
+        "tax.py",
+        make_file(
+            function_block(
+                anchor="billing.tax.apply_tax",
+                signature="def apply_tax(amount: int) -> int:",
+                body="    return amount",
+            ),
+            header=module_header(
+                module_id="billing.tax",
+                interfaces="apply_tax(amount:int) -> int",
+            ),
+        ),
+    )
+    original_text = pricing_path.read_text(encoding="utf-8")
+    invalid_replacement = (
+        "# @grace.anchor billing.pricing.apply_discount\n"
+        "# @grace.complexity 2\n"
+        "def apply_discount(price: int, percent: int) -> int:\n"
+        "    return price\n\n"
+        "# @grace.anchor billing.tax.apply_tax\n"
+        "# @grace.complexity 1\n"
+        "def duplicate_apply_tax(amount: int) -> int:\n"
+        "    return amount\n"
+    )
+
+    result = PATCHER.patch_block(pricing_path, "billing.pricing.apply_discount", invalid_replacement)
+
+    assert isinstance(result, PATCHER.PatchFailure)
+    assert result.stage is PATCHER.PatchFailureStage.VALIDATE
+    assert any(
+        issue.code is VALIDATOR.ValidationIssueCode.DUPLICATE_ANCHOR_ID
+        for issue in result.validation_issues
+    )
+    assert pricing_path.read_text(encoding="utf-8") == original_text
 
 
 def test_patch_block_succeeds_even_when_linter_returns_warnings(tmp_path: Path) -> None:

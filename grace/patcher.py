@@ -16,12 +16,27 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from grace.linter import LintFailure, LintIssue, lint_file
+from grace.linter import LintFailure, LintIssue, lint_project
 from grace.models import GraceFileModel, GraceParseIssue
 from grace.parser import GraceParseError, parse_python_file
-from grace.validator import ValidationFailure, ValidationIssue, validate_file
+from grace.validator import ValidationFailure, ValidationIssue, validate_project
 
 ANCHOR_ANNOTATION_RE = re.compile(r"^\s*#\s*@grace\.anchor\s+(?P<payload>.*\S)\s*$")
+IGNORED_DISCOVERY_DIR_NAMES = {
+    ".git",
+    ".hg",
+    ".svn",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "node_modules",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".pytest-tmp",
+    ".tmp_parser_tests",
+    "build",
+    "dist",
+}
 
 
  # @grace.anchor grace.patcher.PatchFailureStage
@@ -97,8 +112,8 @@ PatchResult = PatchSuccess | PatchFailure
 
 # @grace.anchor grace.patcher.patch_block
 # @grace.complexity 7
-# @grace.belief Safe semantic patching depends on preserving target identity up front, then reusing the existing parse and validation pipeline both before and after any write so rollback decisions remain deterministic.
-# @grace.links grace.patcher._find_anchor_annotation_line, grace.patcher._extract_replacement_anchor_id, grace.patcher._normalize_replacement_source, grace.patcher._build_preview_diff, grace.patcher._hash_text, grace.patcher._parse_candidate_text, grace.patcher._splice_block
+# @grace.belief Safe semantic patching depends on preserving target identity up front, then reusing the existing parse and validation pipeline against a temporary project snapshot so cross-file links survive preflight and rollback decisions remain deterministic.
+# @grace.links grace.patcher._find_anchor_annotation_line, grace.patcher._extract_replacement_anchor_id, grace.patcher._normalize_replacement_source, grace.patcher._build_preview_diff, grace.patcher._hash_text, grace.patcher._parse_candidate_text, grace.patcher._load_project_state, grace.patcher._splice_block
 def patch_block(path: str | Path, anchor_id: str, replacement_source: str, *, dry_run: bool = False) -> PatchResult:
     source_path = Path(path)
     original_text = source_path.read_text(encoding="utf-8")
@@ -205,14 +220,32 @@ def patch_block(path: str | Path, anchor_id: str, replacement_source: str, *, dr
             parse_errors=exc.errors,
         )
 
-    validation_result = validate_file(candidate_file)
+    try:
+        candidate_project_files = _load_project_state(source_path, replacement_file=candidate_file)
+    except GraceParseError as exc:
+        return PatchFailure(
+            path=source_path,
+            anchor_id=anchor_id,
+            dry_run=dry_run,
+            stage=PatchFailureStage.PARSE,
+            message="project parsing failed during patch preflight",
+            identity_preserved=True,
+            parse=PatchStepResult(status=PatchStepStatus.FAILED, issue_count=len(exc.errors)),
+            validation=PatchStepResult(status=PatchStepStatus.NOT_RUN),
+            before_hash=before_hash,
+            after_hash=after_hash,
+            preview=preview,
+            parse_errors=exc.errors,
+        )
+
+    validation_result = validate_project(candidate_project_files)
     if isinstance(validation_result, ValidationFailure):
         return PatchFailure(
             path=source_path,
             anchor_id=anchor_id,
             dry_run=dry_run,
             stage=PatchFailureStage.VALIDATE,
-            message="replacement failed GRACE validation during patch preflight",
+            message="replacement failed GRACE project validation during patch preflight",
             identity_preserved=True,
             parse=PatchStepResult(status=PatchStepStatus.PASSED),
             validation=PatchStepResult(status=PatchStepStatus.FAILED, issue_count=len(validation_result.issues)),
@@ -223,7 +256,7 @@ def patch_block(path: str | Path, anchor_id: str, replacement_source: str, *, dr
         )
 
     if dry_run:
-        lint_result = lint_file(candidate_file)
+        lint_result = lint_project(candidate_project_files)
         lint_issues = lint_result.issues if isinstance(lint_result, LintFailure) else ()
         return PatchSuccess(
             path=source_path,
@@ -242,7 +275,7 @@ def patch_block(path: str | Path, anchor_id: str, replacement_source: str, *, dr
     source_path.write_text(patched_text, encoding="utf-8")
 
     try:
-        patched_file = parse_python_file(source_path)
+        patched_project_files = _load_project_state(source_path)
     except GraceParseError as exc:
         source_path.write_text(original_text, encoding="utf-8")
         return PatchFailure(
@@ -250,7 +283,7 @@ def patch_block(path: str | Path, anchor_id: str, replacement_source: str, *, dr
             anchor_id=anchor_id,
             dry_run=False,
             stage=PatchFailureStage.PARSE,
-            message="patched file failed GRACE parsing and was rolled back",
+            message="patched project state failed GRACE parsing and was rolled back",
             identity_preserved=True,
             parse=PatchStepResult(status=PatchStepStatus.FAILED, issue_count=len(exc.errors)),
             validation=PatchStepResult(status=PatchStepStatus.NOT_RUN),
@@ -261,7 +294,8 @@ def patch_block(path: str | Path, anchor_id: str, replacement_source: str, *, dr
             parse_errors=exc.errors,
         )
 
-    validation_result = validate_file(patched_file)
+    patched_file = next(grace_file for grace_file in patched_project_files if grace_file.path == source_path)
+    validation_result = validate_project(patched_project_files)
     if isinstance(validation_result, ValidationFailure):
         source_path.write_text(original_text, encoding="utf-8")
         return PatchFailure(
@@ -269,7 +303,7 @@ def patch_block(path: str | Path, anchor_id: str, replacement_source: str, *, dr
             anchor_id=anchor_id,
             dry_run=False,
             stage=PatchFailureStage.VALIDATE,
-            message="patched file failed GRACE validation and was rolled back",
+            message="patched project state failed GRACE validation and was rolled back",
             identity_preserved=True,
             parse=PatchStepResult(status=PatchStepStatus.PASSED),
             validation=PatchStepResult(status=PatchStepStatus.FAILED, issue_count=len(validation_result.issues)),
@@ -280,7 +314,7 @@ def patch_block(path: str | Path, anchor_id: str, replacement_source: str, *, dr
             validation_issues=validation_result.issues,
         )
 
-    lint_result = lint_file(patched_file)
+    lint_result = lint_project(patched_project_files)
     lint_issues = lint_result.issues if isinstance(lint_result, LintFailure) else ()
     return PatchSuccess(
         path=source_path,
@@ -364,6 +398,50 @@ def _parse_candidate_text(source_path: Path, patched_text: str) -> GraceFileMode
             temp_path.unlink()
         except OSError:
             pass
+
+
+# @grace.anchor grace.patcher._load_project_state
+# @grace.complexity 6
+# @grace.belief Project-aware patch validation should scope itself to the target file's containing directory so cross-file links are checked consistently without dragging unrelated repo fixtures into patch preflight.
+# @grace.links grace.patcher._discover_project_paths
+def _load_project_state(source_path: Path, replacement_file: GraceFileModel | None = None) -> tuple[GraceFileModel, ...]:
+    resolved_source_path = source_path.resolve()
+    discovered_paths = _discover_project_paths(resolved_source_path.parent)
+    project_files: list[GraceFileModel] = []
+    replacement_consumed = False
+
+    for discovered_path in discovered_paths:
+        resolved_discovered_path = discovered_path.resolve()
+        if replacement_file is not None and resolved_discovered_path == resolved_source_path:
+            project_files.append(replacement_file.model_copy(update={"path": source_path}))
+            replacement_consumed = True
+            continue
+        project_files.append(parse_python_file(discovered_path))
+
+    if replacement_file is not None and not replacement_consumed:
+        project_files.append(replacement_file.model_copy(update={"path": source_path}))
+
+    return tuple(sorted(project_files, key=lambda item: (item.module.module_id, str(item.path))))
+
+
+# @grace.anchor grace.patcher._discover_project_paths
+# @grace.complexity 5
+def _discover_project_paths(project_root: Path) -> tuple[Path, ...]:
+    discovered_paths: list[Path] = []
+    for current_root, dir_names, file_names in os.walk(project_root):
+        dir_names[:] = [
+            dir_name
+            for dir_name in dir_names
+            if dir_name not in IGNORED_DISCOVERY_DIR_NAMES and not dir_name.endswith(".egg-info")
+        ]
+        for file_name in sorted(file_names):
+            if not file_name.endswith(".py"):
+                continue
+            candidate_path = Path(current_root) / file_name
+            if "@grace.module" not in candidate_path.read_text(encoding="utf-8"):
+                continue
+            discovered_paths.append(candidate_path)
+    return tuple(sorted(discovered_paths, key=lambda item: str(item)))
 
 
 # @grace.anchor grace.patcher._splice_block

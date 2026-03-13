@@ -60,6 +60,7 @@ Derived artifacts must not invent new `module_id` or `anchor_id`.
 - Supports dry-run preflight without writing patched contents to disk.
 - Supports semantic block preview diffs as derived output, not as a new coordinate system.
 - Re-parses, validates, and lints after applying a patch.
+- Uses project-aware validation and linting against a temporary snapshot of GRACE files under the target file's containing directory.
 - Rolls back to original file contents if parse or validation fails.
 - Allows successful patch completion with lint warnings.
 

@@ -18,6 +18,9 @@
 - Added `apply-plan --dry-run` and `apply-plan --preview`.
 - Added stable execution-stage taxonomy for patch and apply-plan JSON results.
 - Added `docs/polyglot_annotations.md` as the parallel spec track for future frontends.
+- Made patch preflight and post-write validation project-aware for cross-file `grace.links`.
+- Made patch linting run against the temporary project snapshot instead of file-only scope.
+- Added `docs/patch_semantics.md` to document anchor-driven patch execution guarantees.
 
 ## v0.1.0
 
