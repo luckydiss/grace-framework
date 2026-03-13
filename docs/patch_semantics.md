@@ -29,6 +29,16 @@ If parse or validation fails after a write, the file is rolled back.
 
 Lint warnings remain non-blocking.
 
+`apply_patch_plan(...)` extends this discipline to multi-entry plans.
+
+Current baseline treats plan execution as transactional:
+
+- all entries are first simulated against a temporary project mirror
+- each step still reuses `patch_block(...)` semantics
+- real repository files are written only after the whole simulated plan passes
+- if any entry fails during simulation, no repository file is modified
+- if commit-to-disk fails after a successful simulation, already written files are restored from the original snapshot
+
 ## Project-Aware Validation
 
 Current GRACE baseline supports cross-file `grace.links`.

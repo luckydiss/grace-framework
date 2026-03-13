@@ -275,7 +275,7 @@ def test_apply_patch_plan_preview_returns_diff_without_modifying_files(tmp_path:
     assert pricing_path.read_text(encoding="utf-8") == original_text
 
 
-def test_apply_patch_plan_stops_on_first_failure_without_transactional_rollback(tmp_path: Path) -> None:
+def test_apply_patch_plan_rolls_back_all_disk_writes_when_later_entry_fails(tmp_path: Path) -> None:
     pricing_path = write_temp_file(
         tmp_path,
         make_file(function_block(anchor="billing.pricing.apply_discount")),
@@ -297,6 +297,8 @@ def test_apply_patch_plan_stops_on_first_failure_without_transactional_rollback(
         ),
         "audit.py",
     )
+    original_pricing_text = pricing_path.read_text(encoding="utf-8")
+    original_tax_text = tax_path.read_text(encoding="utf-8")
     original_later_text = later_path.read_text(encoding="utf-8")
     plan = PLAN.PatchPlan(
         entries=(
@@ -344,12 +346,12 @@ def test_apply_patch_plan_stops_on_first_failure_without_transactional_rollback(
     assert len(result.entries) == 2
     assert result.entries[0].result.ok is True
     assert result.entries[1].result.ok is False
-    assert "return 42" in pricing_path.read_text(encoding="utf-8")
-    assert "return amount + 1" not in tax_path.read_text(encoding="utf-8")
+    assert pricing_path.read_text(encoding="utf-8") == original_pricing_text
+    assert tax_path.read_text(encoding="utf-8") == original_tax_text
     assert later_path.read_text(encoding="utf-8") == original_later_text
 
 
-def test_apply_patch_plan_is_thin_wrapper_over_patch_block(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_apply_patch_plan_dry_run_normalizes_results_back_to_original_paths(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     path = write_temp_file(tmp_path, make_file(function_block()), "pricing.py")
     stub_file = PARSER.parse_python_file(path)
     calls: list[tuple[Path, str, str, bool]] = []
@@ -386,32 +388,23 @@ def test_apply_patch_plan_is_thin_wrapper_over_patch_block(tmp_path: Path, monke
         )
     )
 
-    result = PLAN.apply_patch_plan(plan)
+    result = PLAN.apply_patch_plan(plan, dry_run=True)
 
     assert isinstance(result, PLAN.ApplyPlanSuccess)
-    assert calls == [
-        (
-            path,
-            "billing.pricing.apply_discount",
-            "# @grace.anchor billing.pricing.apply_discount\n"
-            "# @grace.complexity 2\n"
-            "def apply_discount(price: int, percent: int) -> int:\n"
-            "    return 42\n",
-            False,
-        )
-    ]
-
-    preview_result = PLAN.apply_patch_plan(plan, preview=True)
-
-    assert isinstance(preview_result, PLAN.ApplyPlanSuccess)
-    assert calls[-1] == (
-        path,
+    assert result.dry_run is True
+    assert result.entries[0].path == path.resolve()
+    assert result.entries[0].result.path == path.resolve()
+    assert result.entries[0].result.dry_run is True
+    assert result.entries[0].result.file.path == path.resolve()
+    assert len(calls) == 1
+    assert calls[0][0] != path.resolve()
+    assert calls[0][1:] == (
         "billing.pricing.apply_discount",
         "# @grace.anchor billing.pricing.apply_discount\n"
         "# @grace.complexity 2\n"
         "def apply_discount(price: int, percent: int) -> int:\n"
         "    return 42\n",
-        True,
+        False,
     )
 
 

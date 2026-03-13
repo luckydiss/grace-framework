@@ -744,6 +744,8 @@ def test_cli_apply_plan_failure_stops_on_first_failure_json_output(tmp_path: Pat
         ),
         name="tax.py",
     )
+    original_pricing_text = pricing_path.read_text(encoding="utf-8")
+    original_tax_text = tax_path.read_text(encoding="utf-8")
     replacement_path = write_temp_python_file(
         tmp_path,
         (
@@ -801,8 +803,8 @@ def test_cli_apply_plan_failure_stops_on_first_failure_json_output(tmp_path: Pat
     assert payload["failed_anchor_id"] == "billing.tax.missing_anchor"
     assert payload["entries"][0]["result"]["ok"] is True
     assert payload["entries"][1]["result"]["ok"] is False
-    assert "return 42" in pricing_path.read_text(encoding="utf-8")
-    assert "return amount + 1" not in tax_path.read_text(encoding="utf-8")
+    assert pricing_path.read_text(encoding="utf-8") == original_pricing_text
+    assert tax_path.read_text(encoding="utf-8") == original_tax_text
 
 
 def test_cli_apply_plan_plan_load_failure_has_stable_taxonomy(tmp_path: Path) -> None:

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Made `apply-plan` transactional by simulating all entries against a temporary project mirror before writing any repository file.
+- Ensured multi-entry plan failures no longer leave partial on-disk writes from earlier successful entries.
+- Added regression coverage for transactional `apply-plan` failure behavior and normalized result paths during dry-run execution.
+
 ## v1.0.0 - 2026-03-13
 
 - Added `docs/v1_release_notes.md` as the public framing for the first stable release.

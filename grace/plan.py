@@ -118,50 +118,133 @@ def load_patch_plan(path: str | Path) -> PatchPlan:
 
 
 # @grace.anchor grace.plan.apply_patch_plan
-# @grace.complexity 7
-# @grace.belief Plan execution should stay intentionally simple: reuse patch_block entry by entry, preserve its rollback semantics, and surface the canonical path reported by patch_block so relative and absolute plan entries behave identically without inventing implicit transaction behavior that the current core does not guarantee.
+# @grace.complexity 8
+# @grace.belief Transactional plan execution should simulate patches against a temporary project mirror first, so entry-level validation still reuses patch_block semantics while real repository writes happen only after every step has already passed parse and validation in the staged snapshot. The mirror itself must live under the writable project root so dry-run and real execution behave identically across relative, absolute, and Path-based plan entries without depending on host temp-directory permissions.
 # @grace.links grace.patcher.patch_block, grace.plan._load_replacement_source
 def apply_patch_plan(plan: PatchPlan, *, dry_run: bool = False, preview: bool = False) -> ApplyPlanResult:
-    applied_entries: list[AppliedPatchEntry] = []
-    applied_count = 0
-    effective_dry_run = dry_run or preview
+    import os
+    import shutil
+    import uuid
 
-    for index, entry in enumerate(plan.entries):
-        replacement_source = _load_replacement_source(entry)
-        patch_result = patch_block(entry.path, entry.anchor_id, replacement_source, dry_run=effective_dry_run)
-        applied_entries.append(
-            AppliedPatchEntry(
-                index=index,
-                path=patch_result.path,
-                anchor_id=entry.anchor_id,
-                operation=entry.operation,
-                result=patch_result,
-            )
+    from grace.patcher import _discover_project_paths
+
+    applied_entries: list[AppliedPatchEntry] = []
+    effective_dry_run = dry_run or preview
+    resolved_entry_paths = tuple(Path(entry.path).expanduser().resolve() for entry in plan.entries)
+    touched_paths = tuple(dict.fromkeys(resolved_entry_paths))
+    original_texts = {path: path.read_text(encoding="utf-8") for path in touched_paths}
+
+    discovered_project_paths: set[Path] = set()
+    for touched_path in touched_paths:
+        for discovered_path in _discover_project_paths(touched_path.parent):
+            discovered_project_paths.add(discovered_path.resolve())
+    for touched_path in touched_paths:
+        discovered_project_paths.add(touched_path)
+
+    common_root = Path(os.path.commonpath([str(path.parent) for path in discovered_project_paths]))
+
+    def normalize_patch_result(result: PatchResult, *, original_path: Path) -> PatchResult:
+        if isinstance(result, PatchFailure):
+            return result.model_copy(update={"path": original_path, "dry_run": effective_dry_run})
+        return result.model_copy(
+            update={
+                "path": original_path,
+                "dry_run": effective_dry_run,
+                "file": result.file.model_copy(update={"path": original_path}),
+            }
         )
-        if isinstance(patch_result, PatchFailure):
-            return ApplyPlanFailure(
+
+    temp_root = common_root / f".grace_plan_{uuid.uuid4().hex}"
+    temp_root.mkdir(parents=True, exist_ok=False)
+    temp_path_map: dict[Path, Path] = {}
+
+    try:
+        for discovered_path in sorted(discovered_project_paths, key=lambda item: str(item)):
+            relative_path = discovered_path.relative_to(common_root)
+            temp_path = temp_root / relative_path
+            temp_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(discovered_path, temp_path)
+            temp_path_map[discovered_path] = temp_path
+
+        for index, entry in enumerate(plan.entries):
+            replacement_source = _load_replacement_source(entry)
+            original_path = resolved_entry_paths[index]
+            temp_path = temp_path_map[original_path]
+            patch_result = normalize_patch_result(
+                patch_block(temp_path, entry.anchor_id, replacement_source, dry_run=False),
+                original_path=original_path,
+            )
+            applied_entries.append(
+                AppliedPatchEntry(
+                    index=index,
+                    path=original_path,
+                    anchor_id=entry.anchor_id,
+                    operation=entry.operation,
+                    result=patch_result,
+                )
+            )
+            if isinstance(patch_result, PatchFailure):
+                return ApplyPlanFailure(
+                    plan=plan.model_dump(mode="python"),
+                    dry_run=effective_dry_run,
+                    preview=preview,
+                    stage=ApplyPlanFailureStage.ENTRY_FAILURE,
+                    applied_count=index,
+                    entry_count=len(plan.entries),
+                    failed_index=index,
+                    failed_path=original_path,
+                    failed_anchor_id=entry.anchor_id,
+                    message=f"patch plan failed at entry {index}",
+                    entries=tuple(applied_entries),
+                )
+
+        if effective_dry_run:
+            return ApplyPlanSuccess(
                 plan=plan.model_dump(mode="python"),
-                dry_run=effective_dry_run,
+                dry_run=True,
                 preview=preview,
-                stage=ApplyPlanFailureStage.ENTRY_FAILURE,
-                applied_count=applied_count,
+                applied_count=len(plan.entries),
                 entry_count=len(plan.entries),
-                failed_index=index,
-                failed_path=patch_result.path,
-                failed_anchor_id=entry.anchor_id,
-                message=f"patch plan failed at entry {index}",
                 entries=tuple(applied_entries),
             )
-        applied_count += 1
 
-    return ApplyPlanSuccess(
-        plan=plan.model_dump(mode="python"),
-        dry_run=effective_dry_run,
-        preview=preview,
-        applied_count=applied_count,
-        entry_count=len(plan.entries),
-        entries=tuple(applied_entries),
-    )
+        written_paths: list[Path] = []
+        try:
+            for original_path in touched_paths:
+                original_path.write_text(temp_path_map[original_path].read_text(encoding="utf-8"), encoding="utf-8")
+                written_paths.append(original_path)
+        except OSError as exc:
+            for rollback_path in reversed(written_paths):
+                rollback_path.write_text(original_texts[rollback_path], encoding="utf-8")
+            failed_path = original_path
+            failed_index = max(
+                index for index, candidate_path in enumerate(resolved_entry_paths) if candidate_path == failed_path
+            )
+            failed_anchor_id = plan.entries[failed_index].anchor_id
+            return ApplyPlanFailure(
+                plan=plan.model_dump(mode="python"),
+                dry_run=False,
+                preview=preview,
+                stage=ApplyPlanFailureStage.ENTRY_FAILURE,
+                applied_count=0,
+                entry_count=len(plan.entries),
+                failed_index=failed_index,
+                failed_path=failed_path,
+                failed_anchor_id=failed_anchor_id,
+                message=f"transactional commit failed for {failed_path}: {exc}",
+                entries=tuple(applied_entries),
+            )
+
+        return ApplyPlanSuccess(
+            plan=plan.model_dump(mode="python"),
+            dry_run=False,
+            preview=preview,
+            applied_count=len(plan.entries),
+            entry_count=len(plan.entries),
+            entries=tuple(applied_entries),
+        )
+    finally:
+        shutil.rmtree(temp_root, ignore_errors=True)
 
 
 # @grace.anchor grace.plan.plan_to_dict
