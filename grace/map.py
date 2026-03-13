@@ -1,3 +1,8 @@
+# @grace.module grace.map
+# @grace.purpose Build derived GRACE maps from parsed file models without introducing new identities or source-of-truth semantics.
+# @grace.interfaces build_file_map(grace_file)->GraceMap; build_project_map(grace_files)->GraceMap; map_to_dict(grace_map)->dict
+# @grace.invariant Every module_id and anchor_id in a map must come directly from the input GraceFileModel set.
+# @grace.invariant Map output is a derived navigation artifact only and never overrides inline annotations.
 from __future__ import annotations
 
 from pathlib import Path
@@ -9,6 +14,8 @@ from grace.models import GraceFileModel
 GRACE_MAP_VERSION = "v1"
 
 
+# @grace.anchor grace.map.GraceMapModule
+# @grace.complexity 1
 class GraceMapModule(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -17,6 +24,8 @@ class GraceMapModule(BaseModel):
     purpose: str
 
 
+# @grace.anchor grace.map.GraceMapAnchor
+# @grace.complexity 1
 class GraceMapAnchor(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -27,6 +36,8 @@ class GraceMapAnchor(BaseModel):
     links: tuple[str, ...] = Field(default_factory=tuple)
 
 
+# @grace.anchor grace.map.GraceMapEdge
+# @grace.complexity 1
 class GraceMapEdge(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -35,6 +46,8 @@ class GraceMapEdge(BaseModel):
     target: str
 
 
+# @grace.anchor grace.map.GraceMap
+# @grace.complexity 1
 class GraceMap(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -44,10 +57,15 @@ class GraceMap(BaseModel):
     edges: tuple[GraceMapEdge, ...]
 
 
+# @grace.anchor grace.map.build_file_map
+# @grace.complexity 1
+# @grace.links grace.map.build_project_map
 def build_file_map(grace_file: GraceFileModel) -> GraceMap:
     return build_project_map([grace_file])
 
 
+# @grace.anchor grace.map.build_project_map
+# @grace.complexity 5
 def build_project_map(grace_files: list[GraceFileModel] | tuple[GraceFileModel, ...]) -> GraceMap:
     sorted_files = tuple(sorted(grace_files, key=lambda item: (item.module.module_id, str(item.path))))
     modules: list[GraceMapModule] = []
@@ -96,6 +114,8 @@ def build_project_map(grace_files: list[GraceFileModel] | tuple[GraceFileModel, 
     )
 
 
+# @grace.anchor grace.map.map_to_dict
+# @grace.complexity 1
 def map_to_dict(grace_map: GraceMap) -> dict:
     return grace_map.model_dump(mode="json")
 

@@ -1,3 +1,8 @@
+# @grace.module grace.validator
+# @grace.purpose Enforce hard structural and semantic consistency rules over parsed GRACE file models.
+# @grace.interfaces validate_file(grace_file)->ValidationResult; validate_project(grace_files)->ValidationResult
+# @grace.invariant Validation operates only on parsed GRACE models and never reparses source files.
+# @grace.invariant Broken identity, namespace, and link consistency are validator failures rather than linter warnings.
 from __future__ import annotations
 
 import re
@@ -15,6 +20,8 @@ SEMANTIC_DOT_PATH_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z
 ALLOWED_KIND_VALUES = {kind.value for kind in BlockKind}
 
 
+# @grace.anchor grace.validator.ValidationIssueCode
+# @grace.complexity 1
 class ValidationIssueCode(str, Enum):
     INVALID_MODULE_ID = "invalid_module_id"
     INVALID_ANCHOR_ID = "invalid_anchor_id"
@@ -30,6 +37,8 @@ class ValidationIssueCode(str, Enum):
     EMPTY_INVARIANT = "empty_invariant"
 
 
+# @grace.anchor grace.validator.ValidationIssue
+# @grace.complexity 1
 class ValidationIssue(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -40,6 +49,8 @@ class ValidationIssue(BaseModel):
     anchor_id: str | None = None
 
 
+# @grace.anchor grace.validator.ValidationSuccess
+# @grace.complexity 1
 class ValidationSuccess(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -47,6 +58,8 @@ class ValidationSuccess(BaseModel):
     scope: Literal["file", "project"]
 
 
+# @grace.anchor grace.validator.ValidationFailure
+# @grace.complexity 1
 class ValidationFailure(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -58,6 +71,9 @@ class ValidationFailure(BaseModel):
 ValidationResult = ValidationSuccess | ValidationFailure
 
 
+# @grace.anchor grace.validator.validate_file
+# @grace.complexity 3
+# @grace.links grace.validator._validate_file_semantics
 def validate_file(grace_file: GraceFileModel) -> ValidationResult:
     issues = _validate_file_semantics(grace_file, available_anchor_ids={block.anchor_id for block in grace_file.blocks})
     if issues:
@@ -65,6 +81,10 @@ def validate_file(grace_file: GraceFileModel) -> ValidationResult:
     return ValidationSuccess(scope="file")
 
 
+# @grace.anchor grace.validator.validate_project
+# @grace.complexity 6
+# @grace.belief Project validation must aggregate duplicate identities and cross-file link scope before delegating per-file semantic checks so repo-level consistency errors are reported without reparsing or graph-specific infrastructure.
+# @grace.links grace.validator._validate_file_semantics
 def validate_project(grace_files: list[GraceFileModel] | tuple[GraceFileModel, ...]) -> ValidationResult:
     issues: list[ValidationIssue] = []
     module_counter = Counter(file.module.module_id for file in grace_files)
@@ -107,6 +127,9 @@ def validate_project(grace_files: list[GraceFileModel] | tuple[GraceFileModel, .
     return ValidationSuccess(scope="project")
 
 
+# @grace.anchor grace.validator._validate_file_semantics
+# @grace.complexity 5
+# @grace.links grace.validator._validate_block
 def _validate_file_semantics(grace_file: GraceFileModel, available_anchor_ids: set[str]) -> list[ValidationIssue]:
     issues: list[ValidationIssue] = []
     module_id = grace_file.module.module_id
@@ -171,6 +194,9 @@ def _validate_file_semantics(grace_file: GraceFileModel, available_anchor_ids: s
     return issues
 
 
+# @grace.anchor grace.validator._validate_block
+# @grace.complexity 6
+# @grace.belief Block validation centralizes namespace, symbol-tail, belief-threshold, and link checks so file-level and project-level validation share the same hard consistency rules across scopes.
 def _validate_block(
     grace_file: GraceFileModel,
     block: GraceBlockMetadata,

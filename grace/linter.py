@@ -1,3 +1,8 @@
+# @grace.module grace.linter
+# @grace.purpose Emit soft policy warnings about maintainability, machine utility, and LLM-friendly block granularity for parsed GRACE models.
+# @grace.interfaces lint_file(grace_file)->LintResult; lint_project(grace_files)->LintResult
+# @grace.invariant Linter must not duplicate parser or validator hard failures as a second blocking layer.
+# @grace.invariant Lint issues remain advisory in the execution loop and do not change source-of-truth semantics.
 from __future__ import annotations
 
 import re
@@ -19,11 +24,15 @@ MIN_STRONG_BELIEF_LENGTH = 24
 MIN_INVARIANTS_FOR_COMPLEX_MODULE = 2
 
 
+# @grace.anchor grace.linter.LintSeverity
+# @grace.complexity 1
 class LintSeverity(str, Enum):
     WARNING = "warning"
     ERROR = "error"
 
 
+# @grace.anchor grace.linter.LintIssueCode
+# @grace.complexity 1
 class LintIssueCode(str, Enum):
     LARGE_BLOCK = "large_block"
     WEAK_BELIEF = "weak_belief"
@@ -33,6 +42,8 @@ class LintIssueCode(str, Enum):
     TOO_FEW_INVARIANTS = "too_few_invariants"
 
 
+# @grace.anchor grace.linter.LintIssue
+# @grace.complexity 1
 class LintIssue(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -44,6 +55,8 @@ class LintIssue(BaseModel):
     anchor_id: str | None = None
 
 
+# @grace.anchor grace.linter.LintSuccess
+# @grace.complexity 1
 class LintSuccess(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -51,6 +64,8 @@ class LintSuccess(BaseModel):
     scope: Literal["file", "project"]
 
 
+# @grace.anchor grace.linter.LintFailure
+# @grace.complexity 1
 class LintFailure(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -62,6 +77,9 @@ class LintFailure(BaseModel):
 LintResult = LintSuccess | LintFailure
 
 
+# @grace.anchor grace.linter.lint_file
+# @grace.complexity 2
+# @grace.links grace.linter._lint_file
 def lint_file(grace_file: GraceFileModel) -> LintResult:
     issues = _lint_file(grace_file)
     if issues:
@@ -69,6 +87,9 @@ def lint_file(grace_file: GraceFileModel) -> LintResult:
     return LintSuccess(scope="file")
 
 
+# @grace.anchor grace.linter.lint_project
+# @grace.complexity 3
+# @grace.links grace.linter._lint_file
 def lint_project(grace_files: list[GraceFileModel] | tuple[GraceFileModel, ...]) -> LintResult:
     issues: list[LintIssue] = []
     for grace_file in grace_files:
@@ -78,6 +99,9 @@ def lint_project(grace_files: list[GraceFileModel] | tuple[GraceFileModel, ...])
     return LintSuccess(scope="project")
 
 
+# @grace.anchor grace.linter._lint_file
+# @grace.complexity 4
+# @grace.links grace.linter._lint_module_text, grace.linter._lint_block
 def _lint_file(grace_file: GraceFileModel) -> list[LintIssue]:
     issues: list[LintIssue] = []
     module_id = grace_file.module.module_id
@@ -104,6 +128,8 @@ def _lint_file(grace_file: GraceFileModel) -> list[LintIssue]:
     return issues
 
 
+# @grace.anchor grace.linter._lint_module_text
+# @grace.complexity 4
 def _lint_module_text(grace_file: GraceFileModel) -> list[LintIssue]:
     issues: list[LintIssue] = []
     module_id = grace_file.module.module_id
@@ -161,6 +187,8 @@ def _lint_module_text(grace_file: GraceFileModel) -> list[LintIssue]:
     return issues
 
 
+# @grace.anchor grace.linter._lint_block
+# @grace.complexity 5
 def _lint_block(grace_file: GraceFileModel, block: GraceBlockMetadata) -> list[LintIssue]:
     issues: list[LintIssue] = []
     module_id = grace_file.module.module_id

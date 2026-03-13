@@ -1,3 +1,8 @@
+# @grace.module grace.plan
+# @grace.purpose Load derived patch plans and apply them as deterministic sequences of semantic block replacements.
+# @grace.interfaces load_patch_plan(path)->PatchPlan; apply_patch_plan(plan, *, dry_run=False, preview=False)->ApplyPlanResult; plan_to_dict(plan)->dict
+# @grace.invariant Patch plans remain derived artifacts; inline file annotations stay the only source of truth.
+# @grace.invariant Plan execution applies entries sequentially and stops at the first patch failure.
 from __future__ import annotations
 
 import json
@@ -12,10 +17,14 @@ from grace.patcher import PatchFailure, PatchResult, patch_block
 PATCH_PLAN_VERSION = "v1"
 
 
+# @grace.anchor grace.plan.PatchPlanOperation
+# @grace.complexity 1
 class PatchPlanOperation(str, Enum):
     REPLACE_BLOCK = "replace_block"
 
 
+# @grace.anchor grace.plan.PatchPlanEntry
+# @grace.complexity 3
 class PatchPlanEntry(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -25,6 +34,8 @@ class PatchPlanEntry(BaseModel):
     replacement_file: Path | None = None
     replacement_source: str | None = None
 
+    # @grace.anchor grace.plan.PatchPlanEntry._validate_replacement_locator
+    # @grace.complexity 2
     @model_validator(mode="after")
     def _validate_replacement_locator(self) -> "PatchPlanEntry":
         provided_count = int(self.replacement_file is not None) + int(self.replacement_source is not None)
@@ -33,6 +44,8 @@ class PatchPlanEntry(BaseModel):
         return self
 
 
+# @grace.anchor grace.plan.PatchPlan
+# @grace.complexity 1
 class PatchPlan(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -40,6 +53,8 @@ class PatchPlan(BaseModel):
     entries: tuple[PatchPlanEntry, ...] = Field(min_length=1)
 
 
+# @grace.anchor grace.plan.AppliedPatchEntry
+# @grace.complexity 1
 class AppliedPatchEntry(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -50,10 +65,14 @@ class AppliedPatchEntry(BaseModel):
     result: PatchResult
 
 
+# @grace.anchor grace.plan.ApplyPlanFailureStage
+# @grace.complexity 1
 class ApplyPlanFailureStage(str, Enum):
     ENTRY_FAILURE = "entry_failure"
 
 
+# @grace.anchor grace.plan.ApplyPlanSuccess
+# @grace.complexity 2
 class ApplyPlanSuccess(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -66,6 +85,8 @@ class ApplyPlanSuccess(BaseModel):
     entries: tuple[AppliedPatchEntry, ...]
 
 
+# @grace.anchor grace.plan.ApplyPlanFailure
+# @grace.complexity 2
 class ApplyPlanFailure(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -86,6 +107,9 @@ class ApplyPlanFailure(BaseModel):
 ApplyPlanResult = ApplyPlanSuccess | ApplyPlanFailure
 
 
+# @grace.anchor grace.plan.load_patch_plan
+# @grace.complexity 4
+# @grace.links grace.plan._resolve_plan_paths
 def load_patch_plan(path: str | Path) -> PatchPlan:
     plan_path = Path(path)
     payload = json.loads(plan_path.read_text(encoding="utf-8"))
@@ -93,6 +117,10 @@ def load_patch_plan(path: str | Path) -> PatchPlan:
     return _resolve_plan_paths(plan, base_dir=plan_path.parent)
 
 
+# @grace.anchor grace.plan.apply_patch_plan
+# @grace.complexity 7
+# @grace.belief Plan execution should stay intentionally simple: reuse patch_block entry by entry, preserve its rollback semantics, and fail fast rather than inventing implicit transaction behavior that the current core does not guarantee.
+# @grace.links grace.patcher.patch_block, grace.plan._load_replacement_source
 def apply_patch_plan(plan: PatchPlan, *, dry_run: bool = False, preview: bool = False) -> ApplyPlanResult:
     applied_entries: list[AppliedPatchEntry] = []
     applied_count = 0
@@ -136,10 +164,14 @@ def apply_patch_plan(plan: PatchPlan, *, dry_run: bool = False, preview: bool = 
     )
 
 
+# @grace.anchor grace.plan.plan_to_dict
+# @grace.complexity 1
 def plan_to_dict(plan: PatchPlan) -> dict:
     return plan.model_dump(mode="json")
 
 
+# @grace.anchor grace.plan._resolve_plan_paths
+# @grace.complexity 3
 def _resolve_plan_paths(plan: PatchPlan, *, base_dir: Path) -> PatchPlan:
     resolved_entries = []
     for entry in plan.entries:
@@ -162,6 +194,8 @@ def _resolve_path(path: Path, base_dir: Path) -> Path:
     return (base_dir / path).resolve()
 
 
+# @grace.anchor grace.plan._load_replacement_source
+# @grace.complexity 2
 def _load_replacement_source(entry: PatchPlanEntry) -> str:
     if entry.replacement_source is not None:
         return entry.replacement_source
