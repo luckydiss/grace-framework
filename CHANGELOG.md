@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added `docs/v1_readiness_review.md` to separate current release-ready surfaces from remaining `v1.0` blockers.
+- Added review-level regression coverage for current green surfaces (`parse/map .`, `validate/lint grace`) and current documented blockers (`validate/lint .`).
 - Added repo-scale reliability coverage for deterministic root export, curated validation scopes, and self-hosted dry-run patch/apply-plan behavior.
 - Added `docs/release_criteria.md` to define hardening gates for protocol reliability before future releases.
 - Added `docs/adapter_authoring.md` to define a repeatable workflow for future language adapters.

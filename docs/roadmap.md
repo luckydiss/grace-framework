@@ -200,6 +200,26 @@ Explicit non-goals for this stage:
 - broader syntax coverage
 - graph or patch semantics changes
 
+## v0.20 - v1.0 Readiness Review
+
+Goal:
+
+Assess whether GRACE is actually ready to become a stable agent development platform, rather than assuming readiness from feature count.
+
+Focus:
+
+- audit invariants and protocol docs
+- compare release criteria with current behavior
+- separate real `v1.0` blockers from post-1.0 backlog
+- define a narrow release-ready promise for the core
+
+Explicit non-goals for this stage:
+
+- runtime feature expansion
+- new adapters
+- broader adapter coverage
+- semantic contract changes
+
 ## v0.3 - Strong Patch Workflow
 
 Goal:

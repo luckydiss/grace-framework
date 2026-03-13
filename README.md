@@ -13,6 +13,7 @@ The language integration architecture lives in [docs/language_integration.md](C:
 The frozen adapter contract lives in [docs/language_adapter_contract.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_adapter_contract.md).
 The adapter authoring workflow lives in [docs/adapter_authoring.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_authoring.md).
 The near-stable CLI/protocol freeze lives in [docs/protocol_freeze.md](C:\Users\luckydiss\Documents\grace_framework\docs\protocol_freeze.md).
+The current v1 readiness review lives in [docs/v1_readiness_review.md](C:\Users\luckydiss\Documents\grace_framework\docs\v1_readiness_review.md).
 The TypeScript pilot adapter lives in [docs/typescript_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\typescript_adapter.md).
 The Go pilot adapter lives in [docs/go_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\go_adapter.md).
 The adapter compatibility matrix lives in [docs/adapter_compatibility.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_compatibility.md).
@@ -95,6 +96,13 @@ GRACE now maintains explicit repo-scale reliability gates:
 - dry-run patch/apply-plan reliability without unnecessary file touches
 
 These gates are described in [docs/release_criteria.md](C:\Users\luckydiss\Documents\grace_framework\docs\release_criteria.md).
+
+Current readiness review:
+
+- the core and CLI protocol are close to a stable platform baseline
+- Python is the stable reference adapter
+- TypeScript and Go remain pilot adapters
+- repository-root export is stable, but repository-root validation is intentionally not a release gate because parity fixtures mirror identities across languages
 
 ## Install
 
