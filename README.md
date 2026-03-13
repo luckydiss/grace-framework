@@ -175,6 +175,32 @@ Preview all patch plan entries without writing to disk:
 grace apply-plan examples/basic/apply_discount.plan.json --preview --json
 ```
 
+## Dogfood
+
+PowerShell:
+
+```powershell
+./scripts/dogfood.ps1 -SkipInstall
+```
+
+POSIX shell:
+
+```bash
+./scripts/dogfood.sh --skip-install
+```
+
+Both scripts run the same safe loop against the repository:
+
+- `pytest`
+- `parse`
+- `validate`
+- `lint`
+- `map`
+- `patch --dry-run`
+- `apply-plan --dry-run`
+
+To target your own annotated subtree instead of the built-in example, change `Scope`, `File`, `Anchor`, `Replacement`, and `Plan`.
+
 ## Scope
 
 GRACE v1 release scope includes:
