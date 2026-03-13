@@ -68,6 +68,7 @@ For self-hosted GRACE development, the preferred scope is the annotated `grace/`
 9. `grace lint grace --json`
 
 This self-hosting loop is described in more detail in `docs/self_hosting.md`.
+The workflow guidance and eval framing for agents are documented in `docs/agent_playbook.md`.
 
 ## Output Contract
 

@@ -468,6 +468,13 @@ The playbook should standardize:
 - `validate`
 - `lint`
 
+This stage also adds a small self-hosted eval suite and explicit metrics for:
+
+- anchor selection accuracy
+- patch/apply-plan success rate
+- rollback rate
+- unnecessary file touch rate
+
 It should include concrete examples for:
 
 - Codex

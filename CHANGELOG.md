@@ -34,6 +34,8 @@
 - Added `docs/self_hosting.md` to document the canonical GRACE-on-GRACE development workflow.
 - Verified the self-hosted loop over `grace/`: `map -> query -> read -> impact -> plan -> apply-plan -> validate -> lint`.
 - Confirmed a real GRACE-native patch on `grace.map.build_file_map` as the first consolidated self-hosting baseline.
+- Added `docs/agent_playbook.md` to define the canonical agent workflow for GRACE-native repositories.
+- Added a small self-hosted eval suite over `grace/` with baseline metrics for anchor selection accuracy, patch/apply-plan success rate, rollback rate, and unnecessary file touch rate.
 
 ## v0.1.0
 
