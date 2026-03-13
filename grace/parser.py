@@ -89,145 +89,20 @@ class _ModuleAccumulator:
 
 # @grace.anchor grace.parser.parse_python_file
 # @grace.complexity 7
-# @grace.belief The parser must keep a single left-to-right pass over source lines while delegating block-span detection to the Python AST so semantic binding stays deterministic without line-number patch coordinates.
-# @grace.links grace.parser._collect_definition_targets, grace.parser._consume_module_annotation, grace.parser._consume_block_annotation, grace.parser._build_block_model, grace.parser._finalize_module_annotations
+# @grace.belief The parser entrypoint should stay language-agnostic while remaining self-contained under reload-heavy test and dogfood workflows, so it uses the paired adapter module when available and falls back to the registered language adapter lookup otherwise.
+# @grace.links grace.language_adapter.get_language_adapter_for_path
 def parse_python_file(path: str | Path) -> GraceFileModel:
+    import sys
+
     source_path = Path(path)
-    source_text = source_path.read_text(encoding="utf-8")
-    lines = source_text.splitlines()
-    errors: list[GraceParseIssue] = []
+    adapter_module = getattr(sys.modules[__name__], "_grace_language_adapter_module", None)
+    if adapter_module is None:
+        from grace.language_adapter import get_language_adapter_for_path
+    else:
+        get_language_adapter_for_path = adapter_module.get_language_adapter_for_path
 
-    try:
-        tree = ast.parse(source_text, filename=str(source_path))
-    except SyntaxError as exc:
-        raise GraceParseError(
-            source_path,
-            [
-                GraceParseIssue(
-                    code=ParseErrorCode.PYTHON_SYNTAX_ERROR,
-                    message=exc.msg,
-                    line=exc.lineno,
-                )
-            ],
-        ) from exc
-
-    definition_targets = _collect_definition_targets(tree)
-    module = _ModuleAccumulator()
-    blocks: list[GraceBlockMetadata] = []
-    pending_block: _PendingBlock | None = None
-    block_section_started = False
-    seen_anchor_ids: set[str] = set()
-
-    for line_number, raw_line in enumerate(lines, start=1):
-        match = ANNOTATION_RE.match(raw_line)
-        stripped = raw_line.strip()
-
-        if match:
-            annotation_name = match.group("name")
-            payload = (match.group("payload") or "").strip()
-
-            if annotation_name in MODULE_ANNOTATIONS:
-                if block_section_started:
-                    errors.append(
-                        GraceParseIssue(
-                            code=ParseErrorCode.MODULE_ANNOTATION_AFTER_BLOCKS,
-                            message=f"@grace.{annotation_name} is not allowed after block declarations start",
-                            line=line_number,
-                        )
-                    )
-                    continue
-                _consume_module_annotation(module, annotation_name, payload, line_number, errors)
-                continue
-
-            if annotation_name in BLOCK_ANNOTATIONS:
-                block_section_started = True
-                pending_block = _consume_block_annotation(pending_block, annotation_name, payload, line_number, errors)
-                continue
-
-            errors.append(
-                GraceParseIssue(
-                    code=ParseErrorCode.UNKNOWN_GRACE_ANNOTATION,
-                    message=f"unknown GRACE annotation @grace.{annotation_name}",
-                    line=line_number,
-                )
-            )
-            continue
-
-        if not stripped:
-            continue
-
-        if pending_block is not None:
-            if stripped.startswith("#"):
-                continue
-
-            if DECORATOR_RE.match(raw_line):
-                continue
-
-            if DEFINITION_RE.match(raw_line):
-                target = definition_targets.get(line_number)
-                if target is None:
-                    errors.append(
-                        GraceParseIssue(
-                            code=ParseErrorCode.INVALID_BINDING_TARGET,
-                            message="block annotations must bind to the nearest next class/def/async def",
-                            line=line_number,
-                        )
-                    )
-                    pending_block = None
-                    continue
-
-                block = _build_block_model(pending_block, target, line_number, errors)
-                pending_block = None
-                if block is None:
-                    continue
-
-                if block.anchor_id in seen_anchor_ids:
-                    errors.append(
-                        GraceParseIssue(
-                            code=ParseErrorCode.DUPLICATE_ANCHOR_ID,
-                            message=f"duplicate anchor id {block.anchor_id!r}",
-                            line=line_number,
-                        )
-                    )
-                    continue
-
-                seen_anchor_ids.add(block.anchor_id)
-                blocks.append(block)
-                continue
-
-            errors.append(
-                GraceParseIssue(
-                    code=ParseErrorCode.ARBITRARY_CODE_BETWEEN_ANNOTATIONS_AND_BLOCK,
-                    message="arbitrary code is not allowed between block annotations and the bound class/def/async def",
-                    line=line_number,
-                )
-            )
-            pending_block = None
-            continue
-
-    if pending_block is not None:
-        errors.append(
-            GraceParseIssue(
-                code=ParseErrorCode.ORPHAN_BLOCK_ANNOTATIONS,
-                message=f"block annotations for anchor {pending_block.anchor_id!r} do not bind to a class/def/async def",
-                line=pending_block.anchor_line,
-            )
-        )
-
-    _finalize_module_annotations(module, errors)
-    if errors:
-        raise GraceParseError(source_path, errors)
-
-    return GraceFileModel(
-        path=source_path,
-        module=GraceModuleMetadata(
-            module_id=module.module_id or "",
-            purpose=module.purpose or "",
-            interfaces=module.interfaces or "",
-            invariants=tuple(module.invariants),
-        ),
-        blocks=tuple(blocks),
-    )
+    adapter = get_language_adapter_for_path(source_path)
+    return adapter.build_grace_file_model(source_path)
 
 
 # @grace.anchor grace.parser.try_parse_python_file

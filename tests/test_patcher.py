@@ -7,13 +7,15 @@ import types
 from functools import lru_cache
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 @lru_cache(maxsize=1)
 def load_foundation_modules():
-    for module_name in ("grace", "grace.models", "grace.parser", "grace.validator", "grace.linter", "grace.patcher"):
+    for module_name in ("grace", "grace.models", "grace.parser", "grace.language_adapter", "grace.python_adapter", "grace.validator", "grace.linter", "grace.patcher"):
         sys.modules.pop(module_name, None)
 
     grace_package = types.ModuleType("grace")
@@ -33,6 +35,13 @@ def load_foundation_modules():
 
 
 MODELS, PARSER, VALIDATOR, LINTER, PATCHER = load_foundation_modules()
+
+
+@pytest.fixture(autouse=True)
+def _reload_modules():
+    global MODELS, PARSER, VALIDATOR, LINTER, PATCHER
+    load_foundation_modules.cache_clear()
+    MODELS, PARSER, VALIDATOR, LINTER, PATCHER = load_foundation_modules()
 
 
 def write_temp_python_file(tmp_path: Path, content: str, name: str = "sample.py") -> Path:

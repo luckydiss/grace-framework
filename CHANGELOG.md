@@ -36,6 +36,8 @@
 - Confirmed a real GRACE-native patch on `grace.map.build_file_map` as the first consolidated self-hosting baseline.
 - Added `docs/agent_playbook.md` to define the canonical agent workflow for GRACE-native repositories.
 - Added a small self-hosted eval suite over `grace/` with baseline metrics for anchor selection accuracy, patch/apply-plan success rate, rollback rate, and unnecessary file touch rate.
+- Added a language adapter contract and reference Python adapter so parser entrypoints can stay language-agnostic without changing core GRACE semantics.
+- Added `docs/language_integration.md` and compatibility coverage for adapter-backed parsing.
 
 ## v0.1.0
 

@@ -19,6 +19,8 @@ def load_planner_modules():
         "grace",
         "grace.models",
         "grace.parser",
+        "grace.language_adapter",
+        "grace.python_adapter",
         "grace.map",
         "grace.impact",
         "grace.planner",
@@ -42,6 +44,13 @@ def load_planner_modules():
 
 
 MODELS, PARSER, MAP, IMPACT, PLANNER = load_planner_modules()
+
+
+@pytest.fixture(autouse=True)
+def _reload_modules():
+    global MODELS, PARSER, MAP, IMPACT, PLANNER
+    load_planner_modules.cache_clear()
+    MODELS, PARSER, MAP, IMPACT, PLANNER = load_planner_modules()
 
 
 def module_header(

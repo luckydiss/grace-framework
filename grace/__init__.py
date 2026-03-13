@@ -93,6 +93,7 @@ def _public_api() -> tuple[str, ...]:
         "GRACE_MAP_VERSION",
         "GraceBlockMetadata",
         "GraceFileModel",
+        "GraceLanguageAdapter",
         "GraceMap",
         "GraceMapAnchor",
         "GraceMapEdge",
@@ -124,6 +125,7 @@ def _public_api() -> tuple[str, ...]:
         "PatchStepStatus",
         "PatchSuccess",
         "PlannerLookupError",
+        "PythonAdapter",
         "QueryLookupError",
         "ReadAnchorContext",
         "ReadLookupError",
@@ -142,6 +144,7 @@ def _public_api() -> tuple[str, ...]:
         "extract_anchor_annotations",
         "extract_anchor_code",
         "filter_self_anchor",
+        "get_language_adapter_for_path",
         "impact_direct",
         "impact_summary",
         "impact_transitive",
@@ -169,6 +172,20 @@ def _public_api() -> tuple[str, ...]:
 # @grace.anchor grace.api.__getattr__
 # @grace.complexity 5
 def __getattr__(name: str) -> object:
+    if name in {
+        "GraceLanguageAdapter",
+        "PythonAdapter",
+        "get_language_adapter_for_path",
+    }:
+        from grace.language_adapter import GraceLanguageAdapter, get_language_adapter_for_path
+        from grace.python_adapter import PythonAdapter
+
+        exported = {
+            "GraceLanguageAdapter": GraceLanguageAdapter,
+            "PythonAdapter": PythonAdapter,
+            "get_language_adapter_for_path": get_language_adapter_for_path,
+        }
+        return exported[name]
     if name in {
         "ReadAnchorContext",
         "ReadLookupError",

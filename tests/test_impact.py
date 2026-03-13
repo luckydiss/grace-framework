@@ -21,6 +21,8 @@ def load_impact_modules():
         "grace",
         "grace.models",
         "grace.parser",
+        "grace.language_adapter",
+        "grace.python_adapter",
         "grace.validator",
         "grace.linter",
         "grace.map",
@@ -55,6 +57,13 @@ def load_impact_modules():
 
 
 MODELS, PARSER, MAP, IMPACT, CLI = load_impact_modules()
+
+
+@pytest.fixture(autouse=True)
+def _reload_modules():
+    global MODELS, PARSER, MAP, IMPACT, CLI
+    load_impact_modules.cache_clear()
+    MODELS, PARSER, MAP, IMPACT, CLI = load_impact_modules()
 
 
 def runner() -> CliRunner:

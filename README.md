@@ -9,6 +9,7 @@ The shell-oriented agent contract lives in [docs/agent_contract.md](C:\Users\luc
 The polyglot annotation spec track lives in [docs/polyglot_annotations.md](C:\Users\luckydiss\Documents\grace_framework\docs\polyglot_annotations.md).
 The self-hosting workflow lives in [docs/self_hosting.md](C:\Users\luckydiss\Documents\grace_framework\docs\self_hosting.md).
 The agent workflow playbook lives in [docs/agent_playbook.md](C:\Users\luckydiss\Documents\grace_framework\docs\agent_playbook.md).
+The language integration architecture lives in [docs/language_integration.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_integration.md).
 The longer-term development plan lives in [docs/roadmap.md](C:\Users\luckydiss\Documents\grace_framework\docs\roadmap.md).
 
 ## Source Of Truth
@@ -29,6 +30,8 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 ## Layers
 
 - `parser`: parses inline annotations and binds them to `def`, `async def`, `class`, and methods.
+- `language_adapter`: defines the language integration contract that feeds `GraceFileModel` into the core.
+- `python_adapter`: reference adapter that preserves the existing Python parsing behavior behind the language adapter layer.
 - `validator`: enforces hard semantic and identity consistency on parsed GRACE objects.
 - `linter`: emits soft warnings for readability, maintainability, and machine-utility quality.
 - `map`: builds a derived semantic graph artifact from `GraceFileModel`, including repo-level cross-file anchor edges.

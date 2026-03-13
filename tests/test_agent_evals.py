@@ -8,6 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from click.testing import CliRunner
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,6 +20,8 @@ def load_cli_module():
         "grace",
         "grace.models",
         "grace.parser",
+        "grace.language_adapter",
+        "grace.python_adapter",
         "grace.validator",
         "grace.linter",
         "grace.map",
@@ -62,6 +65,13 @@ def load_cli_module():
 
 
 CLI = load_cli_module()
+
+
+@pytest.fixture(autouse=True)
+def _reload_modules():
+    global CLI
+    load_cli_module.cache_clear()
+    CLI = load_cli_module()
 
 
 def runner() -> CliRunner:

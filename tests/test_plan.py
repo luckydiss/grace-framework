@@ -20,6 +20,8 @@ def load_foundation_modules():
         "grace",
         "grace.models",
         "grace.parser",
+        "grace.language_adapter",
+        "grace.python_adapter",
         "grace.validator",
         "grace.linter",
         "grace.patcher",
@@ -51,6 +53,13 @@ def load_foundation_modules():
 
 
 MODELS, PARSER, VALIDATOR, LINTER, PATCHER, PLAN = load_foundation_modules()
+
+
+@pytest.fixture(autouse=True)
+def _reload_modules():
+    global MODELS, PARSER, VALIDATOR, LINTER, PATCHER, PLAN
+    load_foundation_modules.cache_clear()
+    MODELS, PARSER, VALIDATOR, LINTER, PATCHER, PLAN = load_foundation_modules()
 
 
 def write_temp_file(tmp_path: Path, content: str, name: str) -> Path:

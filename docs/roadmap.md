@@ -481,28 +481,37 @@ It should include concrete examples for:
 - Claude Code
 - shell-driven agents
 
-## v0.12 - Self-Hosting Completion
+## v0.12 - Scalable Language Integration Architecture
 
 Goal:
 
-Complete the migration of GRACE development onto GRACE itself.
+Prepare GRACE for additional languages without changing GRACE Core semantics.
 
-All files in `grace/` should eventually carry:
+Required work:
 
-- anchors
-- invariants
-- complexity
-- belief where required
+- add a language adapter contract layer
+- move Python-specific parsing into a reference adapter
+- keep parser entrypoints language-agnostic at the top level
+- preserve the existing `GraceFileModel` contract for all core layers
+- document how future adapters must emit core-compatible models
+
+Non-goals:
+
+- no new source of truth
+- no new annotation grammar
+- no Tree-sitter yet
+- no new runtime language support beyond Python
+- no changes to patch, map, query, impact, read, or planner contracts
 
 Outcome:
 
-GRACE becomes a self-hosted development framework rather than only a framework that can annotate examples and selected core modules.
+Core stays language-agnostic while Python remains the reference implementation behind an explicit adapter boundary.
 
 ## v0.13 - Frontend Abstraction
 
 Goal:
 
-Separate the language-specific parsing frontend from the stable GRACE core.
+Generalize the adapter boundary so future language integrations can live in dedicated frontend packages without changing core semantics.
 
 Target structure:
 

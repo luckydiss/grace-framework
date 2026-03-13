@@ -11,6 +11,7 @@ Agents should treat the CLI as the stable integration surface.
 - Source of truth remains inline GRACE annotations in code.
 - The CLI does not create new identities.
 - Semantic patch targets are always `anchor_id`, never line numbers.
+- Parser entrypoints may dispatch through a language adapter, but CLI contracts and `GraceFileModel` semantics stay unchanged.
 
 ## Scope
 

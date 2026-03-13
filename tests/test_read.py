@@ -19,6 +19,8 @@ def load_read_modules():
         "grace",
         "grace.models",
         "grace.parser",
+        "grace.language_adapter",
+        "grace.python_adapter",
         "grace.map",
         "grace.query",
         "grace.read",
@@ -42,6 +44,13 @@ def load_read_modules():
 
 
 MODELS, PARSER, MAP, QUERY, READ = load_read_modules()
+
+
+@pytest.fixture(autouse=True)
+def _reload_modules():
+    global MODELS, PARSER, MAP, QUERY, READ
+    load_read_modules.cache_clear()
+    MODELS, PARSER, MAP, QUERY, READ = load_read_modules()
 
 
 def module_header(
