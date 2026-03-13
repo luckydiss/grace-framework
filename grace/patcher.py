@@ -426,7 +426,10 @@ def _load_project_state(source_path: Path, replacement_file: GraceFileModel | No
 
 # @grace.anchor grace.patcher._discover_project_paths
 # @grace.complexity 5
+# @grace.links grace.artifact_hygiene.is_ignored_artifact_dir_name
 def _discover_project_paths(project_root: Path) -> tuple[Path, ...]:
+    from grace.artifact_hygiene import is_ignored_artifact_dir_name
+
     def has_grace_module_header(source_text: str) -> bool:
         for raw_line in source_text.splitlines():
             stripped = raw_line.strip()
@@ -444,7 +447,9 @@ def _discover_project_paths(project_root: Path) -> tuple[Path, ...]:
         dir_names[:] = [
             dir_name
             for dir_name in dir_names
-            if dir_name not in IGNORED_DISCOVERY_DIR_NAMES and not dir_name.endswith(".egg-info")
+            if dir_name not in IGNORED_DISCOVERY_DIR_NAMES
+            and not dir_name.endswith(".egg-info")
+            and not is_ignored_artifact_dir_name(dir_name)
         ]
         for file_name in sorted(file_names):
             if not file_name.endswith(".py"):

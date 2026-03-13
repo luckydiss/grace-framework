@@ -5,6 +5,9 @@
 - Made `apply-plan` transactional by simulating all entries against a temporary project mirror before writing any repository file.
 - Ensured multi-entry plan failures no longer leave partial on-disk writes from earlier successful entries.
 - Added regression coverage for transactional `apply-plan` failure behavior and normalized result paths during dry-run execution.
+- Added deterministic artifact hygiene helpers plus `grace clean` for removing GRACE temp artifacts without touching committed example plans or replacement fragments.
+- Added `untracked_artifact` lint warnings for project scopes that contain derived artifacts not ignored by `.gitignore`.
+- Taught CLI and patcher discovery to ignore `.grace_plan_*` directories so temporary mirrors do not pollute later discovery or graph export.
 
 ## v1.0.0 - 2026-03-13
 

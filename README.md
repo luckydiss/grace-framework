@@ -302,6 +302,13 @@ Preview all patch plan entries without writing to disk:
 grace apply-plan examples/basic/apply_discount.plan.json --preview --json
 ```
 
+Clean deterministic GRACE temp artifacts:
+
+```bash
+grace clean repo/ --dry-run --json
+grace clean repo/ --json
+```
+
 ## Dogfood
 
 PowerShell:
@@ -334,6 +341,7 @@ grace apply-plan plan.json --dry-run --preview --json
 grace apply-plan plan.json --json
 grace validate grace --json
 grace lint grace --json
+grace clean grace --dry-run --json
 ```
 
 The longer workflow notes and dogfooding lessons are documented in [docs/self_hosting.md](C:\Users\luckydiss\Documents\grace_framework\docs\self_hosting.md).

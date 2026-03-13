@@ -8,6 +8,13 @@ __pycache__/
 .pytest-basetemp-runs/
 .pytest-basetemp-test/
 .tmp_parser_tests/
+.grace.tmp.json
+.grace_plan_*/
+**/.grace_plan_*
+.tmp_*.json
+.tmp_*.pyfrag
+.grace_test_runtime/
+.tmp_probe_repo/
 
 *.egg-info/
 .eggs/

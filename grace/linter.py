@@ -40,6 +40,7 @@ class LintIssueCode(str, Enum):
     LONG_TEXT = "long_text"
     DUPLICATE_LINK = "duplicate_link"
     TOO_FEW_INVARIANTS = "too_few_invariants"
+    UNTRACKED_ARTIFACT = "untracked_artifact"
 
 
 # @grace.anchor grace.linter.LintIssue
@@ -88,12 +89,34 @@ def lint_file(grace_file: GraceFileModel) -> LintResult:
 
 
 # @grace.anchor grace.linter.lint_project
-# @grace.complexity 3
-# @grace.links grace.linter._lint_file
+# @grace.complexity 4
+# @grace.links grace.linter._lint_file, grace.artifact_hygiene.discover_unignored_artifact_paths
 def lint_project(grace_files: list[GraceFileModel] | tuple[GraceFileModel, ...]) -> LintResult:
+    import os
+
+    from grace.artifact_hygiene import discover_unignored_artifact_paths
+
+    if not grace_files:
+        return LintSuccess(scope="project")
+
     issues: list[LintIssue] = []
     for grace_file in grace_files:
         issues.extend(_lint_file(grace_file))
+
+    scope_root = Path(os.path.commonpath([str(grace_file.path.parent) for grace_file in grace_files]))
+    for artifact_path in discover_unignored_artifact_paths(scope_root):
+        issues.append(
+            LintIssue(
+                code=LintIssueCode.UNTRACKED_ARTIFACT,
+                severity=LintSeverity.WARNING,
+                message=(
+                    f"derived artifact {artifact_path.name!r} is present under {scope_root} and should either be cleaned "
+                    "or ignored in .gitignore"
+                ),
+                path=artifact_path,
+            )
+        )
+
     if issues:
         return LintFailure(scope="project", issues=tuple(issues))
     return LintSuccess(scope="project")

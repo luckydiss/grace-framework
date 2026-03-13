@@ -22,6 +22,7 @@ grace apply-plan plan.json --dry-run --preview --json
 grace apply-plan plan.json --json
 grace validate grace --json
 grace lint grace --json
+grace clean grace --dry-run --json
 ```
 
 ## Operating Rules
@@ -31,6 +32,7 @@ grace lint grace --json
 - Use `plan impact` as a proposal surface, not as an executable change by itself.
 - Prefer atomic anchor-driven patches over whole-file rewrites.
 - Treat `validate` as blocking and `lint` as advisory unless a project policy says otherwise.
+- Use `clean --dry-run` to inspect leftover GRACE temp artifacts before they pollute later discovery or graph export.
 
 ## Self-Hosted Scope
 

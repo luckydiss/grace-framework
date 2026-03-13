@@ -66,6 +66,7 @@ If no GRACE-annotated supported files are found, the command fails with:
 12. `grace apply-plan <plan_file> --json`
 13. `grace validate <path> --json`
 14. `grace lint <path> --json`
+15. `grace clean <path> --dry-run --json`
 
 For self-hosted GRACE development, the preferred scope is the annotated `grace/` package:
 
@@ -78,6 +79,7 @@ For self-hosted GRACE development, the preferred scope is the annotated `grace/`
 7. `grace apply-plan <plan_file> --json`
 8. `grace validate grace --json`
 9. `grace lint grace --json`
+10. `grace clean grace --dry-run --json`
 
 This self-hosting loop is described in more detail in `docs/self_hosting.md`.
 The workflow guidance and eval framing for agents are documented in `docs/agent_playbook.md`.
@@ -119,6 +121,7 @@ For `map`:
 - `map`: `0` on success, non-zero on parse failure
 - `patch`: `0` on success, non-zero on patch failure
 - `apply-plan`: `0` on success, non-zero on plan-load failure or first patch failure
+- `clean`: `0` on success, non-zero only when cleanup leaves failed artifact paths
 
 ## Command JSON Shapes
 
@@ -435,10 +438,10 @@ Patch plan semantics:
 - Current operation set contains only `replace_block`.
 - `--dry-run` preflights the full plan without writing to disk.
 - `--preview` produces entry-level semantic diffs without writing to disk.
-- Entries are applied sequentially in plan order.
+- Entries are evaluated sequentially in plan order against a temporary project mirror.
 - Execution stops on the first failing entry.
-- Current baseline is not transactional:
-  already-applied earlier entries are not rolled back automatically.
+- Current baseline is transactional for `replace_block` plans:
+  no earlier entry is flushed to disk if a later entry fails during preflight.
 
 Failure taxonomy for current execution baseline:
 
@@ -447,6 +450,40 @@ Failure taxonomy for current execution baseline:
 - `apply-plan` stages:
   `plan_load`, `entry_failure`
 - `apply-plan entry_failure` always includes the nested patch result for the failing entry
+
+### `clean --json`
+
+Success:
+
+```json
+{
+  "ok": true,
+  "command": "clean",
+  "path": "repo/",
+  "scope_root": "/abs/repo",
+  "dry_run": true,
+  "cleaned_count": 2,
+  "failed_count": 0,
+  "cleaned_paths": [],
+  "failed_paths": []
+}
+```
+
+Failure:
+
+```json
+{
+  "ok": false,
+  "command": "clean",
+  "path": "repo/",
+  "scope_root": "/abs/repo",
+  "dry_run": false,
+  "cleaned_count": 1,
+  "failed_count": 1,
+  "cleaned_paths": [],
+  "failed_paths": []
+}
+```
 
 ### `map --json`
 
@@ -586,6 +623,7 @@ Failure:
 - Use `impact --json` to inspect reverse dependents before touching a widely-linked anchor.
 - Use `plan impact --json` to turn direct dependents into a deterministic patch proposal before writing a real plan file.
 - Prefer `apply-plan` when the intended change spans multiple anchors.
+- Use `clean --dry-run --json` to inspect leftover GRACE temp artifacts before they pollute later discovery or graph export.
 - Treat `patch` success as provisional until a follow-up `validate --json` succeeds.
 - Do not infer semantic identity from line numbers or file offsets.
 - Treat repo `map --json` as the canonical cross-file graph view for current GRACE baseline.

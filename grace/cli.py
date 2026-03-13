@@ -469,8 +469,9 @@ def _query_anchor_collection_payload(
 
 # @grace.anchor grace.cli._discover_grace_paths
 # @grace.complexity 5
-# @grace.links grace.language_adapter.get_language_adapter_for_path
+# @grace.links grace.language_adapter.get_language_adapter_for_path, grace.artifact_hygiene.is_ignored_artifact_dir_name
 def _discover_grace_paths(path: Path) -> tuple[str, tuple[Path, ...]]:
+    from grace.artifact_hygiene import is_ignored_artifact_dir_name
     from grace.language_adapter import get_language_adapter_for_path
 
     def has_grace_module_header(source_text: str) -> bool:
@@ -497,7 +498,9 @@ def _discover_grace_paths(path: Path) -> tuple[str, tuple[Path, ...]]:
         dir_names[:] = [
             dir_name
             for dir_name in dir_names
-            if dir_name not in IGNORED_DISCOVERY_DIR_NAMES and not dir_name.endswith(".egg-info")
+            if dir_name not in IGNORED_DISCOVERY_DIR_NAMES
+            and not dir_name.endswith(".egg-info")
+            and not is_ignored_artifact_dir_name(dir_name)
         ]
 
         root_path = Path(current_root)
@@ -655,10 +658,17 @@ def _emit_apply_plan_preview(result: ApplyPlanSuccess | ApplyPlanFailure) -> Non
 
 
 # @grace.anchor grace.cli.app
-# @grace.complexity 1
+# @grace.complexity 2
+# @grace.links grace.clean_command.clean_command
 @click.group(help="GRACE v1 CLI")
 def app() -> None:
     pass
+
+
+from grace.clean_command import clean_command
+
+if "clean" not in app.commands:
+    app.add_command(clean_command, name="clean")
 
 
 # @grace.anchor grace.cli.query_group
@@ -1448,8 +1458,13 @@ def apply_plan_command(plan_file: Path, dry_run: bool, preview: bool, as_json: b
 
 
 # @grace.anchor grace.cli.main
-# @grace.complexity 2
+# @grace.complexity 3
+# @grace.links grace.clean_command.clean_command
 def main(argv: list[str] | None = None) -> int:
+    from grace.clean_command import clean_command
+
+    if "clean" not in app.commands:
+        app.add_command(clean_command, name="clean")
     try:
         app.main(args=argv, prog_name="grace", standalone_mode=False)
     except click.ClickException as error:
