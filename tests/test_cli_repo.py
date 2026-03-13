@@ -151,7 +151,20 @@ def test_cli_parse_directory_json_success_and_ignores_non_grace_files(tmp_path: 
             ),
         ),
     )
-    write_temp_python_file(repo_dir, "tests/helper.py", "def helper() -> int:\n    return 1\n")
+    write_temp_python_file(
+        repo_dir,
+        "tests/helper.py",
+        (
+            "FIXTURE = '''\n"
+            "# @grace.module fixture.module\n"
+            "# @grace.purpose Fixture only.\n"
+            "# @grace.interfaces noop()\n"
+            "# @grace.invariant Fixture data stays intentionally invalid for discovery tests.\n"
+            "'''\n\n"
+            "def helper() -> int:\n"
+            "    return 1\n"
+        ),
+    )
     write_temp_python_file(
         repo_dir,
         ".venv/ignored.py",
@@ -180,6 +193,46 @@ def test_cli_parse_directory_json_success_and_ignores_non_grace_files(tmp_path: 
     }
 
 
+def test_cli_parse_directory_ignores_fixture_strings_that_are_not_top_level_module_headers(tmp_path: Path) -> None:
+    repo_dir = create_repo_dir(tmp_path)
+    write_temp_python_file(
+        repo_dir,
+        "src/pricing.py",
+        make_file(
+            module_header(module_id="billing.pricing"),
+            function_block(
+                anchor="billing.pricing.apply_discount",
+                signature="def apply_discount(price: int, percent: int) -> int:",
+                body="    return price",
+            ),
+        ),
+    )
+    write_temp_python_file(
+        repo_dir,
+        "tests/fixtures.py",
+        (
+            "BAD_FIXTURE = '''\n"
+            "# @grace.module broken.fixture\n"
+            "# @grace.purpose This should not be discovered.\n"
+            "# @grace.interfaces noop()\n"
+            "# @grace.invariant Fixture remains text, not a module header.\n"
+            "\n"
+            "# @grace.anchor broken.fixture.example\n"
+            "# @grace.complexity 1\n"
+            "def example() -> int:\n"
+            "    return 0\n"
+            "'''\n"
+        ),
+    )
+
+    result = runner().invoke(CLI.app, ["parse", "--json", str(repo_dir)])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["file_count"] == 1
+    assert [file_payload["module"]["module_id"] for file_payload in payload["files"]] == ["billing.pricing"]
+
+
 def test_cli_parse_directory_json_failure_on_invalid_grace_candidate(tmp_path: Path) -> None:
     repo_dir = create_repo_dir(tmp_path)
     write_temp_python_file(
@@ -198,8 +251,13 @@ def test_cli_parse_directory_json_failure_on_invalid_grace_candidate(tmp_path: P
         repo_dir,
         "src/broken.py",
         (
+            "# @grace.module billing.broken\n"
+            "# @grace.purpose Broken candidate for parse failure coverage.\n"
+            "# @grace.interfaces partial() -> int\n"
+            "# @grace.invariant Broken candidates should still fail predictably once discovered.\n"
+            "\n"
             "# @grace.anchor billing.broken.partial\n"
-            "# @grace.complexity 1\n"
+            "# @grace.complexity 6\n"
             "def partial() -> int:\n"
             "    return 0\n"
         ),

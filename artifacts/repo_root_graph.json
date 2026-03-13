@@ -1,0 +1,3940 @@
+﻿{
+  "grace_version": "v1",
+  "modules": [
+    {
+      "module_id": "billing.pricing",
+      "path": "examples\\basic\\pricing.py",
+      "purpose": "Determine discount strategy and apply discounts."
+    },
+    {
+      "module_id": "billing.pricing",
+      "path": "examples\\typescript\\basic.ts",
+      "purpose": "Determine discount behavior in a TypeScript pilot module."
+    },
+    {
+      "module_id": "demo.go_basic",
+      "path": "examples\\go\\basic.go",
+      "purpose": "Demonstrate the minimal Go pilot adapter for GRACE."
+    },
+    {
+      "module_id": "demo.parity",
+      "path": "examples\\parity\\go\\basic.go",
+      "purpose": "Verify semantic parity for the pilot Go adapter."
+    },
+    {
+      "module_id": "demo.parity",
+      "path": "examples\\parity\\python\\basic.py",
+      "purpose": "Verify semantic parity for the reference Python adapter."
+    },
+    {
+      "module_id": "demo.parity",
+      "path": "examples\\parity\\typescript\\basic.ts",
+      "purpose": "Verify semantic parity for the pilot TypeScript adapter."
+    },
+    {
+      "module_id": "demo.parity.async_shape",
+      "path": "examples\\parity\\go\\async_shape.go",
+      "purpose": "Verify async-shape semantic parity for the pilot Go adapter."
+    },
+    {
+      "module_id": "demo.parity.async_shape",
+      "path": "examples\\parity\\python\\async_shape.py",
+      "purpose": "Verify async-shape semantic parity for the reference Python adapter."
+    },
+    {
+      "module_id": "demo.parity.async_shape",
+      "path": "examples\\parity\\typescript\\async_shape.ts",
+      "purpose": "Verify async-shape semantic parity for the pilot TypeScript adapter."
+    },
+    {
+      "module_id": "demo.parity.links_shape",
+      "path": "examples\\parity\\go\\links_shape.go",
+      "purpose": "Verify linked semantic block ordering for the pilot Go adapter."
+    },
+    {
+      "module_id": "demo.parity.links_shape",
+      "path": "examples\\parity\\python\\links_shape.py",
+      "purpose": "Verify linked semantic block ordering for the reference Python adapter."
+    },
+    {
+      "module_id": "demo.parity.links_shape",
+      "path": "examples\\parity\\typescript\\links_shape.ts",
+      "purpose": "Verify linked semantic block ordering for the pilot TypeScript adapter."
+    },
+    {
+      "module_id": "demo.parity.service_shape",
+      "path": "examples\\parity\\go\\service_shape.go",
+      "purpose": "Verify class-and-method semantic parity for the pilot Go adapter."
+    },
+    {
+      "module_id": "demo.parity.service_shape",
+      "path": "examples\\parity\\python\\service_shape.py",
+      "purpose": "Verify class-and-method semantic parity for the reference Python adapter."
+    },
+    {
+      "module_id": "demo.parity.service_shape",
+      "path": "examples\\parity\\typescript\\service_shape.ts",
+      "purpose": "Verify class-and-method semantic parity for the pilot TypeScript adapter."
+    },
+    {
+      "module_id": "grace.api",
+      "path": "grace\\__init__.py",
+      "purpose": "Re-export the stable GRACE public API for library callers and shell-driven tooling."
+    },
+    {
+      "module_id": "grace.cli",
+      "path": "grace\\cli.py",
+      "purpose": "Expose a thin CLI over GRACE core APIs for file-level and repo-level agent workflows."
+    },
+    {
+      "module_id": "grace.go_adapter",
+      "path": "grace\\go_adapter.py",
+      "purpose": "Implement a minimal Go language adapter that proves GRACE adapter architecture scales to a third language without changing core semantics."
+    },
+    {
+      "module_id": "grace.impact",
+      "path": "grace\\impact.py",
+      "purpose": "Compute deterministic reverse-dependency impact sets over a derived GraceMap."
+    },
+    {
+      "module_id": "grace.language_adapter",
+      "path": "grace\\language_adapter.py",
+      "purpose": "Define the language adapter contract that lets GRACE parse annotated files through language-specific integrations while keeping core semantics unchanged."
+    },
+    {
+      "module_id": "grace.linter",
+      "path": "grace\\linter.py",
+      "purpose": "Emit soft policy warnings about maintainability, machine utility, and LLM-friendly block granularity for parsed GRACE models."
+    },
+    {
+      "module_id": "grace.map",
+      "path": "grace\\map.py",
+      "purpose": "Build derived GRACE maps from parsed file models without introducing new identities or source-of-truth semantics."
+    },
+    {
+      "module_id": "grace.parser",
+      "path": "grace\\parser.py",
+      "purpose": "Parse inline GRACE annotations from Python source into typed file models."
+    },
+    {
+      "module_id": "grace.patcher",
+      "path": "grace\\patcher.py",
+      "purpose": "Replace semantic blocks by anchor_id while preserving identity and enforcing parse-validate rollback discipline."
+    },
+    {
+      "module_id": "grace.plan",
+      "path": "grace\\plan.py",
+      "purpose": "Load derived patch plans and apply them as deterministic sequences of semantic block replacements."
+    },
+    {
+      "module_id": "grace.planner",
+      "path": "grace\\planner.py",
+      "purpose": "Build deterministic patch-plan proposals from existing semantic graph data without executing changes or inferring edits."
+    },
+    {
+      "module_id": "grace.python_adapter",
+      "path": "grace\\python_adapter.py",
+      "purpose": "Implement the reference Python language adapter that parses inline GRACE annotations and emits GraceFileModel data without changing core semantics."
+    },
+    {
+      "module_id": "grace.query",
+      "path": "grace\\query.py",
+      "purpose": "Provide deterministic read-only graph queries over derived GRACE maps for agent navigation."
+    },
+    {
+      "module_id": "grace.read",
+      "path": "grace\\read.py",
+      "purpose": "Extract deterministic anchor-local context from parsed GRACE files and derived maps without reading whole modules at the agent layer."
+    },
+    {
+      "module_id": "grace.tree_sitter_adapter",
+      "path": "grace\\tree_sitter_adapter.py",
+      "purpose": "Provide minimal Tree-sitter substrate helpers for non-Python pilot adapters without changing GRACE core semantics."
+    },
+    {
+      "module_id": "grace.typescript_adapter",
+      "path": "grace\\typescript_adapter.py",
+      "purpose": "Implement the pilot TypeScript language adapter using Tree-sitter as parsing substrate while preserving GRACE core semantics."
+    },
+    {
+      "module_id": "grace.validator",
+      "path": "grace\\validator.py",
+      "purpose": "Enforce hard structural and semantic consistency rules over parsed GRACE file models."
+    }
+  ],
+  "anchors": [
+    {
+      "anchor_id": "billing.pricing.apply_discount",
+      "module_id": "billing.pricing",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "billing.pricing.choose_discount_strategy",
+      "module_id": "billing.pricing",
+      "kind": "function",
+      "complexity": 6,
+      "links": [
+        "billing.pricing.apply_discount"
+      ]
+    },
+    {
+      "anchor_id": "billing.pricing.StrategyRegistry",
+      "module_id": "billing.pricing",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "billing.pricing.StrategyRegistry.resolve",
+      "module_id": "billing.pricing",
+      "kind": "method",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "billing.pricing.applyDiscount",
+      "module_id": "billing.pricing",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "billing.pricing.chooseDiscount",
+      "module_id": "billing.pricing",
+      "kind": "async_function",
+      "complexity": 6,
+      "links": [
+        "billing.pricing.applyDiscount"
+      ]
+    },
+    {
+      "anchor_id": "demo.go_basic.ExampleService",
+      "module_id": "demo.go_basic",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.go_basic.ExampleService.run",
+      "module_id": "demo.go_basic",
+      "kind": "method",
+      "complexity": 1,
+      "links": [
+        "demo.go_basic.example"
+      ]
+    },
+    {
+      "anchor_id": "demo.go_basic.example",
+      "module_id": "demo.go_basic",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.ExampleService",
+      "module_id": "demo.parity",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.ExampleService.run",
+      "module_id": "demo.parity",
+      "kind": "method",
+      "complexity": 1,
+      "links": [
+        "demo.parity.example"
+      ]
+    },
+    {
+      "anchor_id": "demo.parity.example",
+      "module_id": "demo.parity",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.load_example",
+      "module_id": "demo.parity",
+      "kind": "function",
+      "complexity": 6,
+      "links": [
+        "demo.parity.example"
+      ]
+    },
+    {
+      "anchor_id": "demo.parity.ExampleService",
+      "module_id": "demo.parity",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.ExampleService.run",
+      "module_id": "demo.parity",
+      "kind": "method",
+      "complexity": 1,
+      "links": [
+        "demo.parity.example"
+      ]
+    },
+    {
+      "anchor_id": "demo.parity.example",
+      "module_id": "demo.parity",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.load_example",
+      "module_id": "demo.parity",
+      "kind": "async_function",
+      "complexity": 6,
+      "links": [
+        "demo.parity.example"
+      ]
+    },
+    {
+      "anchor_id": "demo.parity.ExampleService",
+      "module_id": "demo.parity",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.ExampleService.run",
+      "module_id": "demo.parity",
+      "kind": "method",
+      "complexity": 1,
+      "links": [
+        "demo.parity.example"
+      ]
+    },
+    {
+      "anchor_id": "demo.parity.example",
+      "module_id": "demo.parity",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.load_example",
+      "module_id": "demo.parity",
+      "kind": "async_function",
+      "complexity": 6,
+      "links": [
+        "demo.parity.example"
+      ]
+    },
+    {
+      "anchor_id": "demo.parity.async_shape.fetch_example",
+      "module_id": "demo.parity.async_shape",
+      "kind": "function",
+      "complexity": 6,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.async_shape.fetch_example",
+      "module_id": "demo.parity.async_shape",
+      "kind": "async_function",
+      "complexity": 6,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.async_shape.fetch_example",
+      "module_id": "demo.parity.async_shape",
+      "kind": "async_function",
+      "complexity": 6,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.links_shape.publish",
+      "module_id": "demo.parity.links_shape",
+      "kind": "function",
+      "complexity": 2,
+      "links": [
+        "demo.parity.links_shape.transform"
+      ]
+    },
+    {
+      "anchor_id": "demo.parity.links_shape.seed",
+      "module_id": "demo.parity.links_shape",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.links_shape.transform",
+      "module_id": "demo.parity.links_shape",
+      "kind": "function",
+      "complexity": 2,
+      "links": [
+        "demo.parity.links_shape.seed"
+      ]
+    },
+    {
+      "anchor_id": "demo.parity.links_shape.publish",
+      "module_id": "demo.parity.links_shape",
+      "kind": "function",
+      "complexity": 2,
+      "links": [
+        "demo.parity.links_shape.transform"
+      ]
+    },
+    {
+      "anchor_id": "demo.parity.links_shape.seed",
+      "module_id": "demo.parity.links_shape",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.links_shape.transform",
+      "module_id": "demo.parity.links_shape",
+      "kind": "function",
+      "complexity": 2,
+      "links": [
+        "demo.parity.links_shape.seed"
+      ]
+    },
+    {
+      "anchor_id": "demo.parity.links_shape.publish",
+      "module_id": "demo.parity.links_shape",
+      "kind": "function",
+      "complexity": 2,
+      "links": [
+        "demo.parity.links_shape.transform"
+      ]
+    },
+    {
+      "anchor_id": "demo.parity.links_shape.seed",
+      "module_id": "demo.parity.links_shape",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.links_shape.transform",
+      "module_id": "demo.parity.links_shape",
+      "kind": "function",
+      "complexity": 2,
+      "links": [
+        "demo.parity.links_shape.seed"
+      ]
+    },
+    {
+      "anchor_id": "demo.parity.service_shape.ExampleService",
+      "module_id": "demo.parity.service_shape",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.service_shape.ExampleService.run",
+      "module_id": "demo.parity.service_shape",
+      "kind": "method",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.service_shape.ExampleService",
+      "module_id": "demo.parity.service_shape",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.service_shape.ExampleService.run",
+      "module_id": "demo.parity.service_shape",
+      "kind": "method",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.service_shape.ExampleService",
+      "module_id": "demo.parity.service_shape",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "demo.parity.service_shape.ExampleService.run",
+      "module_id": "demo.parity.service_shape",
+      "kind": "method",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.api.__getattr__",
+      "module_id": "grace.api",
+      "kind": "function",
+      "complexity": 5,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.api._public_api",
+      "module_id": "grace.api",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.api.__getattr__"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.DiscoveryError",
+      "module_id": "grace.cli",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli.DiscoveryError.__init__",
+      "module_id": "grace.cli",
+      "kind": "method",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._apply_plan_failure_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._apply_plan_success_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._discover_grace_paths",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 5,
+      "links": [
+        "grace.language_adapter.get_language_adapter_for_path"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli._discovery_failure_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._emit_apply_plan_failure",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._emit_apply_plan_preview",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._emit_apply_plan_success",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._emit_discovery_failure",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._emit_json",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._emit_lint_warnings",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._emit_parse_errors",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._emit_patch_failure",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._emit_patch_preview",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._emit_patch_success",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._emit_project_parse_failure",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._emit_validation_failure",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._lint_success_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._lint_warning_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._load_grace_map_for_query",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.cli._discover_grace_paths",
+        "grace.cli._parse_many",
+        "grace.parser.parse_python_file"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli._parse_error_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._parse_many",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 3,
+      "links": [
+        "grace.parser.try_parse_python_file"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli._parse_success_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._patch_failure_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._patch_success_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._path_argument",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._project_lint_success_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._project_lint_warning_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._project_parse_failure_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._project_parse_success_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._project_validation_success_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._query_anchor_collection_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._query_anchor_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._query_collection_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._query_failure_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._serialize_applied_patch_entry",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._serialize_file",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._serialize_parse_failure",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._serialize_patch_result",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._serialize_patch_step",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._validation_failure_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli._validation_success_payload",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli.app",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli.apply_plan_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 5,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli.impact_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 6,
+      "links": [
+        "grace.cli._load_grace_map_for_query",
+        "grace.impact.impact_summary"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.lint_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 6,
+      "links": [
+        "grace.cli._discover_grace_paths",
+        "grace.cli._parse_many",
+        "grace.parser.parse_python_file"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.main",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli.map_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 5,
+      "links": [
+        "grace.cli._discover_grace_paths",
+        "grace.cli._parse_many",
+        "grace.parser.parse_python_file"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.parse_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 6,
+      "links": [
+        "grace.cli._discover_grace_paths",
+        "grace.cli._parse_many",
+        "grace.parser.parse_python_file"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.patch_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.patcher.patch_block"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.plan_group",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli.plan_impact_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 5,
+      "links": [
+        "grace.cli._load_grace_map_for_query",
+        "grace.planner.plan_from_impact"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.query_anchor_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.cli._load_grace_map_for_query"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.query_anchors_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.cli._load_grace_map_for_query"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.query_dependents_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.cli._load_grace_map_for_query",
+        "grace.query.query_dependents"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.query_group",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.cli.query_links_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.cli._load_grace_map_for_query",
+        "grace.query.query_links"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.query_modules_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.cli._load_grace_map_for_query"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.query_neighbors_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.cli._load_grace_map_for_query",
+        "grace.query.query_neighbors"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.read_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 6,
+      "links": [
+        "grace.cli._discover_grace_paths",
+        "grace.cli._parse_many",
+        "grace.read.read_anchor_context",
+        "grace.map.build_file_map",
+        "grace.map.build_project_map"
+      ]
+    },
+    {
+      "anchor_id": "grace.cli.validate_command",
+      "module_id": "grace.cli",
+      "kind": "function",
+      "complexity": 6,
+      "links": [
+        "grace.cli._discover_grace_paths",
+        "grace.cli._parse_many",
+        "grace.parser.parse_python_file"
+      ]
+    },
+    {
+      "anchor_id": "grace.go_adapter.GoAdapter",
+      "module_id": "grace.go_adapter",
+      "kind": "class",
+      "complexity": 5,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.go_adapter.GoAdapter.build_grace_file_model",
+      "module_id": "grace.go_adapter",
+      "kind": "method",
+      "complexity": 7,
+      "links": [
+        "grace.go_adapter._collect_definition_targets"
+      ]
+    },
+    {
+      "anchor_id": "grace.go_adapter.GoAdapter.compute_block_span",
+      "module_id": "grace.go_adapter",
+      "kind": "method",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.go_adapter.GoAdapter.discover_annotations",
+      "module_id": "grace.go_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.go_adapter.GoAdapter.extract_blocks",
+      "module_id": "grace.go_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.go_adapter.GoAdapter.extract_module_metadata",
+      "module_id": "grace.go_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.go_adapter._collect_definition_targets",
+      "module_id": "grace.go_adapter",
+      "kind": "function",
+      "complexity": 6,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.go_adapter._compute_block_end",
+      "module_id": "grace.go_adapter",
+      "kind": "function",
+      "complexity": 4,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.go_adapter._is_comment_like_line",
+      "module_id": "grace.go_adapter",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.go_adapter._match_annotation_line",
+      "module_id": "grace.go_adapter",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.go_adapter._parse_receiver_type",
+      "module_id": "grace.go_adapter",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.impact.ImpactLookupError",
+      "module_id": "grace.impact",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.impact.ImpactLookupError.__init__",
+      "module_id": "grace.impact",
+      "kind": "method",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.impact.ImpactSummary",
+      "module_id": "grace.impact",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.impact._anchor_index",
+      "module_id": "grace.impact",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.impact._module_index",
+      "module_id": "grace.impact",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.impact._require_anchor",
+      "module_id": "grace.impact",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.impact._reverse_dependents_index",
+      "module_id": "grace.impact",
+      "kind": "function",
+      "complexity": 4,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.impact.impact_direct",
+      "module_id": "grace.impact",
+      "kind": "function",
+      "complexity": 3,
+      "links": [
+        "grace.impact._require_anchor",
+        "grace.impact._anchor_index",
+        "grace.impact._reverse_dependents_index"
+      ]
+    },
+    {
+      "anchor_id": "grace.impact.impact_summary",
+      "module_id": "grace.impact",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.impact.impact_direct",
+        "grace.impact.impact_transitive",
+        "grace.impact._module_index"
+      ]
+    },
+    {
+      "anchor_id": "grace.impact.impact_transitive",
+      "module_id": "grace.impact",
+      "kind": "function",
+      "complexity": 6,
+      "links": [
+        "grace.impact._require_anchor",
+        "grace.impact._anchor_index",
+        "grace.impact._reverse_dependents_index"
+      ]
+    },
+    {
+      "anchor_id": "grace.language_adapter.GraceLanguageAdapter",
+      "module_id": "grace.language_adapter",
+      "kind": "class",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.language_adapter.GraceLanguageAdapter.build_grace_file_model",
+      "module_id": "grace.language_adapter",
+      "kind": "method",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.language_adapter.GraceLanguageAdapter.compute_block_span",
+      "module_id": "grace.language_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.language_adapter.GraceLanguageAdapter.discover_annotations",
+      "module_id": "grace.language_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.language_adapter.GraceLanguageAdapter.extract_blocks",
+      "module_id": "grace.language_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.language_adapter.GraceLanguageAdapter.extract_module_metadata",
+      "module_id": "grace.language_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.language_adapter._register_python_adapter",
+      "module_id": "grace.language_adapter",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.language_adapter.get_language_adapter_for_path",
+      "module_id": "grace.language_adapter",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.linter.LintFailure",
+      "module_id": "grace.linter",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.linter.LintIssue",
+      "module_id": "grace.linter",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.linter.LintIssueCode",
+      "module_id": "grace.linter",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.linter.LintSeverity",
+      "module_id": "grace.linter",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.linter.LintSuccess",
+      "module_id": "grace.linter",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.linter._lint_block",
+      "module_id": "grace.linter",
+      "kind": "function",
+      "complexity": 5,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.linter._lint_file",
+      "module_id": "grace.linter",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.linter._lint_module_text",
+        "grace.linter._lint_block"
+      ]
+    },
+    {
+      "anchor_id": "grace.linter._lint_module_text",
+      "module_id": "grace.linter",
+      "kind": "function",
+      "complexity": 4,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.linter.lint_file",
+      "module_id": "grace.linter",
+      "kind": "function",
+      "complexity": 2,
+      "links": [
+        "grace.linter._lint_file"
+      ]
+    },
+    {
+      "anchor_id": "grace.linter.lint_project",
+      "module_id": "grace.linter",
+      "kind": "function",
+      "complexity": 3,
+      "links": [
+        "grace.linter._lint_file"
+      ]
+    },
+    {
+      "anchor_id": "grace.map.GraceMap",
+      "module_id": "grace.map",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.map.GraceMapAnchor",
+      "module_id": "grace.map",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.map.GraceMapEdge",
+      "module_id": "grace.map",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.map.GraceMapModule",
+      "module_id": "grace.map",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.map.build_file_map",
+      "module_id": "grace.map",
+      "kind": "function",
+      "complexity": 1,
+      "links": [
+        "grace.map.build_project_map"
+      ]
+    },
+    {
+      "anchor_id": "grace.map.build_project_map",
+      "module_id": "grace.map",
+      "kind": "function",
+      "complexity": 5,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.map.map_to_dict",
+      "module_id": "grace.map",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.parser.GraceParseError",
+      "module_id": "grace.parser",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.parser.GraceParseError.__init__",
+      "module_id": "grace.parser",
+      "kind": "method",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.parser.GraceParseError._build_message",
+      "module_id": "grace.parser",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.parser._DefinitionTarget",
+      "module_id": "grace.parser",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.parser._ModuleAccumulator",
+      "module_id": "grace.parser",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.parser._PendingBlock",
+      "module_id": "grace.parser",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.parser._build_block_model",
+      "module_id": "grace.parser",
+      "kind": "function",
+      "complexity": 5,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.parser._collect_definition_targets",
+      "module_id": "grace.parser",
+      "kind": "function",
+      "complexity": 3,
+      "links": [
+        "grace.parser._walk_statement_list"
+      ]
+    },
+    {
+      "anchor_id": "grace.parser._consume_block_annotation",
+      "module_id": "grace.parser",
+      "kind": "function",
+      "complexity": 6,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.parser._consume_module_annotation",
+      "module_id": "grace.parser",
+      "kind": "function",
+      "complexity": 5,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.parser._finalize_module_annotations",
+      "module_id": "grace.parser",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.parser._walk_nested_bodies",
+      "module_id": "grace.parser",
+      "kind": "function",
+      "complexity": 4,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.parser._walk_statement_list",
+      "module_id": "grace.parser",
+      "kind": "function",
+      "complexity": 6,
+      "links": [
+        "grace.parser._walk_nested_bodies"
+      ]
+    },
+    {
+      "anchor_id": "grace.parser.parse_python_file",
+      "module_id": "grace.parser",
+      "kind": "function",
+      "complexity": 7,
+      "links": [
+        "grace.language_adapter.get_language_adapter_for_path"
+      ]
+    },
+    {
+      "anchor_id": "grace.parser.parse_python_module",
+      "module_id": "grace.parser",
+      "kind": "function",
+      "complexity": 1,
+      "links": [
+        "grace.parser.parse_python_file"
+      ]
+    },
+    {
+      "anchor_id": "grace.parser.try_parse_python_file",
+      "module_id": "grace.parser",
+      "kind": "function",
+      "complexity": 2,
+      "links": [
+        "grace.parser.parse_python_file"
+      ]
+    },
+    {
+      "anchor_id": "grace.patcher.PatchFailure",
+      "module_id": "grace.patcher",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.patcher.PatchFailureStage",
+      "module_id": "grace.patcher",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.patcher.PatchStepResult",
+      "module_id": "grace.patcher",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.patcher.PatchStepStatus",
+      "module_id": "grace.patcher",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.patcher.PatchSuccess",
+      "module_id": "grace.patcher",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.patcher._build_preview_diff",
+      "module_id": "grace.patcher",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.patcher._discover_project_paths",
+      "module_id": "grace.patcher",
+      "kind": "function",
+      "complexity": 5,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.patcher._extract_replacement_anchor_id",
+      "module_id": "grace.patcher",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.patcher._find_anchor_annotation_line",
+      "module_id": "grace.patcher",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.patcher._hash_text",
+      "module_id": "grace.patcher",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.patcher._load_project_state",
+      "module_id": "grace.patcher",
+      "kind": "function",
+      "complexity": 6,
+      "links": [
+        "grace.patcher._discover_project_paths"
+      ]
+    },
+    {
+      "anchor_id": "grace.patcher._normalize_replacement_source",
+      "module_id": "grace.patcher",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.patcher._parse_candidate_text",
+      "module_id": "grace.patcher",
+      "kind": "function",
+      "complexity": 5,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.patcher._splice_block",
+      "module_id": "grace.patcher",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.patcher.patch_block",
+      "module_id": "grace.patcher",
+      "kind": "function",
+      "complexity": 7,
+      "links": [
+        "grace.patcher._find_anchor_annotation_line",
+        "grace.patcher._extract_replacement_anchor_id",
+        "grace.patcher._normalize_replacement_source",
+        "grace.patcher._build_preview_diff",
+        "grace.patcher._hash_text",
+        "grace.patcher._parse_candidate_text",
+        "grace.patcher._load_project_state",
+        "grace.patcher._splice_block"
+      ]
+    },
+    {
+      "anchor_id": "grace.plan.AppliedPatchEntry",
+      "module_id": "grace.plan",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.plan.ApplyPlanFailure",
+      "module_id": "grace.plan",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.plan.ApplyPlanFailureStage",
+      "module_id": "grace.plan",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.plan.ApplyPlanSuccess",
+      "module_id": "grace.plan",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.plan.PatchPlan",
+      "module_id": "grace.plan",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.plan.PatchPlanEntry",
+      "module_id": "grace.plan",
+      "kind": "class",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.plan.PatchPlanEntry._validate_replacement_locator",
+      "module_id": "grace.plan",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.plan.PatchPlanOperation",
+      "module_id": "grace.plan",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.plan._load_replacement_source",
+      "module_id": "grace.plan",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.plan._resolve_plan_paths",
+      "module_id": "grace.plan",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.plan.apply_patch_plan",
+      "module_id": "grace.plan",
+      "kind": "function",
+      "complexity": 7,
+      "links": [
+        "grace.patcher.patch_block",
+        "grace.plan._load_replacement_source"
+      ]
+    },
+    {
+      "anchor_id": "grace.plan.load_patch_plan",
+      "module_id": "grace.plan",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.plan._resolve_plan_paths"
+      ]
+    },
+    {
+      "anchor_id": "grace.plan.plan_to_dict",
+      "module_id": "grace.plan",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.planner.PatchPlanProposal",
+      "module_id": "grace.planner",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.planner.PlannerLookupError",
+      "module_id": "grace.planner",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.planner.PlannerLookupError.__init__",
+      "module_id": "grace.planner",
+      "kind": "method",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.planner.SuggestedPatchOperation",
+      "module_id": "grace.planner",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.planner.build_plan_skeleton",
+      "module_id": "grace.planner",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.planner.collect_patch_targets",
+      "module_id": "grace.planner",
+      "kind": "function",
+      "complexity": 3,
+      "links": [
+        "grace.impact.impact_direct"
+      ]
+    },
+    {
+      "anchor_id": "grace.planner.filter_self_anchor",
+      "module_id": "grace.planner",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.planner.plan_from_impact",
+      "module_id": "grace.planner",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.planner.collect_patch_targets",
+        "grace.planner.filter_self_anchor",
+        "grace.planner.build_plan_skeleton"
+      ]
+    },
+    {
+      "anchor_id": "grace.python_adapter.PythonAdapter",
+      "module_id": "grace.python_adapter",
+      "kind": "class",
+      "complexity": 4,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.python_adapter.PythonAdapter.build_grace_file_model",
+      "module_id": "grace.python_adapter",
+      "kind": "method",
+      "complexity": 7,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.python_adapter.PythonAdapter.compute_block_span",
+      "module_id": "grace.python_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.python_adapter.PythonAdapter.discover_annotations",
+      "module_id": "grace.python_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.python_adapter.PythonAdapter.extract_blocks",
+      "module_id": "grace.python_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.python_adapter.PythonAdapter.extract_module_metadata",
+      "module_id": "grace.python_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.query.QueryLookupError",
+      "module_id": "grace.query",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.query.QueryLookupError.__init__",
+      "module_id": "grace.query",
+      "kind": "method",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.query._anchor_index",
+      "module_id": "grace.query",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.query.query_anchor",
+      "module_id": "grace.query",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.query.query_anchors",
+      "module_id": "grace.query",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.query.query_dependents",
+      "module_id": "grace.query",
+      "kind": "function",
+      "complexity": 4,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.query.query_links",
+      "module_id": "grace.query",
+      "kind": "function",
+      "complexity": 3,
+      "links": [
+        "grace.query.query_anchor"
+      ]
+    },
+    {
+      "anchor_id": "grace.query.query_modules",
+      "module_id": "grace.query",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.query.query_neighbors",
+      "module_id": "grace.query",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.query.query_links",
+        "grace.query.query_dependents"
+      ]
+    },
+    {
+      "anchor_id": "grace.read.ReadAnchorContext",
+      "module_id": "grace.read",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.read.ReadLookupError",
+      "module_id": "grace.read",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.read.ReadLookupError.__init__",
+      "module_id": "grace.read",
+      "kind": "method",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.read._collect_annotation_lines",
+      "module_id": "grace.read",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.read._find_anchor_annotation_start",
+      "module_id": "grace.read",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.read._find_block",
+      "module_id": "grace.read",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.read._find_code_start",
+      "module_id": "grace.read",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.read._find_grace_file_for_anchor",
+      "module_id": "grace.read",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.read._read_source_lines",
+      "module_id": "grace.read",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.read._require_anchor",
+      "module_id": "grace.read",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.read.build_anchor_neighbors",
+      "module_id": "grace.read",
+      "kind": "function",
+      "complexity": 2,
+      "links": [
+        "grace.query.query_neighbors"
+      ]
+    },
+    {
+      "anchor_id": "grace.read.extract_anchor_annotations",
+      "module_id": "grace.read",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.read._find_anchor_annotation_start",
+        "grace.read._collect_annotation_lines"
+      ]
+    },
+    {
+      "anchor_id": "grace.read.extract_anchor_code",
+      "module_id": "grace.read",
+      "kind": "function",
+      "complexity": 4,
+      "links": [
+        "grace.read._find_block",
+        "grace.read._find_anchor_annotation_start",
+        "grace.read._find_code_start"
+      ]
+    },
+    {
+      "anchor_id": "grace.read.read_anchor_context",
+      "module_id": "grace.read",
+      "kind": "function",
+      "complexity": 5,
+      "links": [
+        "grace.read._find_grace_file_for_anchor",
+        "grace.read._find_block",
+        "grace.read.extract_anchor_annotations",
+        "grace.read.extract_anchor_code",
+        "grace.read.build_anchor_neighbors",
+        "grace.read._find_anchor_annotation_start"
+      ]
+    },
+    {
+      "anchor_id": "grace.tree_sitter_adapter.TreeSitterSourceFile",
+      "module_id": "grace.tree_sitter_adapter",
+      "kind": "class",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.tree_sitter_adapter.iter_tree_nodes",
+      "module_id": "grace.tree_sitter_adapter",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.tree_sitter_adapter.load_tree_sitter_source",
+      "module_id": "grace.tree_sitter_adapter",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.tree_sitter_adapter.strip_comment_delimiters",
+      "module_id": "grace.tree_sitter_adapter",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.typescript_adapter.TypeScriptAdapter",
+      "module_id": "grace.typescript_adapter",
+      "kind": "class",
+      "complexity": 5,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.typescript_adapter.TypeScriptAdapter.build_grace_file_model",
+      "module_id": "grace.typescript_adapter",
+      "kind": "method",
+      "complexity": 7,
+      "links": [
+        "grace.typescript_adapter._collect_definition_targets"
+      ]
+    },
+    {
+      "anchor_id": "grace.typescript_adapter.TypeScriptAdapter.compute_block_span",
+      "module_id": "grace.typescript_adapter",
+      "kind": "method",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.typescript_adapter.TypeScriptAdapter.discover_annotations",
+      "module_id": "grace.typescript_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.typescript_adapter.TypeScriptAdapter.extract_blocks",
+      "module_id": "grace.typescript_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.typescript_adapter.TypeScriptAdapter.extract_module_metadata",
+      "module_id": "grace.typescript_adapter",
+      "kind": "method",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.typescript_adapter._build_class_target",
+      "module_id": "grace.typescript_adapter",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.typescript_adapter._build_function_target",
+      "module_id": "grace.typescript_adapter",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.typescript_adapter._build_method_target",
+      "module_id": "grace.typescript_adapter",
+      "kind": "function",
+      "complexity": 3,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.typescript_adapter._collect_definition_targets",
+      "module_id": "grace.typescript_adapter",
+      "kind": "function",
+      "complexity": 5,
+      "links": [
+        "grace.tree_sitter_adapter.iter_tree_nodes"
+      ]
+    },
+    {
+      "anchor_id": "grace.typescript_adapter._is_comment_like_line",
+      "module_id": "grace.typescript_adapter",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.typescript_adapter._match_annotation_line",
+      "module_id": "grace.typescript_adapter",
+      "kind": "function",
+      "complexity": 2,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.typescript_adapter._node_text",
+      "module_id": "grace.typescript_adapter",
+      "kind": "function",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.validator.ValidationFailure",
+      "module_id": "grace.validator",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.validator.ValidationIssue",
+      "module_id": "grace.validator",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.validator.ValidationIssueCode",
+      "module_id": "grace.validator",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.validator.ValidationSuccess",
+      "module_id": "grace.validator",
+      "kind": "class",
+      "complexity": 1,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.validator._validate_block",
+      "module_id": "grace.validator",
+      "kind": "function",
+      "complexity": 6,
+      "links": []
+    },
+    {
+      "anchor_id": "grace.validator._validate_file_semantics",
+      "module_id": "grace.validator",
+      "kind": "function",
+      "complexity": 5,
+      "links": [
+        "grace.validator._validate_block"
+      ]
+    },
+    {
+      "anchor_id": "grace.validator.validate_file",
+      "module_id": "grace.validator",
+      "kind": "function",
+      "complexity": 3,
+      "links": [
+        "grace.validator._validate_file_semantics"
+      ]
+    },
+    {
+      "anchor_id": "grace.validator.validate_project",
+      "module_id": "grace.validator",
+      "kind": "function",
+      "complexity": 6,
+      "links": [
+        "grace.validator._validate_file_semantics"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "type": "module_has_anchor",
+      "source": "billing.pricing",
+      "target": "billing.pricing.apply_discount"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "billing.pricing",
+      "target": "billing.pricing.choose_discount_strategy"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "billing.pricing.choose_discount_strategy",
+      "target": "billing.pricing.apply_discount"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "billing.pricing",
+      "target": "billing.pricing.StrategyRegistry"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "billing.pricing",
+      "target": "billing.pricing.StrategyRegistry.resolve"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "billing.pricing",
+      "target": "billing.pricing.applyDiscount"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "billing.pricing",
+      "target": "billing.pricing.chooseDiscount"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "billing.pricing.chooseDiscount",
+      "target": "billing.pricing.applyDiscount"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.go_basic",
+      "target": "demo.go_basic.ExampleService"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.go_basic",
+      "target": "demo.go_basic.ExampleService.run"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "demo.go_basic.ExampleService.run",
+      "target": "demo.go_basic.example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.go_basic",
+      "target": "demo.go_basic.example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity",
+      "target": "demo.parity.ExampleService"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity",
+      "target": "demo.parity.ExampleService.run"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "demo.parity.ExampleService.run",
+      "target": "demo.parity.example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity",
+      "target": "demo.parity.example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity",
+      "target": "demo.parity.load_example"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "demo.parity.load_example",
+      "target": "demo.parity.example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity",
+      "target": "demo.parity.ExampleService"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity",
+      "target": "demo.parity.ExampleService.run"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "demo.parity.ExampleService.run",
+      "target": "demo.parity.example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity",
+      "target": "demo.parity.example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity",
+      "target": "demo.parity.load_example"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "demo.parity.load_example",
+      "target": "demo.parity.example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity",
+      "target": "demo.parity.ExampleService"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity",
+      "target": "demo.parity.ExampleService.run"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "demo.parity.ExampleService.run",
+      "target": "demo.parity.example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity",
+      "target": "demo.parity.example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity",
+      "target": "demo.parity.load_example"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "demo.parity.load_example",
+      "target": "demo.parity.example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.async_shape",
+      "target": "demo.parity.async_shape.fetch_example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.async_shape",
+      "target": "demo.parity.async_shape.fetch_example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.async_shape",
+      "target": "demo.parity.async_shape.fetch_example"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.links_shape",
+      "target": "demo.parity.links_shape.publish"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "demo.parity.links_shape.publish",
+      "target": "demo.parity.links_shape.transform"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.links_shape",
+      "target": "demo.parity.links_shape.seed"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.links_shape",
+      "target": "demo.parity.links_shape.transform"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "demo.parity.links_shape.transform",
+      "target": "demo.parity.links_shape.seed"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.links_shape",
+      "target": "demo.parity.links_shape.publish"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "demo.parity.links_shape.publish",
+      "target": "demo.parity.links_shape.transform"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.links_shape",
+      "target": "demo.parity.links_shape.seed"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.links_shape",
+      "target": "demo.parity.links_shape.transform"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "demo.parity.links_shape.transform",
+      "target": "demo.parity.links_shape.seed"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.links_shape",
+      "target": "demo.parity.links_shape.publish"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "demo.parity.links_shape.publish",
+      "target": "demo.parity.links_shape.transform"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.links_shape",
+      "target": "demo.parity.links_shape.seed"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.links_shape",
+      "target": "demo.parity.links_shape.transform"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "demo.parity.links_shape.transform",
+      "target": "demo.parity.links_shape.seed"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.service_shape",
+      "target": "demo.parity.service_shape.ExampleService"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.service_shape",
+      "target": "demo.parity.service_shape.ExampleService.run"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.service_shape",
+      "target": "demo.parity.service_shape.ExampleService"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.service_shape",
+      "target": "demo.parity.service_shape.ExampleService.run"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.service_shape",
+      "target": "demo.parity.service_shape.ExampleService"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "demo.parity.service_shape",
+      "target": "demo.parity.service_shape.ExampleService.run"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.api",
+      "target": "grace.api.__getattr__"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.api",
+      "target": "grace.api._public_api"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.api._public_api",
+      "target": "grace.api.__getattr__"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.DiscoveryError"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.DiscoveryError.__init__"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._apply_plan_failure_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._apply_plan_success_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._discover_grace_paths"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli._discover_grace_paths",
+      "target": "grace.language_adapter.get_language_adapter_for_path"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._discovery_failure_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._emit_apply_plan_failure"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._emit_apply_plan_preview"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._emit_apply_plan_success"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._emit_discovery_failure"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._emit_json"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._emit_lint_warnings"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._emit_parse_errors"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._emit_patch_failure"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._emit_patch_preview"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._emit_patch_success"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._emit_project_parse_failure"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._emit_validation_failure"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._lint_success_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._lint_warning_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._load_grace_map_for_query"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli._load_grace_map_for_query",
+      "target": "grace.cli._discover_grace_paths"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli._load_grace_map_for_query",
+      "target": "grace.cli._parse_many"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli._load_grace_map_for_query",
+      "target": "grace.parser.parse_python_file"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._parse_error_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._parse_many"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli._parse_many",
+      "target": "grace.parser.try_parse_python_file"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._parse_success_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._patch_failure_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._patch_success_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._path_argument"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._project_lint_success_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._project_lint_warning_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._project_parse_failure_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._project_parse_success_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._project_validation_success_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._query_anchor_collection_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._query_anchor_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._query_collection_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._query_failure_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._serialize_applied_patch_entry"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._serialize_file"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._serialize_parse_failure"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._serialize_patch_result"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._serialize_patch_step"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._validation_failure_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli._validation_success_payload"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.app"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.apply_plan_command"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.impact_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.impact_command",
+      "target": "grace.cli._load_grace_map_for_query"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.impact_command",
+      "target": "grace.impact.impact_summary"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.lint_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.lint_command",
+      "target": "grace.cli._discover_grace_paths"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.lint_command",
+      "target": "grace.cli._parse_many"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.lint_command",
+      "target": "grace.parser.parse_python_file"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.main"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.map_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.map_command",
+      "target": "grace.cli._discover_grace_paths"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.map_command",
+      "target": "grace.cli._parse_many"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.map_command",
+      "target": "grace.parser.parse_python_file"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.parse_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.parse_command",
+      "target": "grace.cli._discover_grace_paths"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.parse_command",
+      "target": "grace.cli._parse_many"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.parse_command",
+      "target": "grace.parser.parse_python_file"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.patch_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.patch_command",
+      "target": "grace.patcher.patch_block"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.plan_group"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.plan_impact_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.plan_impact_command",
+      "target": "grace.cli._load_grace_map_for_query"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.plan_impact_command",
+      "target": "grace.planner.plan_from_impact"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.query_anchor_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.query_anchor_command",
+      "target": "grace.cli._load_grace_map_for_query"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.query_anchors_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.query_anchors_command",
+      "target": "grace.cli._load_grace_map_for_query"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.query_dependents_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.query_dependents_command",
+      "target": "grace.cli._load_grace_map_for_query"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.query_dependents_command",
+      "target": "grace.query.query_dependents"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.query_group"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.query_links_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.query_links_command",
+      "target": "grace.cli._load_grace_map_for_query"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.query_links_command",
+      "target": "grace.query.query_links"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.query_modules_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.query_modules_command",
+      "target": "grace.cli._load_grace_map_for_query"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.query_neighbors_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.query_neighbors_command",
+      "target": "grace.cli._load_grace_map_for_query"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.query_neighbors_command",
+      "target": "grace.query.query_neighbors"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.read_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.read_command",
+      "target": "grace.cli._discover_grace_paths"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.read_command",
+      "target": "grace.cli._parse_many"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.read_command",
+      "target": "grace.read.read_anchor_context"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.read_command",
+      "target": "grace.map.build_file_map"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.read_command",
+      "target": "grace.map.build_project_map"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.cli",
+      "target": "grace.cli.validate_command"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.validate_command",
+      "target": "grace.cli._discover_grace_paths"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.validate_command",
+      "target": "grace.cli._parse_many"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.cli.validate_command",
+      "target": "grace.parser.parse_python_file"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.go_adapter",
+      "target": "grace.go_adapter.GoAdapter"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.go_adapter",
+      "target": "grace.go_adapter.GoAdapter.build_grace_file_model"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.go_adapter.GoAdapter.build_grace_file_model",
+      "target": "grace.go_adapter._collect_definition_targets"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.go_adapter",
+      "target": "grace.go_adapter.GoAdapter.compute_block_span"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.go_adapter",
+      "target": "grace.go_adapter.GoAdapter.discover_annotations"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.go_adapter",
+      "target": "grace.go_adapter.GoAdapter.extract_blocks"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.go_adapter",
+      "target": "grace.go_adapter.GoAdapter.extract_module_metadata"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.go_adapter",
+      "target": "grace.go_adapter._collect_definition_targets"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.go_adapter",
+      "target": "grace.go_adapter._compute_block_end"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.go_adapter",
+      "target": "grace.go_adapter._is_comment_like_line"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.go_adapter",
+      "target": "grace.go_adapter._match_annotation_line"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.go_adapter",
+      "target": "grace.go_adapter._parse_receiver_type"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.impact",
+      "target": "grace.impact.ImpactLookupError"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.impact",
+      "target": "grace.impact.ImpactLookupError.__init__"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.impact",
+      "target": "grace.impact.ImpactSummary"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.impact",
+      "target": "grace.impact._anchor_index"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.impact",
+      "target": "grace.impact._module_index"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.impact",
+      "target": "grace.impact._require_anchor"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.impact",
+      "target": "grace.impact._reverse_dependents_index"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.impact",
+      "target": "grace.impact.impact_direct"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.impact.impact_direct",
+      "target": "grace.impact._require_anchor"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.impact.impact_direct",
+      "target": "grace.impact._anchor_index"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.impact.impact_direct",
+      "target": "grace.impact._reverse_dependents_index"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.impact",
+      "target": "grace.impact.impact_summary"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.impact.impact_summary",
+      "target": "grace.impact.impact_direct"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.impact.impact_summary",
+      "target": "grace.impact.impact_transitive"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.impact.impact_summary",
+      "target": "grace.impact._module_index"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.impact",
+      "target": "grace.impact.impact_transitive"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.impact.impact_transitive",
+      "target": "grace.impact._require_anchor"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.impact.impact_transitive",
+      "target": "grace.impact._anchor_index"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.impact.impact_transitive",
+      "target": "grace.impact._reverse_dependents_index"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.language_adapter",
+      "target": "grace.language_adapter.GraceLanguageAdapter"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.language_adapter",
+      "target": "grace.language_adapter.GraceLanguageAdapter.build_grace_file_model"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.language_adapter",
+      "target": "grace.language_adapter.GraceLanguageAdapter.compute_block_span"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.language_adapter",
+      "target": "grace.language_adapter.GraceLanguageAdapter.discover_annotations"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.language_adapter",
+      "target": "grace.language_adapter.GraceLanguageAdapter.extract_blocks"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.language_adapter",
+      "target": "grace.language_adapter.GraceLanguageAdapter.extract_module_metadata"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.language_adapter",
+      "target": "grace.language_adapter._register_python_adapter"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.language_adapter",
+      "target": "grace.language_adapter.get_language_adapter_for_path"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.linter",
+      "target": "grace.linter.LintFailure"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.linter",
+      "target": "grace.linter.LintIssue"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.linter",
+      "target": "grace.linter.LintIssueCode"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.linter",
+      "target": "grace.linter.LintSeverity"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.linter",
+      "target": "grace.linter.LintSuccess"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.linter",
+      "target": "grace.linter._lint_block"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.linter",
+      "target": "grace.linter._lint_file"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.linter._lint_file",
+      "target": "grace.linter._lint_module_text"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.linter._lint_file",
+      "target": "grace.linter._lint_block"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.linter",
+      "target": "grace.linter._lint_module_text"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.linter",
+      "target": "grace.linter.lint_file"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.linter.lint_file",
+      "target": "grace.linter._lint_file"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.linter",
+      "target": "grace.linter.lint_project"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.linter.lint_project",
+      "target": "grace.linter._lint_file"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.map",
+      "target": "grace.map.GraceMap"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.map",
+      "target": "grace.map.GraceMapAnchor"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.map",
+      "target": "grace.map.GraceMapEdge"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.map",
+      "target": "grace.map.GraceMapModule"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.map",
+      "target": "grace.map.build_file_map"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.map.build_file_map",
+      "target": "grace.map.build_project_map"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.map",
+      "target": "grace.map.build_project_map"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.map",
+      "target": "grace.map.map_to_dict"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser.GraceParseError"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser.GraceParseError.__init__"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser.GraceParseError._build_message"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser._DefinitionTarget"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser._ModuleAccumulator"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser._PendingBlock"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser._build_block_model"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser._collect_definition_targets"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.parser._collect_definition_targets",
+      "target": "grace.parser._walk_statement_list"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser._consume_block_annotation"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser._consume_module_annotation"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser._finalize_module_annotations"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser._walk_nested_bodies"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser._walk_statement_list"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.parser._walk_statement_list",
+      "target": "grace.parser._walk_nested_bodies"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser.parse_python_file"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.parser.parse_python_file",
+      "target": "grace.language_adapter.get_language_adapter_for_path"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser.parse_python_module"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.parser.parse_python_module",
+      "target": "grace.parser.parse_python_file"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.parser",
+      "target": "grace.parser.try_parse_python_file"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.parser.try_parse_python_file",
+      "target": "grace.parser.parse_python_file"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher.PatchFailure"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher.PatchFailureStage"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher.PatchStepResult"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher.PatchStepStatus"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher.PatchSuccess"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher._build_preview_diff"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher._discover_project_paths"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher._extract_replacement_anchor_id"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher._find_anchor_annotation_line"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher._hash_text"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher._load_project_state"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.patcher._load_project_state",
+      "target": "grace.patcher._discover_project_paths"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher._normalize_replacement_source"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher._parse_candidate_text"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher._splice_block"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.patcher",
+      "target": "grace.patcher.patch_block"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.patcher.patch_block",
+      "target": "grace.patcher._find_anchor_annotation_line"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.patcher.patch_block",
+      "target": "grace.patcher._extract_replacement_anchor_id"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.patcher.patch_block",
+      "target": "grace.patcher._normalize_replacement_source"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.patcher.patch_block",
+      "target": "grace.patcher._build_preview_diff"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.patcher.patch_block",
+      "target": "grace.patcher._hash_text"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.patcher.patch_block",
+      "target": "grace.patcher._parse_candidate_text"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.patcher.patch_block",
+      "target": "grace.patcher._load_project_state"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.patcher.patch_block",
+      "target": "grace.patcher._splice_block"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.plan",
+      "target": "grace.plan.AppliedPatchEntry"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.plan",
+      "target": "grace.plan.ApplyPlanFailure"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.plan",
+      "target": "grace.plan.ApplyPlanFailureStage"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.plan",
+      "target": "grace.plan.ApplyPlanSuccess"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.plan",
+      "target": "grace.plan.PatchPlan"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.plan",
+      "target": "grace.plan.PatchPlanEntry"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.plan",
+      "target": "grace.plan.PatchPlanEntry._validate_replacement_locator"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.plan",
+      "target": "grace.plan.PatchPlanOperation"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.plan",
+      "target": "grace.plan._load_replacement_source"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.plan",
+      "target": "grace.plan._resolve_plan_paths"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.plan",
+      "target": "grace.plan.apply_patch_plan"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.plan.apply_patch_plan",
+      "target": "grace.patcher.patch_block"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.plan.apply_patch_plan",
+      "target": "grace.plan._load_replacement_source"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.plan",
+      "target": "grace.plan.load_patch_plan"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.plan.load_patch_plan",
+      "target": "grace.plan._resolve_plan_paths"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.plan",
+      "target": "grace.plan.plan_to_dict"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.planner",
+      "target": "grace.planner.PatchPlanProposal"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.planner",
+      "target": "grace.planner.PlannerLookupError"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.planner",
+      "target": "grace.planner.PlannerLookupError.__init__"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.planner",
+      "target": "grace.planner.SuggestedPatchOperation"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.planner",
+      "target": "grace.planner.build_plan_skeleton"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.planner",
+      "target": "grace.planner.collect_patch_targets"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.planner.collect_patch_targets",
+      "target": "grace.impact.impact_direct"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.planner",
+      "target": "grace.planner.filter_self_anchor"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.planner",
+      "target": "grace.planner.plan_from_impact"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.planner.plan_from_impact",
+      "target": "grace.planner.collect_patch_targets"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.planner.plan_from_impact",
+      "target": "grace.planner.filter_self_anchor"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.planner.plan_from_impact",
+      "target": "grace.planner.build_plan_skeleton"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.python_adapter",
+      "target": "grace.python_adapter.PythonAdapter"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.python_adapter",
+      "target": "grace.python_adapter.PythonAdapter.build_grace_file_model"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.python_adapter",
+      "target": "grace.python_adapter.PythonAdapter.compute_block_span"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.python_adapter",
+      "target": "grace.python_adapter.PythonAdapter.discover_annotations"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.python_adapter",
+      "target": "grace.python_adapter.PythonAdapter.extract_blocks"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.python_adapter",
+      "target": "grace.python_adapter.PythonAdapter.extract_module_metadata"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.query",
+      "target": "grace.query.QueryLookupError"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.query",
+      "target": "grace.query.QueryLookupError.__init__"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.query",
+      "target": "grace.query._anchor_index"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.query",
+      "target": "grace.query.query_anchor"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.query",
+      "target": "grace.query.query_anchors"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.query",
+      "target": "grace.query.query_dependents"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.query",
+      "target": "grace.query.query_links"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.query.query_links",
+      "target": "grace.query.query_anchor"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.query",
+      "target": "grace.query.query_modules"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.query",
+      "target": "grace.query.query_neighbors"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.query.query_neighbors",
+      "target": "grace.query.query_links"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.query.query_neighbors",
+      "target": "grace.query.query_dependents"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read.ReadAnchorContext"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read.ReadLookupError"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read.ReadLookupError.__init__"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read._collect_annotation_lines"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read._find_anchor_annotation_start"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read._find_block"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read._find_code_start"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read._find_grace_file_for_anchor"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read._read_source_lines"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read._require_anchor"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read.build_anchor_neighbors"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.read.build_anchor_neighbors",
+      "target": "grace.query.query_neighbors"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read.extract_anchor_annotations"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.read.extract_anchor_annotations",
+      "target": "grace.read._find_anchor_annotation_start"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.read.extract_anchor_annotations",
+      "target": "grace.read._collect_annotation_lines"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read.extract_anchor_code"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.read.extract_anchor_code",
+      "target": "grace.read._find_block"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.read.extract_anchor_code",
+      "target": "grace.read._find_anchor_annotation_start"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.read.extract_anchor_code",
+      "target": "grace.read._find_code_start"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.read",
+      "target": "grace.read.read_anchor_context"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.read.read_anchor_context",
+      "target": "grace.read._find_grace_file_for_anchor"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.read.read_anchor_context",
+      "target": "grace.read._find_block"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.read.read_anchor_context",
+      "target": "grace.read.extract_anchor_annotations"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.read.read_anchor_context",
+      "target": "grace.read.extract_anchor_code"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.read.read_anchor_context",
+      "target": "grace.read.build_anchor_neighbors"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.read.read_anchor_context",
+      "target": "grace.read._find_anchor_annotation_start"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.tree_sitter_adapter",
+      "target": "grace.tree_sitter_adapter.TreeSitterSourceFile"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.tree_sitter_adapter",
+      "target": "grace.tree_sitter_adapter.iter_tree_nodes"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.tree_sitter_adapter",
+      "target": "grace.tree_sitter_adapter.load_tree_sitter_source"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.tree_sitter_adapter",
+      "target": "grace.tree_sitter_adapter.strip_comment_delimiters"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.typescript_adapter",
+      "target": "grace.typescript_adapter.TypeScriptAdapter"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.typescript_adapter",
+      "target": "grace.typescript_adapter.TypeScriptAdapter.build_grace_file_model"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.typescript_adapter.TypeScriptAdapter.build_grace_file_model",
+      "target": "grace.typescript_adapter._collect_definition_targets"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.typescript_adapter",
+      "target": "grace.typescript_adapter.TypeScriptAdapter.compute_block_span"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.typescript_adapter",
+      "target": "grace.typescript_adapter.TypeScriptAdapter.discover_annotations"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.typescript_adapter",
+      "target": "grace.typescript_adapter.TypeScriptAdapter.extract_blocks"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.typescript_adapter",
+      "target": "grace.typescript_adapter.TypeScriptAdapter.extract_module_metadata"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.typescript_adapter",
+      "target": "grace.typescript_adapter._build_class_target"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.typescript_adapter",
+      "target": "grace.typescript_adapter._build_function_target"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.typescript_adapter",
+      "target": "grace.typescript_adapter._build_method_target"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.typescript_adapter",
+      "target": "grace.typescript_adapter._collect_definition_targets"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.typescript_adapter._collect_definition_targets",
+      "target": "grace.tree_sitter_adapter.iter_tree_nodes"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.typescript_adapter",
+      "target": "grace.typescript_adapter._is_comment_like_line"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.typescript_adapter",
+      "target": "grace.typescript_adapter._match_annotation_line"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.typescript_adapter",
+      "target": "grace.typescript_adapter._node_text"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.validator",
+      "target": "grace.validator.ValidationFailure"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.validator",
+      "target": "grace.validator.ValidationIssue"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.validator",
+      "target": "grace.validator.ValidationIssueCode"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.validator",
+      "target": "grace.validator.ValidationSuccess"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.validator",
+      "target": "grace.validator._validate_block"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.validator",
+      "target": "grace.validator._validate_file_semantics"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.validator._validate_file_semantics",
+      "target": "grace.validator._validate_block"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.validator",
+      "target": "grace.validator.validate_file"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.validator.validate_file",
+      "target": "grace.validator._validate_file_semantics"
+    },
+    {
+      "type": "module_has_anchor",
+      "source": "grace.validator",
+      "target": "grace.validator.validate_project"
+    },
+    {
+      "type": "anchor_links_to_anchor",
+      "source": "grace.validator.validate_project",
+      "target": "grace.validator._validate_file_semantics"
+    }
+  ]
+}

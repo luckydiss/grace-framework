@@ -230,3 +230,37 @@ def test_cli_patch_smoke_supports_relative_and_absolute_paths(tmp_path: Path, mo
 
     assert absolute_result.exit_code == 0
     assert "return 47" in pricing_path.read_text(encoding="utf-8")
+
+
+def test_patch_block_project_discovery_ignores_fixture_strings_in_neighbor_test_files(tmp_path: Path, monkeypatch) -> None:
+    repo_dir = tmp_path.parent / f"{tmp_path.name}_patcher_discovery_repo"
+    repo_dir.mkdir(parents=True, exist_ok=True)
+    pricing_path = write_temp_file(
+        tmp_path,
+        make_file(function_block()),
+        "pricing.py",
+    )
+    target_path = repo_dir / "src" / "pricing.py"
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(pricing_path.read_text(encoding="utf-8"), encoding="utf-8")
+    fixture_path = repo_dir / "tests" / "fixtures.py"
+    fixture_path.parent.mkdir(parents=True, exist_ok=True)
+    fixture_path.write_text(
+        textwrap.dedent(
+            """
+            BAD_FIXTURE = '''
+            # @grace.module broken.fixture
+            # @grace.purpose This should not be discovered.
+            # @grace.interfaces noop()
+            # @grace.invariant Fixture remains text, not a module header.
+            '''
+            """
+        ).lstrip(),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(repo_dir)
+
+    result = PATCHER.patch_block(Path("src/pricing.py"), "billing.pricing.apply_discount", replacement_block(48))
+
+    assert isinstance(result, PATCHER.PatchSuccess)
+    assert "return 48" in target_path.read_text(encoding="utf-8")

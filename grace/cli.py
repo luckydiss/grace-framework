@@ -473,6 +473,18 @@ def _query_anchor_collection_payload(
 def _discover_grace_paths(path: Path) -> tuple[str, tuple[Path, ...]]:
     from grace.language_adapter import get_language_adapter_for_path
 
+    def has_grace_module_header(source_text: str) -> bool:
+        for raw_line in source_text.splitlines():
+            stripped = raw_line.strip()
+            if not stripped:
+                continue
+            if stripped.startswith(("#", "//", "/*", "*", "--")):
+                if "@grace.module" in stripped:
+                    return True
+                continue
+            return False
+        return False
+
     if path.is_file():
         try:
             get_language_adapter_for_path(path)
@@ -495,7 +507,7 @@ def _discover_grace_paths(path: Path) -> tuple[str, tuple[Path, ...]]:
                 source_text = candidate_path.read_text(encoding="utf-8")
             except (OSError, UnicodeDecodeError):
                 continue
-            if "@grace." not in source_text:
+            if not has_grace_module_header(source_text):
                 continue
             try:
                 get_language_adapter_for_path(candidate_path)

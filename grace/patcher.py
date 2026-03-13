@@ -427,6 +427,18 @@ def _load_project_state(source_path: Path, replacement_file: GraceFileModel | No
 # @grace.anchor grace.patcher._discover_project_paths
 # @grace.complexity 5
 def _discover_project_paths(project_root: Path) -> tuple[Path, ...]:
+    def has_grace_module_header(source_text: str) -> bool:
+        for raw_line in source_text.splitlines():
+            stripped = raw_line.strip()
+            if not stripped:
+                continue
+            if stripped.startswith(("#", "//", "/*", "*", "--")):
+                if "@grace.module" in stripped:
+                    return True
+                continue
+            return False
+        return False
+
     discovered_paths: list[Path] = []
     for current_root, dir_names, file_names in os.walk(project_root):
         dir_names[:] = [
@@ -438,7 +450,11 @@ def _discover_project_paths(project_root: Path) -> tuple[Path, ...]:
             if not file_name.endswith(".py"):
                 continue
             candidate_path = Path(current_root) / file_name
-            if "@grace.module" not in candidate_path.read_text(encoding="utf-8"):
+            try:
+                source_text = candidate_path.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError):
+                continue
+            if not has_grace_module_header(source_text):
                 continue
             discovered_paths.append(candidate_path)
     return tuple(sorted(discovered_paths, key=lambda item: str(item)))
