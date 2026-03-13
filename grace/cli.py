@@ -1176,6 +1176,73 @@ def query_neighbors_command(path: Path, anchor_id: str, as_json: bool) -> None:
         click.echo(f"- {neighbor['anchor_id']}")
 
 
+# @grace.anchor grace.cli.query_path_command
+# @grace.complexity 5
+# @grace.links grace.cli._load_grace_map_for_query, grace.path_query.query_path, grace.path_query.query_path_edge_types
+@query_group.command("path")
+@click.argument("path", type=_path_argument(dir_okay=True))
+@click.argument("source_anchor_id")
+@click.argument("target_anchor_id")
+@click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
+def query_path_command(path: Path, source_anchor_id: str, target_anchor_id: str, as_json: bool) -> None:
+    from grace.path_query import query_path, query_path_edge_types
+
+    try:
+        scope, grace_map = _load_grace_map_for_query(path)
+        query_anchor(grace_map, source_anchor_id)
+        query_anchor(grace_map, target_anchor_id)
+        route = tuple(anchor.model_dump(mode="json") for anchor in query_path(grace_map, source_anchor_id, target_anchor_id))
+        edge_types = list(query_path_edge_types(tuple(query_anchor(grace_map, anchor["anchor_id"]) for anchor in route)))
+    except DiscoveryError as error:
+        if as_json:
+            _emit_json(_discovery_failure_payload("query", error.path, error.message))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_discovery_failure(error.path, error.message)
+        raise click.exceptions.Exit(code=1) from error
+    except GraceParseError as error:
+        if as_json:
+            _emit_json(_parse_error_payload("query", error))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_parse_errors(error)
+        raise click.exceptions.Exit(code=1) from error
+    except QueryLookupError as error:
+        if as_json:
+            missing_anchor_id = source_anchor_id
+            if str(target_anchor_id) in str(error):
+                missing_anchor_id = target_anchor_id
+            _emit_json(_query_failure_payload("path", path, scope, str(error), anchor_id=missing_anchor_id))
+            raise click.exceptions.Exit(code=1) from error
+        click.echo(str(error), err=True)
+        raise click.exceptions.Exit(code=1) from error
+
+    if as_json:
+        _emit_json(
+            {
+                "ok": True,
+                "command": "query",
+                "query": "path",
+                "scope": scope,
+                "query_scope": "anchor",
+                "path": str(path),
+                "source_anchor_id": source_anchor_id,
+                "target_anchor_id": target_anchor_id,
+                "found": bool(route),
+                "count": len(route),
+                "route": route,
+                "edge_types": edge_types,
+            }
+        )
+        return
+
+    if not route:
+        click.echo(f"No path from {source_anchor_id} to {target_anchor_id}")
+        return
+
+    click.echo(f"Path from {source_anchor_id} to {target_anchor_id}: {len(route)} anchor(s)")
+    for anchor in route:
+        click.echo(f"- {anchor['anchor_id']}")
+
+
 # @grace.anchor grace.cli.impact_command
 # @grace.complexity 6
 # @grace.belief Impact CLI should stay thin and deterministic by reusing the existing map-loading path and delegating all reverse-dependency traversal to the derived impact layer.

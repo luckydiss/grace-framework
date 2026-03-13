@@ -164,6 +164,8 @@ def _public_api() -> tuple[str, ...]:
         "query_links",
         "query_modules",
         "query_neighbors",
+        "query_path",
+        "query_path_edge_types",
         "read_anchor_context",
         "try_parse_python_file",
         "validate_file",
@@ -192,6 +194,17 @@ def __getattr__(name: str) -> object:
             "PythonAdapter": PythonAdapter,
             "TypeScriptAdapter": TypeScriptAdapter,
             "get_language_adapter_for_path": get_language_adapter_for_path,
+        }
+        return exported[name]
+    if name in {
+        "query_path",
+        "query_path_edge_types",
+    }:
+        from grace.path_query import query_path, query_path_edge_types
+
+        exported = {
+            "query_path": query_path,
+            "query_path_edge_types": query_path_edge_types,
         }
         return exported[name]
     if name in {

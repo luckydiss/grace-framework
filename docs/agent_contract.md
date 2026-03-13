@@ -60,28 +60,30 @@ If no GRACE-annotated supported files are found, the command fails with:
 4. `grace map <path> --json`
 5. `grace query anchors <path> --json`
 6. `grace read <path> <anchor_id> --json`
-7. `grace impact <path> <anchor_id> --json`
-8. `grace plan impact <path> <anchor_id> --json`
-9. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
-10. `grace patch <path> <anchor_id> <replacement_file> --json`
-11. `grace apply-plan <plan_file> --dry-run --json`
-12. `grace apply-plan <plan_file> --json`
-13. `grace validate <path> --json`
-14. `grace lint <path> --json`
-15. `grace clean <path> --dry-run --json`
+7. `grace query path <path> <source_anchor_id> <target_anchor_id> --json`
+8. `grace impact <path> <anchor_id> --json`
+9. `grace plan impact <path> <anchor_id> --json`
+10. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
+11. `grace patch <path> <anchor_id> <replacement_file> --json`
+12. `grace apply-plan <plan_file> --dry-run --json`
+13. `grace apply-plan <plan_file> --json`
+14. `grace validate <path> --json`
+15. `grace lint <path> --json`
+16. `grace clean <path> --dry-run --json`
 
 For self-hosted GRACE development, the preferred scope is the annotated `grace/` package:
 
 1. `grace map grace --json`
 2. `grace query anchors grace --json`
 3. `grace read grace <anchor_id> --json`
-4. `grace impact grace <anchor_id> --json`
-5. `grace plan impact grace <anchor_id> --json`
-6. `grace apply-plan <plan_file> --dry-run --preview --json`
-7. `grace apply-plan <plan_file> --json`
-8. `grace validate grace --json`
-9. `grace lint grace --json`
-10. `grace clean grace --dry-run --json`
+4. `grace query path grace <source_anchor_id> <target_anchor_id> --json`
+5. `grace impact grace <anchor_id> --json`
+6. `grace plan impact grace <anchor_id> --json`
+7. `grace apply-plan <plan_file> --dry-run --preview --json`
+8. `grace apply-plan <plan_file> --json`
+9. `grace validate grace --json`
+10. `grace lint grace --json`
+11. `grace clean grace --dry-run --json`
 
 This self-hosting loop is described in more detail in `docs/self_hosting.md`.
 The workflow guidance and eval framing for agents are documented in `docs/agent_playbook.md`.
@@ -537,6 +539,62 @@ Failure:
 }
 ```
 
+### `query path --json`
+
+Success with a path:
+
+```json
+{
+  "ok": true,
+  "command": "query",
+  "query": "path",
+  "scope": "project",
+  "query_scope": "anchor",
+  "path": "repo/",
+  "source_anchor_id": "billing.pricing.choose_discount_strategy",
+  "target_anchor_id": "billing.audit.record_tax",
+  "found": true,
+  "count": 3,
+  "route": [],
+  "edge_types": []
+}
+```
+
+Success without a path:
+
+```json
+{
+  "ok": true,
+  "command": "query",
+  "query": "path",
+  "scope": "project",
+  "query_scope": "anchor",
+  "path": "repo/",
+  "source_anchor_id": "billing.audit.record_tax",
+  "target_anchor_id": "billing.pricing.choose_discount_strategy",
+  "found": false,
+  "count": 0,
+  "route": [],
+  "edge_types": []
+}
+```
+
+Failure:
+
+```json
+{
+  "ok": false,
+  "command": "query",
+  "query": "path",
+  "scope": "project",
+  "query_scope": "anchor",
+  "stage": "query",
+  "path": "repo/",
+  "anchor_id": "billing.unknown.anchor",
+  "message": "anchor_id ... does not exist in query scope"
+}
+```
+
 ### `read --json`
 
 Success:
@@ -622,6 +680,7 @@ Failure:
 - Treat `patch --dry-run` as preflight, not as an applied change.
 - Treat `apply-plan --dry-run` as plan-level preflight, not as an applied change.
 - Use `read --json` to load one semantic block before patching instead of reading a whole file.
+- Use `query path --json` to inspect the deterministic shortest semantic route between two anchors before planning a refactor across module boundaries.
 - Use `impact --json` to inspect reverse dependents before touching a widely-linked anchor.
 - Use `plan impact --json` to turn direct dependents into a deterministic patch proposal before writing a real plan file.
 - Prefer `apply-plan` when the intended change spans multiple anchors.

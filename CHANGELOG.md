@@ -11,6 +11,8 @@
 - Added `orphan_anchor` project-level lint warnings based on derived incoming semantic links and module interface exposure.
 - Added `[tool.grace]` repository discovery config with `include` and `exclude` globs so repo-root parse, validate, lint, and map can use a stable default scope while explicit file or subdirectory targets still override filters.
 - Made repo-root `validate . --json` and `lint . --json` green-by-default for this repository by scoping discovery through `[tool.grace]`.
+- Added deterministic `grace query path <path> <source_anchor_id> <target_anchor_id> --json` over derived `anchor_links_to_anchor` edges.
+- Added the derived `grace.path_query` layer plus CLI/test coverage for shortest directed semantic-path lookup.
 
 ## v1.0.0 - 2026-03-13
 

@@ -19,6 +19,7 @@ The TypeScript pilot adapter lives in [docs/typescript_adapter.md](C:\Users\luck
 The Go pilot adapter lives in [docs/go_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\go_adapter.md).
 The adapter compatibility matrix lives in [docs/adapter_compatibility.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_compatibility.md).
 The release hardening gates live in [docs/release_criteria.md](C:\Users\luckydiss\Documents\grace_framework\docs\release_criteria.md).
+The deterministic path-query layer lives in [docs/path_query.md](C:\Users\luckydiss\Documents\grace_framework\docs\path_query.md).
 The longer-term development plan lives in [docs/roadmap.md](C:\Users\luckydiss\Documents\grace_framework\docs\roadmap.md).
 
 ## Source Of Truth
@@ -237,6 +238,12 @@ Query project anchors:
 grace query anchors repo/ --json
 ```
 
+Find the shortest deterministic semantic path between two anchors:
+
+```bash
+grace query path repo/ billing.pricing.choose_discount_strategy billing.audit.record_tax --json
+```
+
 Inspect reverse-dependency impact:
 
 ```bash
@@ -336,6 +343,7 @@ Typical self-hosting loop:
 grace map grace --json
 grace query anchors grace --json
 grace read grace grace.map.build_file_map --json
+grace query path grace grace.cli.query_path_command grace.path_query.query_path --json
 grace impact grace grace.map.build_file_map --json
 grace plan impact grace grace.map.build_file_map --json
 grace apply-plan plan.json --dry-run --preview --json
