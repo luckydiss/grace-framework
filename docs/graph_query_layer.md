@@ -22,6 +22,7 @@ The graph query layer is not a new parser, not a graph database, and not an anal
 - Query semantics must remain deterministic and machine-readable.
 - The query layer must stay derived-only and read-only.
 - The query layer must not mutate repositories.
+- All query outputs must use deterministic ordering.
 
 ## Why It Exists
 
@@ -37,6 +38,25 @@ Agents need simple deterministic questions such as:
 
 These are query problems, not parsing problems.
 
+## Query Scope
+
+There are two distinct query shapes:
+
+- file-scoped or repo-scoped collection queries
+- anchor-scoped queries
+
+Collection queries operate on a path scope and return ordered sets:
+
+- modules in a file or repository scope
+- anchors in a file or repository scope
+
+Anchor-scoped queries operate on a path scope plus a target `anchor_id` and return anchor-local graph structure:
+
+- the anchor record itself
+- outgoing links declared by that anchor
+- incoming links from other anchors targeting it
+- immediate neighbors derived from the union of outgoing and incoming links
+
 ## Proposed Scope
 
 v0.7 should focus on a minimal query surface over the current graph:
@@ -50,6 +70,31 @@ v0.7 should focus on a minimal query surface over the current graph:
 - list immediate neighbors for an anchor
 
 All results should be JSON-first.
+
+## Ordering Rules
+
+All query outputs must be deterministic:
+
+- modules ordered by `module_id`, then `path`
+- anchors ordered by `anchor_id`
+- outgoing links ordered by target `anchor_id`
+- incoming links ordered by source `anchor_id`
+- neighbors ordered by `anchor_id`
+
+No query should depend on filesystem traversal order, insertion order, or non-deterministic set ordering.
+
+## Link Direction Semantics
+
+Link semantics must remain explicit:
+
+- outgoing links = anchors named in the target anchor's `grace.links`
+- incoming links = anchors whose `grace.links` include the target anchor
+
+For CLI naming, incoming links should be surfaced as:
+
+- `dependents`
+
+This is more agent-friendly than exposing only graph-theoretic terminology.
 
 ## Non-Goals
 
@@ -70,6 +115,8 @@ The most likely shape is a thin CLI layer over the derived graph, for example:
 - `grace query modules <path> --json`
 - `grace query anchors <path> --json`
 - `grace query anchor <path> <anchor_id> --json`
+- `grace query links <path> <anchor_id> --json`
+- `grace query dependents <path> <anchor_id> --json`
 - `grace query neighbors <path> <anchor_id> --json`
 
 This should remain a machine-readable agent contract, not an interactive UI.

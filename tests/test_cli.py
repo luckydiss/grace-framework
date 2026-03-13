@@ -25,6 +25,7 @@ def load_cli_modules():
         "grace.map",
         "grace.patcher",
         "grace.plan",
+        "grace.query",
         "grace.cli",
     ):
         sys.modules.pop(module_name, None)
@@ -34,7 +35,7 @@ def load_cli_modules():
     sys.modules["grace"] = grace_package
 
     loaded = {}
-    for module_name in ("models", "parser", "validator", "linter", "map", "patcher", "plan", "cli"):
+    for module_name in ("models", "parser", "validator", "linter", "map", "patcher", "plan", "query", "cli"):
         spec = importlib.util.spec_from_file_location(f"grace.{module_name}", ROOT / "grace" / f"{module_name}.py")
         assert spec is not None and spec.loader is not None
         module = importlib.util.module_from_spec(spec)

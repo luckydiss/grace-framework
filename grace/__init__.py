@@ -32,6 +32,15 @@ from grace.plan import (
     load_patch_plan,
     plan_to_dict,
 )
+from grace.query import (
+    QueryLookupError,
+    query_anchor,
+    query_anchors,
+    query_dependents,
+    query_links,
+    query_modules,
+    query_neighbors,
+)
 from grace.models import (
     BlockKind,
     GraceBlockMetadata,
@@ -100,6 +109,7 @@ __all__ = [
     "ApplyPlanResult",
     "ApplyPlanSuccess",
     "AppliedPatchEntry",
+    "QueryLookupError",
     "ValidationFailure",
     "ValidationIssue",
     "ValidationIssueCode",
@@ -115,6 +125,12 @@ __all__ = [
     "parse_python_file",
     "patch_block",
     "plan_to_dict",
+    "query_anchor",
+    "query_anchors",
+    "query_dependents",
+    "query_links",
+    "query_modules",
+    "query_neighbors",
     "try_parse_python_file",
     "validate_file",
     "validate_project",

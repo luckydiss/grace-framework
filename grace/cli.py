@@ -1,6 +1,6 @@
 # @grace.module grace.cli
 # @grace.purpose Expose a thin CLI over GRACE core APIs for file-level and repo-level agent workflows.
-# @grace.interfaces main(argv)->int; commands: parse(path), validate(path), lint(path), map(path), patch(path, anchor_id, replacement_file), apply-plan(plan_file)
+# @grace.interfaces main(argv)->int; commands: parse(path), validate(path), lint(path), map(path), query.<modules|anchors|anchor|links|dependents|neighbors>(path), patch(path, anchor_id, replacement_file), apply-plan(plan_file)
 # @grace.invariant The CLI must not introduce a new source of truth or line-based addressing semantics.
 # @grace.invariant Machine-readable JSON output should mirror core API results closely enough for shell-driven agents to compose deterministic workflows.
 from __future__ import annotations
@@ -15,6 +15,7 @@ from grace.linter import LintFailure, lint_file, lint_project
 from grace.map import build_file_map, build_project_map, map_to_dict
 from grace.patcher import PatchFailure, PatchStepResult, patch_block
 from grace.plan import ApplyPlanFailure, ApplyPlanSuccess, apply_patch_plan, load_patch_plan
+from grace.query import QueryLookupError, query_anchor, query_anchors, query_dependents, query_links, query_modules, query_neighbors
 from grace.models import GraceFileModel, GraceParseFailure, GraceParseSuccess
 from grace.parser import GraceParseError, parse_python_file, try_parse_python_file
 from grace.validator import ValidationFailure, validate_file, validate_project
@@ -391,6 +392,81 @@ def _project_lint_warning_payload(root_path: Path, grace_files: tuple[GraceFileM
     }
 
 
+# @grace.anchor grace.cli._query_failure_payload
+# @grace.complexity 2
+def _query_failure_payload(query_name: str, path: Path, scope: str, message: str, anchor_id: str | None = None) -> dict:
+    payload = {
+        "ok": False,
+        "command": "query",
+        "query": query_name,
+        "scope": scope,
+        "query_scope": "anchor" if anchor_id is not None else "collection",
+        "stage": "query",
+        "path": str(path),
+        "message": message,
+    }
+    if anchor_id is not None:
+        payload["anchor_id"] = anchor_id
+    return payload
+
+
+# @grace.anchor grace.cli._query_collection_payload
+# @grace.complexity 2
+def _query_collection_payload(query_name: str, path: Path, scope: str, items: tuple[dict, ...], module_id: str | None = None) -> dict:
+    payload = {
+        "ok": True,
+        "command": "query",
+        "query": query_name,
+        "scope": scope,
+        "query_scope": "collection",
+        "path": str(path),
+        "count": len(items),
+    }
+    if module_id is not None:
+        payload["module_id"] = module_id
+    payload[query_name] = list(items)
+    return payload
+
+
+# @grace.anchor grace.cli._query_anchor_payload
+# @grace.complexity 2
+def _query_anchor_payload(query_name: str, path: Path, scope: str, anchor_id: str, anchor_payload: dict) -> dict:
+    return {
+        "ok": True,
+        "command": "query",
+        "query": query_name,
+        "scope": scope,
+        "query_scope": "anchor",
+        "path": str(path),
+        "anchor_id": anchor_id,
+        "anchor": anchor_payload,
+    }
+
+
+# @grace.anchor grace.cli._query_anchor_collection_payload
+# @grace.complexity 3
+def _query_anchor_collection_payload(
+    query_name: str,
+    path: Path,
+    scope: str,
+    anchor_id: str,
+    anchor_payload: dict,
+    items: tuple[dict, ...],
+) -> dict:
+    return {
+        "ok": True,
+        "command": "query",
+        "query": query_name,
+        "scope": scope,
+        "query_scope": "anchor",
+        "path": str(path),
+        "anchor_id": anchor_id,
+        "anchor": anchor_payload,
+        "count": len(items),
+        query_name: list(items),
+    }
+
+
 # @grace.anchor grace.cli._discover_grace_paths
 # @grace.complexity 5
 def _discover_grace_paths(path: Path) -> tuple[str, tuple[Path, ...]]:
@@ -436,6 +512,19 @@ def _parse_many(paths: tuple[Path, ...]) -> tuple[tuple[GraceFileModel, ...], tu
         else:
             parse_failures.append(result)
     return tuple(parsed_files), tuple(parse_failures)
+
+
+# @grace.anchor grace.cli._load_grace_map_for_query
+# @grace.complexity 4
+# @grace.links grace.cli._discover_grace_paths, grace.cli._parse_many, grace.parser.parse_python_file
+def _load_grace_map_for_query(path: Path) -> tuple[str, object]:
+    scope, discovered_paths = _discover_grace_paths(path)
+    if scope == "project":
+        parsed_files, parse_failures = _parse_many(discovered_paths)
+        if parse_failures:
+            raise GraceParseError(path, [issue for failure in parse_failures for issue in failure.errors])
+        return scope, build_project_map(parsed_files)
+    return scope, build_file_map(parse_python_file(path))
 
 
 # @grace.anchor grace.cli._emit_project_parse_failure
@@ -547,6 +636,13 @@ def _emit_apply_plan_preview(result: ApplyPlanSuccess | ApplyPlanFailure) -> Non
 # @grace.complexity 1
 @click.group(help="GRACE v1 CLI")
 def app() -> None:
+    pass
+
+
+# @grace.anchor grace.cli.query_group
+# @grace.complexity 1
+@app.group("query", help="Query the derived GRACE graph without changing repository state.")
+def query_group() -> None:
     pass
 
 
@@ -814,6 +910,229 @@ def map_command(path: Path, as_json: bool) -> None:
         f"Built map for module {grace_file.module.module_id}: "
         f"{len(grace_map.anchors)} anchor(s), {len(grace_map.edges)} edge(s)"
     )
+
+
+# @grace.anchor grace.cli.query_modules_command
+# @grace.complexity 4
+# @grace.links grace.cli._load_grace_map_for_query
+@query_group.command("modules")
+@click.argument("path", type=_path_argument(dir_okay=True))
+@click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
+def query_modules_command(path: Path, as_json: bool) -> None:
+    try:
+        scope, grace_map = _load_grace_map_for_query(path)
+    except DiscoveryError as error:
+        if as_json:
+            _emit_json(_discovery_failure_payload("query", error.path, error.message))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_discovery_failure(error.path, error.message)
+        raise click.exceptions.Exit(code=1) from error
+    except GraceParseError as error:
+        if as_json:
+            _emit_json(_parse_error_payload("query", error))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_parse_errors(error)
+        raise click.exceptions.Exit(code=1) from error
+
+    modules = tuple(module.model_dump(mode="json") for module in query_modules(grace_map))
+    if as_json:
+        _emit_json(_query_collection_payload("modules", path, scope, modules))
+        return
+
+    click.echo(f"Query modules for {path}: {len(modules)} module(s)")
+    for module in modules:
+        click.echo(f"- {module['module_id']} ({module['path']})")
+
+
+# @grace.anchor grace.cli.query_anchors_command
+# @grace.complexity 4
+# @grace.links grace.cli._load_grace_map_for_query
+@query_group.command("anchors")
+@click.argument("path", type=_path_argument(dir_okay=True))
+@click.option("--module", "module_id", default=None, help="Limit results to a single module_id.")
+@click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
+def query_anchors_command(path: Path, module_id: str | None, as_json: bool) -> None:
+    try:
+        scope, grace_map = _load_grace_map_for_query(path)
+    except DiscoveryError as error:
+        if as_json:
+            _emit_json(_discovery_failure_payload("query", error.path, error.message))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_discovery_failure(error.path, error.message)
+        raise click.exceptions.Exit(code=1) from error
+    except GraceParseError as error:
+        if as_json:
+            _emit_json(_parse_error_payload("query", error))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_parse_errors(error)
+        raise click.exceptions.Exit(code=1) from error
+
+    anchors = tuple(anchor.model_dump(mode="json") for anchor in query_anchors(grace_map, module_id=module_id))
+    if as_json:
+        _emit_json(_query_collection_payload("anchors", path, scope, anchors, module_id=module_id))
+        return
+
+    label = f" in module {module_id}" if module_id else ""
+    click.echo(f"Query anchors for {path}{label}: {len(anchors)} anchor(s)")
+    for anchor in anchors:
+        click.echo(f"- {anchor['anchor_id']}")
+
+
+# @grace.anchor grace.cli.query_anchor_command
+# @grace.complexity 4
+# @grace.links grace.cli._load_grace_map_for_query
+@query_group.command("anchor")
+@click.argument("path", type=_path_argument(dir_okay=True))
+@click.argument("anchor_id")
+@click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
+def query_anchor_command(path: Path, anchor_id: str, as_json: bool) -> None:
+    try:
+        scope, grace_map = _load_grace_map_for_query(path)
+        anchor = query_anchor(grace_map, anchor_id)
+    except DiscoveryError as error:
+        if as_json:
+            _emit_json(_discovery_failure_payload("query", error.path, error.message))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_discovery_failure(error.path, error.message)
+        raise click.exceptions.Exit(code=1) from error
+    except GraceParseError as error:
+        if as_json:
+            _emit_json(_parse_error_payload("query", error))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_parse_errors(error)
+        raise click.exceptions.Exit(code=1) from error
+    except QueryLookupError as error:
+        if as_json:
+            _emit_json(_query_failure_payload("anchor", path, scope, str(error), anchor_id=anchor_id))
+            raise click.exceptions.Exit(code=1) from error
+        click.echo(str(error), err=True)
+        raise click.exceptions.Exit(code=1) from error
+
+    if as_json:
+        _emit_json(_query_anchor_payload("anchor", path, scope, anchor_id, anchor.model_dump(mode="json")))
+        return
+
+    click.echo(f"Anchor {anchor.anchor_id} in module {anchor.module_id}")
+
+
+# @grace.anchor grace.cli.query_links_command
+# @grace.complexity 4
+# @grace.links grace.cli._load_grace_map_for_query, grace.query.query_links
+@query_group.command("links")
+@click.argument("path", type=_path_argument(dir_okay=True))
+@click.argument("anchor_id")
+@click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
+def query_links_command(path: Path, anchor_id: str, as_json: bool) -> None:
+    try:
+        scope, grace_map = _load_grace_map_for_query(path)
+        anchor = query_anchor(grace_map, anchor_id)
+        linked_anchors = tuple(item.model_dump(mode="json") for item in query_links(grace_map, anchor_id))
+    except DiscoveryError as error:
+        if as_json:
+            _emit_json(_discovery_failure_payload("query", error.path, error.message))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_discovery_failure(error.path, error.message)
+        raise click.exceptions.Exit(code=1) from error
+    except GraceParseError as error:
+        if as_json:
+            _emit_json(_parse_error_payload("query", error))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_parse_errors(error)
+        raise click.exceptions.Exit(code=1) from error
+    except QueryLookupError as error:
+        if as_json:
+            _emit_json(_query_failure_payload("links", path, scope, str(error), anchor_id=anchor_id))
+            raise click.exceptions.Exit(code=1) from error
+        click.echo(str(error), err=True)
+        raise click.exceptions.Exit(code=1) from error
+
+    if as_json:
+        _emit_json(_query_anchor_collection_payload("links", path, scope, anchor_id, anchor.model_dump(mode="json"), linked_anchors))
+        return
+
+    click.echo(f"Outgoing links for {anchor_id}: {len(linked_anchors)}")
+    for linked_anchor in linked_anchors:
+        click.echo(f"- {linked_anchor['anchor_id']}")
+
+
+# @grace.anchor grace.cli.query_dependents_command
+# @grace.complexity 4
+# @grace.links grace.cli._load_grace_map_for_query, grace.query.query_dependents
+@query_group.command("dependents")
+@click.argument("path", type=_path_argument(dir_okay=True))
+@click.argument("anchor_id")
+@click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
+def query_dependents_command(path: Path, anchor_id: str, as_json: bool) -> None:
+    try:
+        scope, grace_map = _load_grace_map_for_query(path)
+        anchor = query_anchor(grace_map, anchor_id)
+        dependents = tuple(item.model_dump(mode="json") for item in query_dependents(grace_map, anchor_id))
+    except DiscoveryError as error:
+        if as_json:
+            _emit_json(_discovery_failure_payload("query", error.path, error.message))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_discovery_failure(error.path, error.message)
+        raise click.exceptions.Exit(code=1) from error
+    except GraceParseError as error:
+        if as_json:
+            _emit_json(_parse_error_payload("query", error))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_parse_errors(error)
+        raise click.exceptions.Exit(code=1) from error
+    except QueryLookupError as error:
+        if as_json:
+            _emit_json(_query_failure_payload("dependents", path, scope, str(error), anchor_id=anchor_id))
+            raise click.exceptions.Exit(code=1) from error
+        click.echo(str(error), err=True)
+        raise click.exceptions.Exit(code=1) from error
+
+    if as_json:
+        _emit_json(_query_anchor_collection_payload("dependents", path, scope, anchor_id, anchor.model_dump(mode="json"), dependents))
+        return
+
+    click.echo(f"Dependents for {anchor_id}: {len(dependents)}")
+    for dependent in dependents:
+        click.echo(f"- {dependent['anchor_id']}")
+
+
+# @grace.anchor grace.cli.query_neighbors_command
+# @grace.complexity 4
+# @grace.links grace.cli._load_grace_map_for_query, grace.query.query_neighbors
+@query_group.command("neighbors")
+@click.argument("path", type=_path_argument(dir_okay=True))
+@click.argument("anchor_id")
+@click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
+def query_neighbors_command(path: Path, anchor_id: str, as_json: bool) -> None:
+    try:
+        scope, grace_map = _load_grace_map_for_query(path)
+        anchor = query_anchor(grace_map, anchor_id)
+        neighbors = tuple(item.model_dump(mode="json") for item in query_neighbors(grace_map, anchor_id))
+    except DiscoveryError as error:
+        if as_json:
+            _emit_json(_discovery_failure_payload("query", error.path, error.message))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_discovery_failure(error.path, error.message)
+        raise click.exceptions.Exit(code=1) from error
+    except GraceParseError as error:
+        if as_json:
+            _emit_json(_parse_error_payload("query", error))
+            raise click.exceptions.Exit(code=1) from error
+        _emit_parse_errors(error)
+        raise click.exceptions.Exit(code=1) from error
+    except QueryLookupError as error:
+        if as_json:
+            _emit_json(_query_failure_payload("neighbors", path, scope, str(error), anchor_id=anchor_id))
+            raise click.exceptions.Exit(code=1) from error
+        click.echo(str(error), err=True)
+        raise click.exceptions.Exit(code=1) from error
+
+    if as_json:
+        _emit_json(_query_anchor_collection_payload("neighbors", path, scope, anchor_id, anchor.model_dump(mode="json"), neighbors))
+        return
+
+    click.echo(f"Neighbors for {anchor_id}: {len(neighbors)}")
+    for neighbor in neighbors:
+        click.echo(f"- {neighbor['anchor_id']}")
 
 
 # @grace.anchor grace.cli.patch_command
