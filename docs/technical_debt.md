@@ -6,6 +6,7 @@
 - CLI is intentionally minimal and shell-oriented.
 - The parser, validator, and linter are file/project model layers, not full repository analysis tools.
 - Patcher is single-file and single-block only.
+- Patcher canonicalizes target paths to absolute filesystem paths early in execution, so machine-readable patch results should be treated as canonical-path outputs rather than preserving the caller's original relative spelling.
 - Apply-plan is sequential only; it does not provide transactional all-or-nothing execution.
 - Repo graph is currently exposed through the existing map contract; there is no separate graph module or richer graph schema yet.
 - Polyglot annotation syntax is specified, but runtime frontends beyond Python do not exist yet.

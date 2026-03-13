@@ -30,6 +30,7 @@
 - Added derived planning layer for deterministic impact-based patch proposals.
 - Added `grace plan impact <path> <anchor_id> --json` for machine-readable patch target suggestions.
 - Added `docs/planning_layer.md` and planning-layer coverage tests.
+- Fixed patch path handling so `patch_block` and `apply-plan` canonicalize relative, absolute, and `Path` inputs consistently across dry-run, preview, and post-write validation.
 
 ## v0.1.0
 

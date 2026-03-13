@@ -112,10 +112,10 @@ PatchResult = PatchSuccess | PatchFailure
 
 # @grace.anchor grace.patcher.patch_block
 # @grace.complexity 7
-# @grace.belief Safe semantic patching depends on preserving target identity up front, then reusing the existing parse and validation pipeline against a temporary project snapshot so cross-file links survive preflight and rollback decisions remain deterministic.
+# @grace.belief Safe semantic patching depends on preserving target identity up front, canonicalizing the target path once, and then reusing the existing parse and validation pipeline against a temporary project snapshot so cross-file links survive preflight and rollback decisions remain deterministic for both relative and absolute inputs.
 # @grace.links grace.patcher._find_anchor_annotation_line, grace.patcher._extract_replacement_anchor_id, grace.patcher._normalize_replacement_source, grace.patcher._build_preview_diff, grace.patcher._hash_text, grace.patcher._parse_candidate_text, grace.patcher._load_project_state, grace.patcher._splice_block
 def patch_block(path: str | Path, anchor_id: str, replacement_source: str, *, dry_run: bool = False) -> PatchResult:
-    source_path = Path(path)
+    source_path = Path(path).expanduser().resolve()
     original_text = source_path.read_text(encoding="utf-8")
 
     try:
@@ -402,10 +402,10 @@ def _parse_candidate_text(source_path: Path, patched_text: str) -> GraceFileMode
 
 # @grace.anchor grace.patcher._load_project_state
 # @grace.complexity 6
-# @grace.belief Project-aware patch validation should scope itself to the target file's containing directory so cross-file links are checked consistently without dragging unrelated repo fixtures into patch preflight.
+# @grace.belief Project-aware patch validation should scope itself to the target file's containing directory and normalize the target path once so replacement snapshots, discovered files, and post-write lookups all compare the same canonical filesystem identity.
 # @grace.links grace.patcher._discover_project_paths
 def _load_project_state(source_path: Path, replacement_file: GraceFileModel | None = None) -> tuple[GraceFileModel, ...]:
-    resolved_source_path = source_path.resolve()
+    resolved_source_path = Path(source_path).expanduser().resolve()
     discovered_paths = _discover_project_paths(resolved_source_path.parent)
     project_files: list[GraceFileModel] = []
     replacement_consumed = False
@@ -413,13 +413,13 @@ def _load_project_state(source_path: Path, replacement_file: GraceFileModel | No
     for discovered_path in discovered_paths:
         resolved_discovered_path = discovered_path.resolve()
         if replacement_file is not None and resolved_discovered_path == resolved_source_path:
-            project_files.append(replacement_file.model_copy(update={"path": source_path}))
+            project_files.append(replacement_file.model_copy(update={"path": resolved_source_path}))
             replacement_consumed = True
             continue
         project_files.append(parse_python_file(discovered_path))
 
     if replacement_file is not None and not replacement_consumed:
-        project_files.append(replacement_file.model_copy(update={"path": source_path}))
+        project_files.append(replacement_file.model_copy(update={"path": resolved_source_path}))
 
     return tuple(sorted(project_files, key=lambda item: (item.module.module_id, str(item.path))))
 
