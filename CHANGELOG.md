@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- Added `docs/v1_release_notes_draft.md` as the draft public framing for the first stable release.
+## v1.0.0 - 2026-03-13
+
+- Added `docs/v1_release_notes.md` as the public framing for the first stable release.
 - Updated `docs/agent_contract.md` to describe GRACE as a stable shell-driven agent protocol rather than an earlier development-phase contract.
 - Added `docs/v1_release_prep.md` to freeze `v1.0` framing around stable core guarantees, pilot adapter messaging, and repository-root policy.
 - Added documentation-driven release-prep coverage so adapter tiers and repo-root validation policy stay aligned across readiness docs.

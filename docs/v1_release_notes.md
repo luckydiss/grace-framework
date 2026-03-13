@@ -1,4 +1,4 @@
-# v1.0.0 Release Notes Draft
+# v1.0.0 Release Notes
 
 GRACE `v1.0.0` is the first stable release of the core semantic editing protocol for shell-driven coding agents.
 

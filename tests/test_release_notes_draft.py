@@ -11,7 +11,7 @@ def _read(relative_path: str) -> str:
 
 
 def test_release_notes_draft_matches_release_prep_messaging() -> None:
-    release_notes = _read("docs/v1_release_notes_draft.md")
+    release_notes = _read("docs/v1_release_notes.md")
     release_prep = _read("docs/v1_release_prep.md")
     agent_contract = _read("docs/agent_contract.md")
 
