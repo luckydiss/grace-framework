@@ -111,181 +111,77 @@ class TypeScriptAdapter(GraceLanguageAdapter):
 
 
 # @grace.anchor grace.typescript_adapter._collect_definition_targets
-# @grace.complexity 5
-# @grace.links grace.tree_sitter_adapter.iter_tree_nodes, grace.typescript_adapter._build_arrow_function_target, grace.typescript_adapter._build_object_method_target
+# @grace.complexity 2
+# @grace.belief The TypeScript adapter no longer performs handwritten AST traversal. Legacy helper anchors stay only as explicit fail-fast shims so all runtime parsing flows through the declarative TreeSitterAdapterBase path.
+# @grace.links grace.typescript_adapter.TypeScriptAdapter, grace.treesitter_base.TreeSitterAdapterBase
 def _collect_definition_targets(parsed_source: TreeSitterSourceFile) -> dict[int, object]:
-    from grace import parser as parser_module
-
-    targets: dict[int, object] = {}
-    for node in iter_tree_nodes(parsed_source.tree.root_node):
-        if node.type == "function_declaration":
-            target = _build_function_target(parsed_source.source_bytes, node)
-            targets.setdefault(target.line_start, target)
-            continue
-
-        if node.type == "variable_declarator":
-            name_node = node.child_by_field_name("name")
-            value_node = node.child_by_field_name("value")
-            if name_node is None or value_node is None:
-                continue
-
-            symbol_name = _node_text(parsed_source.source_bytes, name_node)
-            if value_node.type == "arrow_function":
-                target = _build_arrow_function_target(
-                    parsed_source.source_bytes,
-                    symbol_name,
-                    value_node,
-                    binding_line_start=node.start_point.row + 1,
-                )
-                targets.setdefault(target.line_start, target)
-                continue
-
-            if value_node.type != "object":
-                continue
-
-            for child in value_node.children:
-                if child.type != "method_definition":
-                    continue
-                target = _build_object_method_target(parsed_source.source_bytes, symbol_name, child)
-                targets.setdefault(target.line_start, target)
-            continue
-
-        if node.type != "class_declaration":
-            continue
-
-        class_target = _build_class_target(parsed_source.source_bytes, node)
-        targets.setdefault(class_target.line_start, class_target)
-
-        class_name = class_target.symbol_name
-        class_body = node.child_by_field_name("body")
-        if class_body is None:
-            continue
-
-        for child in class_body.children:
-            if child.type != "method_definition":
-                continue
-            target = _build_method_target(parsed_source.source_bytes, class_name, child)
-            targets.setdefault(target.line_start, target)
-
-    return targets
+    raise RuntimeError(
+        "legacy TypeScript traversal helpers were removed; use TypeScriptAdapter via TreeSitterAdapterBase"
+    )
 
 
 # @grace.anchor grace.typescript_adapter._build_function_target
-# @grace.complexity 3
+# @grace.complexity 1
 def _build_function_target(source_bytes: bytes, node: Node):
-    from grace import parser as parser_module
-
-    name_node = node.child_by_field_name("name")
-    symbol_name = _node_text(source_bytes, name_node)
-    is_async = any(child.type == "async" for child in node.children)
-    kind = BlockKind.ASYNC_FUNCTION if is_async else BlockKind.FUNCTION
-    return parser_module._DefinitionTarget(
-        kind=kind,
-        symbol_name=symbol_name,
-        qualified_name=symbol_name,
-        is_async=is_async,
-        line_start=node.start_point.row + 1,
-        line_end=node.end_point.row + 1,
+    raise RuntimeError(
+        "legacy TypeScript traversal helpers were removed; use TypeScriptAdapter via TreeSitterAdapterBase"
     )
 
 
 # @grace.anchor grace.typescript_adapter._build_arrow_function_target
-# @grace.complexity 3
+# @grace.complexity 1
 def _build_arrow_function_target(source_bytes: bytes, symbol_name: str, node: Node, *, binding_line_start: int):
-    from grace import parser as parser_module
-
-    is_async = any(child.type == "async" for child in node.children)
-    kind = BlockKind.ASYNC_FUNCTION if is_async else BlockKind.FUNCTION
-    return parser_module._DefinitionTarget(
-        kind=kind,
-        symbol_name=symbol_name,
-        qualified_name=symbol_name,
-        is_async=is_async,
-        line_start=binding_line_start,
-        line_end=node.end_point.row + 1,
+    raise RuntimeError(
+        "legacy TypeScript traversal helpers were removed; use TypeScriptAdapter via TreeSitterAdapterBase"
     )
 
 
 # @grace.anchor grace.typescript_adapter._build_class_target
-# @grace.complexity 2
+# @grace.complexity 1
 def _build_class_target(source_bytes: bytes, node: Node):
-    from grace import parser as parser_module
-
-    name_node = node.child_by_field_name("name")
-    class_name = _node_text(source_bytes, name_node)
-    return parser_module._DefinitionTarget(
-        kind=BlockKind.CLASS,
-        symbol_name=class_name,
-        qualified_name=class_name,
-        is_async=False,
-        line_start=node.start_point.row + 1,
-        line_end=node.end_point.row + 1,
+    raise RuntimeError(
+        "legacy TypeScript traversal helpers were removed; use TypeScriptAdapter via TreeSitterAdapterBase"
     )
 
 
 # @grace.anchor grace.typescript_adapter._build_method_target
-# @grace.complexity 3
+# @grace.complexity 1
 def _build_method_target(source_bytes: bytes, class_name: str, node: Node):
-    from grace import parser as parser_module
-
-    name_node = node.child_by_field_name("name")
-    method_name = _node_text(source_bytes, name_node)
-    is_async = any(child.type == "async" for child in node.children)
-    return parser_module._DefinitionTarget(
-        kind=BlockKind.METHOD,
-        symbol_name=method_name,
-        qualified_name=f"{class_name}.{method_name}",
-        is_async=is_async,
-        line_start=node.start_point.row + 1,
-        line_end=node.end_point.row + 1,
+    raise RuntimeError(
+        "legacy TypeScript traversal helpers were removed; use TypeScriptAdapter via TreeSitterAdapterBase"
     )
 
 
 # @grace.anchor grace.typescript_adapter._build_object_method_target
-# @grace.complexity 3
+# @grace.complexity 1
 def _build_object_method_target(source_bytes: bytes, object_name: str, node: Node):
-    from grace import parser as parser_module
-
-    name_node = node.child_by_field_name("name")
-    method_name = _node_text(source_bytes, name_node)
-    is_async = any(child.type == "async" for child in node.children)
-    return parser_module._DefinitionTarget(
-        kind=BlockKind.METHOD,
-        symbol_name=method_name,
-        qualified_name=f"{object_name}.{method_name}",
-        is_async=is_async,
-        line_start=node.start_point.row + 1,
-        line_end=node.end_point.row + 1,
+    raise RuntimeError(
+        "legacy TypeScript traversal helpers were removed; use TypeScriptAdapter via TreeSitterAdapterBase"
     )
 
 
 # @grace.anchor grace.typescript_adapter._match_annotation_line
-# @grace.complexity 2
+# @grace.complexity 1
 def _match_annotation_line(raw_line: str) -> tuple[str, str] | None:
-    line_match = LINE_ANNOTATION_RE.match(raw_line)
-    if line_match:
-        return line_match.group("name"), (line_match.group("payload") or "").strip()
-
-    block_match = BLOCK_ANNOTATION_RE.match(raw_line)
-    if block_match:
-        return block_match.group("name"), (block_match.group("payload") or "").strip()
-
-    return None
+    raise RuntimeError(
+        "legacy TypeScript traversal helpers were removed; use TypeScriptAdapter via TreeSitterAdapterBase"
+    )
 
 
 # @grace.anchor grace.typescript_adapter._is_comment_like_line
-# @grace.complexity 2
+# @grace.complexity 1
 def _is_comment_like_line(raw_line: str) -> bool:
-    stripped = raw_line.strip()
-    return stripped.startswith("//") or stripped.startswith("/*") or stripped.startswith("*") or stripped.startswith("*/")
+    raise RuntimeError(
+        "legacy TypeScript traversal helpers were removed; use TypeScriptAdapter via TreeSitterAdapterBase"
+    )
 
 
 # @grace.anchor grace.typescript_adapter._node_text
 # @grace.complexity 1
 def _node_text(source_bytes: bytes, node: Node | None) -> str:
-    if node is None:
-        return ""
-    return source_bytes[node.start_byte : node.end_byte].decode("utf-8")
+    raise RuntimeError(
+        "legacy TypeScript traversal helpers were removed; use TypeScriptAdapter via TreeSitterAdapterBase"
+    )
 
 
 __all__ = ["TypeScriptAdapter"]
