@@ -37,6 +37,7 @@ class LintIssueCode(str, Enum):
     LARGE_BLOCK = "large_block"
     WEAK_BELIEF = "weak_belief"
     WEAK_MODULE_TEXT = "weak_module_text"
+    TODO_PLACEHOLDER = "todo_placeholder"
     LONG_TEXT = "long_text"
     DUPLICATE_LINK = "duplicate_link"
     TOO_FEW_INVARIANTS = "too_few_invariants"
@@ -197,7 +198,8 @@ def _lint_file(grace_file: GraceFileModel) -> list[LintIssue]:
 
 
 # @grace.anchor grace.linter._lint_module_text
-# @grace.complexity 4
+# @grace.complexity 6
+# @grace.belief Bootstrap intentionally seeds TODO placeholders, so lint needs a dedicated warning code that stays machine-actionable without conflating deliberate bootstrap scaffolds with generic weak text.
 def _lint_module_text(grace_file: GraceFileModel) -> list[LintIssue]:
     issues: list[LintIssue] = []
     module_id = grace_file.module.module_id
@@ -208,7 +210,17 @@ def _lint_module_text(grace_file: GraceFileModel) -> list[LintIssue]:
 
     for field_name, value in module_fields.items():
         normalized = _normalize_text(value)
-        if _looks_placeholder(normalized):
+        if normalized.lower() == "todo":
+            issues.append(
+                LintIssue(
+                    code=LintIssueCode.TODO_PLACEHOLDER,
+                    severity=LintSeverity.WARNING,
+                    message=f"module {field_name} still contains a TODO placeholder and should be filled with real semantics",
+                    path=grace_file.path,
+                    module_id=module_id,
+                )
+            )
+        elif _looks_placeholder(normalized):
             issues.append(
                 LintIssue(
                     code=LintIssueCode.WEAK_MODULE_TEXT,
@@ -231,7 +243,17 @@ def _lint_module_text(grace_file: GraceFileModel) -> list[LintIssue]:
 
     for invariant in grace_file.module.invariants:
         normalized = _normalize_text(invariant)
-        if _looks_placeholder(normalized):
+        if normalized.lower() == "todo":
+            issues.append(
+                LintIssue(
+                    code=LintIssueCode.TODO_PLACEHOLDER,
+                    severity=LintSeverity.WARNING,
+                    message="module invariant still contains a TODO placeholder and should be filled with a real invariant",
+                    path=grace_file.path,
+                    module_id=module_id,
+                )
+            )
+        elif _looks_placeholder(normalized):
             issues.append(
                 LintIssue(
                     code=LintIssueCode.WEAK_MODULE_TEXT,

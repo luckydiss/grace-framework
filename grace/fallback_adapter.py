@@ -27,11 +27,13 @@ _BLOCK_START_PATTERNS = (
 
 
 # @grace.anchor grace.fallback_adapter.FallbackTextAdapter
-# @grace.complexity 6
-# @grace.belief The fallback should remain intentionally coarse: it enables deterministic bootstrap parsing for unsupported languages by reusing annotation discipline and conservative text spans instead of pretending to understand full AST semantics.
+# @grace.complexity 7
+# @grace.belief Fallback bootstrap must stay conservative and text-only, so it exposes only coarse block discovery while leaving parsing and validation deterministic.
+# @grace.links grace.language_adapter.GraceLanguageAdapter
 class FallbackTextAdapter(GraceLanguageAdapter):
     language_name = "fallback"
     file_extensions: tuple[str, ...] = ()
+    annotation_comment_prefix = "#"
 
     def discover_annotations(self, source_text: str) -> tuple[str, ...]:
         discovered: list[str] = []
@@ -72,6 +74,51 @@ class FallbackTextAdapter(GraceLanguageAdapter):
 
     def compute_block_span(self, block: GraceBlockMetadata) -> tuple[int, int]:
         return (block.line_start, block.line_end)
+
+    def discover_unannotated_blocks(self, file_path: str | Path) -> tuple[object, ...]:
+        from grace.bootstrapper import BootstrapDiscoveredBlock
+
+        def has_bound_block_annotations(lines: list[str], line_start: int) -> bool:
+            saw_block_annotation = False
+            index = line_start - 2
+            while index >= 0:
+                raw_line = lines[index]
+                stripped = raw_line.strip()
+                if not stripped:
+                    index -= 1
+                    continue
+                if any(stripped.startswith(prefix) for prefix in _LINE_COMMENT_PREFIXES):
+                    match = _ANNOTATION_RE.match(raw_line)
+                    if match is not None and match.group("name") in {"anchor", "complexity", "belief", "links"}:
+                        saw_block_annotation = True
+                    index -= 1
+                    continue
+                break
+            return saw_block_annotation
+
+        source_path = Path(file_path)
+        lines = source_path.read_text(encoding="utf-8").splitlines()
+        definition_targets = _collect_definition_targets(lines)
+        discovered_blocks: list[BootstrapDiscoveredBlock] = []
+
+        for line_start, target in sorted(definition_targets.items()):
+            if has_bound_block_annotations(lines, line_start):
+                continue
+            indent = ""
+            if 0 < line_start <= len(lines):
+                indent = lines[line_start - 1][: len(lines[line_start - 1]) - len(lines[line_start - 1].lstrip())]
+            discovered_blocks.append(
+                BootstrapDiscoveredBlock(
+                    kind=target.kind,
+                    symbol_name=target.symbol_name,
+                    qualified_name=target.qualified_name,
+                    line_start=target.line_start,
+                    line_end=target.line_end,
+                    indent=indent,
+                )
+            )
+
+        return tuple(discovered_blocks)
 
     def build_grace_file_model(self, file_path: str | Path) -> GraceFileModel:
         from grace import parser as parser_module

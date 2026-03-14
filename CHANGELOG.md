@@ -4,6 +4,8 @@
 
 - Added a shared data-driven `TreeSitterAdapterBase` and `TreeSitterLanguageSpec` so Python, TypeScript, and Go can reuse one AST-driven execution engine instead of duplicating parser loops per language.
 - Added `FallbackTextAdapter` for deterministic bootstrap parsing of unsupported suffixes without changing GRACE source-of-truth semantics.
+- Added preview-first `grace bootstrap` scaffolding with rollback-safe apply semantics for deterministic annotation bootstrapping of unannotated files and directories.
+- Added adapter-driven unannotated block discovery plus a dedicated `todo_placeholder` lint warning for scaffolded module placeholders.
 - Routed unknown file suffixes through the fallback adapter and documented the universal language integration architecture.
 - Declared Tree-sitter Python and Go runtime dependencies explicitly in packaging metadata.
 - Made `apply-plan` transactional by simulating all entries against a temporary project mirror before writing any repository file.

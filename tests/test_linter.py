@@ -137,7 +137,7 @@ def test_lint_file_warns_on_weak_purpose_placeholder(tmp_path: Path) -> None:
     result = LINTER.lint_file(grace_file)
 
     assert isinstance(result, LINTER.LintFailure)
-    assert "weak_module_text" in lint_codes(result)
+    assert "todo_placeholder" in lint_codes(result)
 
 
 def test_lint_file_warns_on_weak_invariant_placeholder(tmp_path: Path) -> None:
@@ -229,7 +229,7 @@ def test_lint_file_accumulates_multiple_warnings(tmp_path: Path) -> None:
     assert isinstance(result, LINTER.LintFailure)
     assert len(result.issues) >= 4
     codes = lint_codes(result)
-    assert "weak_module_text" in codes
+    assert "todo_placeholder" in codes
     assert "long_text" in codes
     assert "duplicate_link" in codes
     assert "too_few_invariants" in codes
@@ -244,7 +244,7 @@ def test_lint_project_aggregates_warnings_across_files(tmp_path: Path) -> None:
     assert isinstance(result, LINTER.LintFailure)
     assert len(result.issues) >= 2
     codes = lint_codes(result)
-    assert "weak_module_text" in codes
+    assert "todo_placeholder" in codes
     assert "weak_belief" in codes
 
 

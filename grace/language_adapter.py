@@ -17,10 +17,12 @@ _PYTHON_ADAPTER_CLASS: type["GraceLanguageAdapter"] | None = None
 
 
 # @grace.anchor grace.language_adapter.GraceLanguageAdapter
-# @grace.complexity 3
+# @grace.complexity 4
+# @grace.belief Adapter contract should expose deterministic scaffold discovery without forcing callers to know adapter internals, but unsupported adapters must still fail explicitly.
 class GraceLanguageAdapter(ABC):
     language_name: str
     file_extensions: tuple[str, ...]
+    annotation_comment_prefix: str = "#"
 
     # @grace.anchor grace.language_adapter.GraceLanguageAdapter.discover_annotations
     # @grace.complexity 2
@@ -45,6 +47,13 @@ class GraceLanguageAdapter(ABC):
     @abstractmethod
     def compute_block_span(self, block: GraceBlockMetadata) -> tuple[int, int]:
         raise NotImplementedError
+
+    # @grace.anchor grace.language_adapter.GraceLanguageAdapter.discover_unannotated_blocks
+    # @grace.complexity 3
+    def discover_unannotated_blocks(self, file_path: str | Path) -> tuple[object, ...]:
+        raise NotImplementedError(
+            f"{self.__class__.__name__} does not implement bootstrap discovery for {file_path!s}"
+        )
 
     # @grace.anchor grace.language_adapter.GraceLanguageAdapter.build_grace_file_model
     # @grace.complexity 3
