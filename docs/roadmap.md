@@ -288,6 +288,23 @@ Outcome:
 
 GRACE can now close specific frontend language gaps through declarative construct packs, and real TSX files become bootstrap-previewable without changing core semantics.
 
+## v1.5 - Bootstrap Safety Matrix
+
+Goal:
+
+Report whether a repository is immediately safe for bootstrap apply, and explain exactly which files still block safe scaffold execution.
+
+Delivered scope:
+
+- added `grace.bootstrap_safety`
+- added `grace adapter safety <path>`
+- added focused runtime and CLI coverage
+- added `docs/bootstrap_safety.md`
+
+Outcome:
+
+Agents can now distinguish between general adapter coverage and actual bootstrap readiness before they mutate a mixed repository.
+
 ## v1.3 - Adapter Probe / Gaps / Eval CLI
 
 Goal:

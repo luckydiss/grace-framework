@@ -11,6 +11,7 @@ from pathlib import Path
 import click
 
 from grace.adapter_tools import collect_adapter_gaps, evaluate_adapter_surface, probe_adapter
+from grace.bootstrap_safety import evaluate_bootstrap_safety
 
 
 # @grace.anchor grace.adapter_command.adapter_group
@@ -95,4 +96,29 @@ def eval_command(path: Path, as_json: bool) -> None:
     click.echo(
         f"Adapter eval for {evaluation.requested_path}: {evaluation.file_count} file(s), "
         f"{sum(evaluation.gap_counts.values())} gap(s)"
+    )
+
+
+# @grace.anchor grace.adapter_command.safety_command
+# @grace.complexity 2
+# @grace.links grace.bootstrap_safety.evaluate_bootstrap_safety
+@adapter_group.command("safety")
+@click.argument("path", type=click.Path(exists=True, file_okay=True, dir_okay=True, path_type=Path))
+@click.option("--json", "as_json", is_flag=True, help="Print a JSON result envelope for agent use.")
+def safety_command(path: Path, as_json: bool) -> None:
+    safety = evaluate_bootstrap_safety(path)
+    payload = {
+        "ok": True,
+        "command": "adapter",
+        "action": "safety",
+        **safety.model_dump(mode="json"),
+    }
+
+    if as_json:
+        click.echo(json.dumps(payload, indent=2))
+        return
+
+    click.echo(
+        f"Bootstrap safety for {safety.requested_path}: {safety.safe_file_count}/{safety.file_count} "
+        f"file(s) safe for apply"
     )

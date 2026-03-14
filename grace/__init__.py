@@ -87,6 +87,8 @@ def _public_api() -> tuple[str, ...]:
         "AdapterEval",
         "AdapterGap",
         "AdapterProbe",
+        "BootstrapSafetyIssue",
+        "BootstrapSafetyReport",
         "ApplyPlanFailure",
         "ApplyPlanFailureStage",
         "ApplyPlanResult",
@@ -159,6 +161,7 @@ def _public_api() -> tuple[str, ...]:
         "build_project_map",
         "collect_adapter_gaps",
         "collect_patch_targets",
+        "evaluate_bootstrap_safety",
         "evaluate_adapter_surface",
         "extract_anchor_annotations",
         "extract_anchor_code",
@@ -283,7 +286,10 @@ def __getattr__(name: str) -> object:
         "AdapterEval",
         "AdapterGap",
         "AdapterProbe",
+        "BootstrapSafetyIssue",
+        "BootstrapSafetyReport",
         "collect_adapter_gaps",
+        "evaluate_bootstrap_safety",
         "evaluate_adapter_surface",
         "probe_adapter",
     }:
@@ -295,12 +301,20 @@ def __getattr__(name: str) -> object:
             evaluate_adapter_surface,
             probe_adapter,
         )
+        from grace.bootstrap_safety import (
+            BootstrapSafetyIssue,
+            BootstrapSafetyReport,
+            evaluate_bootstrap_safety,
+        )
 
         exported = {
             "AdapterEval": AdapterEval,
             "AdapterGap": AdapterGap,
             "AdapterProbe": AdapterProbe,
+            "BootstrapSafetyIssue": BootstrapSafetyIssue,
+            "BootstrapSafetyReport": BootstrapSafetyReport,
             "collect_adapter_gaps": collect_adapter_gaps,
+            "evaluate_bootstrap_safety": evaluate_bootstrap_safety,
             "evaluate_adapter_surface": evaluate_adapter_surface,
             "probe_adapter": probe_adapter,
         }

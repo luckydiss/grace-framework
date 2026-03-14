@@ -66,11 +66,12 @@ If no GRACE-annotated supported files are found, the command fails with:
 10. `grace adapter probe <file> --json`
 11. `grace adapter gaps <path> --json`
 12. `grace adapter eval <path> --json`
-13. `grace bootstrap <path> --preview --json`
-14. `grace bootstrap <path> --apply --json`
-15. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
-16. `grace patch <path> <anchor_id> <replacement_file> --json`
-17. `grace apply-plan <plan_file> --dry-run --json`
+13. `grace adapter safety <path> --json`
+14. `grace bootstrap <path> --preview --json`
+15. `grace bootstrap <path> --apply --json`
+16. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
+17. `grace patch <path> <anchor_id> <replacement_file> --json`
+18. `grace apply-plan <plan_file> --dry-run --json`
 15. `grace apply-plan <plan_file> --json`
 16. `grace validate <path> --json`
 17. `grace lint <path> --json`
@@ -105,6 +106,7 @@ Before bootstrap or framework extension work begins, agents may prepend:
 1. `grace adapter probe <file> --json`
 2. `grace adapter gaps <path> --json`
 3. `grace adapter eval <path> --json`
+4. `grace adapter safety <path> --json`
 
 These commands are read-only. They classify language-pack coverage and file-policy verdicts, but they do not change parser, bootstrap, or patch semantics.
 

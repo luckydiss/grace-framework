@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added `grace.bootstrap_safety` plus `grace adapter safety` so agents can measure immediate bootstrap readiness and see exactly which files still block safe scaffold apply.
+- Added `docs/bootstrap_safety.md` and focused runtime/CLI coverage for deterministic bootstrap safety reporting.
 - Added `grace.construct_pack` and `grace.construct_registry` so missing language shapes can be onboarded declaratively as construct packs instead of bespoke adapter rewrites.
 - Added built-in `typescript.tsx_function_components`, extending TypeScript routing to `.tsx` and covering exported TSX function components.
 - Added `docs/construct_packs.md` plus focused TSX, construct-pack, and adapter diagnostic coverage.
