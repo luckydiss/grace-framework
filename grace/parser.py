@@ -223,8 +223,9 @@ def _consume_module_annotation(
 
 
 # @grace.anchor grace.parser._consume_block_annotation
-# @grace.complexity 6
-# @grace.belief Block-annotation parsing is a strict state machine: preserving order and single-occurrence constraints here is simpler and more deterministic than deferring malformed sequences to later validation passes.
+# @grace.complexity 8
+# @grace.belief Block annotation parsing sits on the parser hot path, so the guard must stay strict and deterministic while still treating missing payloads as ordinary GRACE parse errors instead of adapter crashes.
+# @grace.links grace.parser._PendingBlock
 def _consume_block_annotation(
     pending: _PendingBlock | None,
     annotation_name: str,
@@ -284,7 +285,7 @@ def _consume_block_annotation(
             return pending
         try:
             complexity = int(payload)
-        except ValueError:
+        except (TypeError, ValueError):
             errors.append(
                 GraceParseIssue(
                     code=ParseErrorCode.INVALID_COMPLEXITY,
@@ -335,6 +336,15 @@ def _consume_block_annotation(
                 GraceParseIssue(
                     code=ParseErrorCode.INVALID_BLOCK_ANNOTATION_ORDER,
                     message="@grace.links must appear after @grace.complexity",
+                    line=line_number,
+                )
+            )
+            return pending
+        if not payload:
+            errors.append(
+                GraceParseIssue(
+                    code=ParseErrorCode.EMPTY_ANNOTATION_PAYLOAD,
+                    message="@grace.links requires at least one anchor id",
                     line=line_number,
                 )
             )

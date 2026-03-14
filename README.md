@@ -17,6 +17,7 @@ The current v1 readiness review lives in [docs/v1_readiness_review.md](C:\Users\
 The v1 release-prep framing lives in [docs/v1_release_prep.md](C:\Users\luckydiss\Documents\grace_framework\docs\v1_release_prep.md).
 The TypeScript pilot adapter lives in [docs/typescript_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\typescript_adapter.md).
 The Go pilot adapter lives in [docs/go_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\go_adapter.md).
+The shared data-driven adapter architecture lives in [docs/universal_language_integration.md](C:\Users\luckydiss\Documents\grace_framework\docs\universal_language_integration.md).
 The adapter compatibility matrix lives in [docs/adapter_compatibility.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_compatibility.md).
 The release hardening gates live in [docs/release_criteria.md](C:\Users\luckydiss\Documents\grace_framework\docs\release_criteria.md).
 The deterministic path-query layer lives in [docs/path_query.md](C:\Users\luckydiss\Documents\grace_framework\docs\path_query.md).
@@ -42,7 +43,9 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 - `parser`: parses inline annotations and binds them to `def`, `async def`, `class`, and methods.
 - `language_adapter`: defines the language integration contract that feeds `GraceFileModel` into the core.
 - `tree_sitter_adapter`: provides substrate helpers for non-Python pilot adapters without changing core semantics.
-- `python_adapter`: reference adapter that preserves the existing Python parsing behavior behind the language adapter layer.
+- `treesitter_base`: provides the shared Tree-sitter execution engine plus declarative language specs.
+- `fallback_adapter`: provides deterministic text fallback for unsupported suffixes and bootstrap parsing.
+- `python_adapter`: reference adapter implemented on top of the shared Tree-sitter base.
 - `typescript_adapter`: pilot Tree-sitter-backed adapter for `.ts` files with module annotations, function declarations, async functions, arrow functions, classes, and object literal methods.
 - `go_adapter`: pilot Go adapter for `.go` files with module annotations, function declarations, receiver methods, and simple struct type declarations.
 - `validator`: enforces hard semantic and identity consistency on parsed GRACE objects.
@@ -57,7 +60,7 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 - `cli`: thin command wrapper over the existing APIs.
 
 The normative adapter-freeze reference for future language integrations is [docs/language_adapter_contract.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_adapter_contract.md).
-Python remains the reference implementation; `.ts` and `.go` support are deliberately small pilot adapters.
+Python remains the reference implementation; `.ts` and `.go` support are deliberately small pilot adapters. Unsupported suffixes now route through a deterministic fallback adapter instead of hard-failing at adapter selection.
 Cross-language parity fixtures and adapter conformance tests live under [examples/parity](C:\Users\luckydiss\Documents\grace_framework\examples\parity) and [tests/test_adapter_conformance.py](C:\Users\luckydiss\Documents\grace_framework\tests\test_adapter_conformance.py).
 The parity root is intended for cross-language comparison; project-level validation should be run per language subdirectory because the mirrored fixtures intentionally reuse the same `module_id`.
 Repository-root discovery can be constrained through `[tool.grace]` in [pyproject.toml](C:\Users\luckydiss\Documents\grace_framework\pyproject.toml) with `include` and `exclude` globs. These filters apply to repo-root commands such as `grace validate . --json`, while explicit file and subdirectory targets remain authoritative.
@@ -71,7 +74,7 @@ GRACE currently supports:
 - Go as a pilot adapter
 
 All three adapters normalize into the same `GraceFileModel` contract, so validator, linter, map, query, impact, read, planner, and patch layers remain unchanged.
-Adapter growth is now guided by a reusable authoring/test workflow rather than one-off per-language integration work.
+Adapter growth is now guided by a reusable authoring/test workflow and a shared Tree-sitter execution engine rather than one-off per-language parser loops.
 
 ## Protocol Status
 

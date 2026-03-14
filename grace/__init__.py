@@ -80,8 +80,7 @@ from grace.validator import (
 
 
 # @grace.anchor grace.api._public_api
-# @grace.complexity 4
-# @grace.links grace.api.__getattr__
+# @grace.complexity 3
 def _public_api() -> tuple[str, ...]:
     return (
         "ApplyPlanFailure",
@@ -90,6 +89,7 @@ def _public_api() -> tuple[str, ...]:
         "ApplyPlanSuccess",
         "AppliedPatchEntry",
         "BlockKind",
+        "FallbackTextAdapter",
         "GoAdapter",
         "GRACE_MAP_VERSION",
         "GraceBlockMetadata",
@@ -131,6 +131,9 @@ def _public_api() -> tuple[str, ...]:
         "ReadAnchorContext",
         "ReadLookupError",
         "SuggestedPatchOperation",
+        "TreeSitterAdapterBase",
+        "TreeSitterBlockQuerySpec",
+        "TreeSitterLanguageSpec",
         "TypeScriptAdapter",
         "ValidationFailure",
         "ValidationIssue",
@@ -174,24 +177,39 @@ def _public_api() -> tuple[str, ...]:
 
 
 # @grace.anchor grace.api.__getattr__
-# @grace.complexity 5
+# @grace.complexity 6
+# @grace.belief The public API export surface should stay lazy even as new adapter primitives are added, so imports remain predictable for CLI and test workflows.
 def __getattr__(name: str) -> object:
     if name in {
+        "FallbackTextAdapter",
         "GoAdapter",
         "GraceLanguageAdapter",
         "PythonAdapter",
+        "TreeSitterAdapterBase",
+        "TreeSitterBlockQuerySpec",
+        "TreeSitterLanguageSpec",
         "TypeScriptAdapter",
         "get_language_adapter_for_path",
     }:
+        from grace.fallback_adapter import FallbackTextAdapter
         from grace.go_adapter import GoAdapter
         from grace.language_adapter import GraceLanguageAdapter, get_language_adapter_for_path
         from grace.python_adapter import PythonAdapter
+        from grace.treesitter_base import (
+            TreeSitterAdapterBase,
+            TreeSitterBlockQuerySpec,
+            TreeSitterLanguageSpec,
+        )
         from grace.typescript_adapter import TypeScriptAdapter
 
         exported = {
+            "FallbackTextAdapter": FallbackTextAdapter,
             "GoAdapter": GoAdapter,
             "GraceLanguageAdapter": GraceLanguageAdapter,
             "PythonAdapter": PythonAdapter,
+            "TreeSitterAdapterBase": TreeSitterAdapterBase,
+            "TreeSitterBlockQuerySpec": TreeSitterBlockQuerySpec,
+            "TreeSitterLanguageSpec": TreeSitterLanguageSpec,
             "TypeScriptAdapter": TypeScriptAdapter,
             "get_language_adapter_for_path": get_language_adapter_for_path,
         }

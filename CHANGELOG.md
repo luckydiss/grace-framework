@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added a shared data-driven `TreeSitterAdapterBase` and `TreeSitterLanguageSpec` so Python, TypeScript, and Go can reuse one AST-driven execution engine instead of duplicating parser loops per language.
+- Added `FallbackTextAdapter` for deterministic bootstrap parsing of unsupported suffixes without changing GRACE source-of-truth semantics.
+- Routed unknown file suffixes through the fallback adapter and documented the universal language integration architecture.
+- Declared Tree-sitter Python and Go runtime dependencies explicitly in packaging metadata.
 - Made `apply-plan` transactional by simulating all entries against a temporary project mirror before writing any repository file.
 - Ensured multi-entry plan failures no longer leave partial on-disk writes from earlier successful entries.
 - Added regression coverage for transactional `apply-plan` failure behavior and normalized result paths during dry-run execution.

@@ -55,17 +55,19 @@ The output must be compatible with `GraceFileModel`.
 
 ## Current Runtime Implementations
 
+- `grace/treesitter_base.py` provides the shared Tree-sitter execution engine and declarative language spec surface.
+- `grace/fallback_adapter.py` provides deterministic text fallback for unsupported suffixes.
 - `grace/python_adapter.py` is the reference adapter.
 - `grace/typescript_adapter.py` is the first non-Python pilot adapter.
 - `grace/go_adapter.py` is the second pilot adapter and keeps scope intentionally narrow.
 
-Python remains the normative reference implementation. The TypeScript and Go adapters prove the boundary with intentionally narrow construct coverage.
+Python remains the normative reference implementation. The TypeScript and Go adapters prove the boundary with intentionally narrow construct coverage, while the fallback adapter keeps unsupported suffixes parseable without inventing new GRACE semantics.
 
 ## Adding A New Language
 
 To add a new language later:
 
-1. implement `GraceLanguageAdapter`
+1. implement or configure `GraceLanguageAdapter`
 2. parse the target language syntax
 3. discover GRACE annotations in supported comment hosts
 4. bind annotations to semantic entities
@@ -73,7 +75,7 @@ To add a new language later:
 6. emit `GraceFileModel`
 7. register the adapter in language dispatch
 
-Current runtime support includes Python plus limited `.ts` and `.go` pilots.
+Current runtime support includes Python plus limited `.ts` and `.go` pilots, backed by a shared Tree-sitter engine and a text fallback for unsupported suffixes.
 
 ## Adapter Authoring Workflow
 
@@ -98,6 +100,8 @@ This layer does not:
 - change map/query/impact/read/planner contracts
 - claim broad multi-language runtime support
 - promise full framework-aware language coverage
+
+For the shared execution architecture, see `docs/universal_language_integration.md`.
 
 ## Unsupported Syntax Behavior
 

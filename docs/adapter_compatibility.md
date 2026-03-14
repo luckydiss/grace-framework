@@ -1,6 +1,6 @@
 # Adapter Compatibility Matrix
 
-This matrix records current GRACE adapter coverage after the TypeScript pilot, the Go adapter milestone, and the v0.14 hardening work.
+This matrix records current GRACE adapter coverage after the TypeScript pilot, the Go adapter milestone, the v0.14 hardening work, and the shared data-driven adapter consolidation.
 
 | Feature | Python | TypeScript | Go |
 | --- | --- | --- | --- |
@@ -20,6 +20,8 @@ This matrix records current GRACE adapter coverage after the TypeScript pilot, t
 - Python remains the reference implementation.
 - TypeScript remains a pilot adapter with deliberately narrow syntax coverage.
 - Go remains a pilot adapter with deliberately narrow function/method plus struct-type coverage.
+- Python, TypeScript, and Go now reuse a shared Tree-sitter execution engine with language-specific declarative specs.
+- Unknown suffixes route through a deterministic fallback adapter instead of failing adapter lookup immediately.
 - Unsupported constructs must not break parsing if they do not contain GRACE annotations.
 - If GRACE annotations target an unsupported construct and no supported semantic entity can bind them, parsing must fail predictably.
 

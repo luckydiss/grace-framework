@@ -103,7 +103,7 @@ Adapters must preserve GRACE parse-failure behavior.
 
 Rules:
 
-- Unsupported file types should fail at adapter selection, not by fabricating partial GRACE data.
+- Unsupported file types may route through a deterministic fallback adapter, but they must not fabricate new source-of-truth semantics.
 - Invalid GRACE markup in a supported file must surface as parse failure, not as silent degradation.
 - Unsupported language syntax for the adapter is an adapter limitation or adapter bug, not a new GRACE semantic category.
 - A valid source file with invalid GRACE markup is an invalid GRACE file, not an adapter bug.

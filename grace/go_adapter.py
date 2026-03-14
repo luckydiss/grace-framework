@@ -20,166 +20,84 @@ TYPE_DECL_RE = re.compile(r"^\s*type\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s+struct
 
 
 # @grace.anchor grace.go_adapter.GoAdapter
-# @grace.complexity 5
+# @grace.complexity 6
+# @grace.belief Go should move off regex-driven target collection and onto the same declarative Tree-sitter engine as the other adapters so the third language proves the architecture scales without bespoke parser loops.
+# @grace.links grace.treesitter_base.TreeSitterAdapterBase, grace.treesitter_base.TreeSitterLanguageSpec
 class GoAdapter(GraceLanguageAdapter):
     language_name = "go"
     file_extensions = (".go",)
 
+    def __init__(self) -> None:
+        from tree_sitter_go import language as language_go
+
+        from grace.treesitter_base import (
+            TreeSitterAdapterBase,
+            TreeSitterBlockQuerySpec,
+            TreeSitterLanguageSpec,
+        )
+
+        spec = TreeSitterLanguageSpec(
+            language_name="go",
+            file_extensions=(".go",),
+            language_factory=language_go,
+            line_comment_prefixes=("//",),
+            block_query_specs=(
+                TreeSitterBlockQuerySpec(
+                    query="(source_file (function_declaration name: (identifier) @name) @block)",
+                    kind=BlockKind.FUNCTION,
+                    symbol_capture="name",
+                ),
+                TreeSitterBlockQuerySpec(
+                    query="(source_file (method_declaration receiver: (parameter_list (parameter_declaration type: (pointer_type (type_identifier) @owner))) name: (field_identifier) @name) @block)",
+                    kind=BlockKind.METHOD,
+                    symbol_capture="name",
+                    owner_capture="owner",
+                    qualified_name_template="{owner_name}.{symbol_name}",
+                ),
+                TreeSitterBlockQuerySpec(
+                    query="(source_file (method_declaration receiver: (parameter_list (parameter_declaration type: (type_identifier) @owner)) name: (field_identifier) @name) @block)",
+                    kind=BlockKind.METHOD,
+                    symbol_capture="name",
+                    owner_capture="owner",
+                    qualified_name_template="{owner_name}.{symbol_name}",
+                ),
+                TreeSitterBlockQuerySpec(
+                    query="(source_file (type_declaration (type_spec name: (type_identifier) @name type: (struct_type)) @block))",
+                    kind=BlockKind.CLASS,
+                    symbol_capture="name",
+                ),
+            ),
+        )
+        self._base = TreeSitterAdapterBase(spec)
+        self.language_name = self._base.language_name
+        self.file_extensions = self._base.file_extensions
+
     # @grace.anchor grace.go_adapter.GoAdapter.discover_annotations
     # @grace.complexity 2
     def discover_annotations(self, source_text: str) -> tuple[str, ...]:
-        discovered: list[str] = []
-        for raw_line in source_text.splitlines():
-            match = _match_annotation_line(raw_line)
-            if match is not None:
-                discovered.append(match[0])
-        return tuple(discovered)
+        return self._base.discover_annotations(source_text)
 
     # @grace.anchor grace.go_adapter.GoAdapter.extract_module_metadata
     # @grace.complexity 2
     def extract_module_metadata(self, parsed_file: Any):
-        from grace.models import GraceModuleMetadata
-
-        module = parsed_file["module"]
-        return GraceModuleMetadata(
-            module_id=module.module_id or "",
-            purpose=module.purpose or "",
-            interfaces=module.interfaces or "",
-            invariants=tuple(module.invariants),
-        )
+        return self._base.extract_module_metadata(parsed_file)
 
     # @grace.anchor grace.go_adapter.GoAdapter.extract_blocks
     # @grace.complexity 2
     def extract_blocks(self, parsed_file: Any) -> tuple[GraceBlockMetadata, ...]:
-        return tuple(parsed_file["blocks"])
+        return self._base.extract_blocks(parsed_file)
 
     # @grace.anchor grace.go_adapter.GoAdapter.compute_block_span
     # @grace.complexity 1
     def compute_block_span(self, block: GraceBlockMetadata) -> tuple[int, int]:
-        return (block.line_start, block.line_end)
+        return self._base.compute_block_span(block)
 
     # @grace.anchor grace.go_adapter.GoAdapter.build_grace_file_model
-    # @grace.complexity 7
-    # @grace.belief The Go pilot adapter should reuse the existing GRACE module and block annotation state machine so the only language-specific logic lives in deterministic target discovery and span extraction.
-    # @grace.links grace.go_adapter._collect_definition_targets
+    # @grace.complexity 6
+    # @grace.belief Go now reuses the same declarative Tree-sitter engine as Python and TypeScript, so adding new languages no longer requires copying the module and block annotation state machine.
+    # @grace.links grace.treesitter_base.TreeSitterAdapterBase
     def build_grace_file_model(self, file_path: str | Path):
-        from grace import parser as parser_module
-        from grace.models import GraceFileModel
-
-        source_path = Path(file_path)
-        source_text = source_path.read_text(encoding="utf-8")
-        lines = source_text.splitlines()
-        definition_targets = _collect_definition_targets(lines)
-
-        errors: list[GraceParseIssue] = []
-        module = parser_module._ModuleAccumulator()
-        blocks: list[GraceBlockMetadata] = []
-        pending_block: parser_module._PendingBlock | None = None
-        block_section_started = False
-        seen_anchor_ids: set[str] = set()
-
-        for line_number, raw_line in enumerate(lines, start=1):
-            matched_annotation = _match_annotation_line(raw_line)
-            stripped = raw_line.strip()
-
-            if matched_annotation is not None:
-                annotation_name, payload = matched_annotation
-                if annotation_name in parser_module.MODULE_ANNOTATIONS:
-                    if block_section_started:
-                        errors.append(
-                            GraceParseIssue(
-                                code=parser_module.ParseErrorCode.MODULE_ANNOTATION_AFTER_BLOCKS,
-                                message=f"@grace.{annotation_name} is not allowed after block declarations start",
-                                line=line_number,
-                            )
-                        )
-                        continue
-                    parser_module._consume_module_annotation(module, annotation_name, payload, line_number, errors)
-                    continue
-
-                if annotation_name in parser_module.BLOCK_ANNOTATIONS:
-                    block_section_started = True
-                    pending_block = parser_module._consume_block_annotation(
-                        pending_block,
-                        annotation_name,
-                        payload,
-                        line_number,
-                        errors,
-                    )
-                    continue
-
-                errors.append(
-                    GraceParseIssue(
-                        code=parser_module.ParseErrorCode.UNKNOWN_GRACE_ANNOTATION,
-                        message=f"unknown GRACE annotation @grace.{annotation_name}",
-                        line=line_number,
-                    )
-                )
-                continue
-
-            if not stripped:
-                continue
-
-            if pending_block is not None:
-                if _is_comment_like_line(raw_line):
-                    continue
-
-                target = definition_targets.get(line_number)
-                if target is not None:
-                    block = parser_module._build_block_model(pending_block, target, line_number, errors)
-                    pending_block = None
-                    if block is None:
-                        continue
-
-                    if block.anchor_id in seen_anchor_ids:
-                        errors.append(
-                            GraceParseIssue(
-                                code=parser_module.ParseErrorCode.DUPLICATE_ANCHOR_ID,
-                                message=f"duplicate anchor id {block.anchor_id!r}",
-                                line=line_number,
-                            )
-                        )
-                        continue
-
-                    seen_anchor_ids.add(block.anchor_id)
-                    blocks.append(block)
-                    continue
-
-                errors.append(
-                    GraceParseIssue(
-                        code=parser_module.ParseErrorCode.ARBITRARY_CODE_BETWEEN_ANNOTATIONS_AND_BLOCK,
-                        message="arbitrary code is not allowed between block annotations and the bound Go entity",
-                        line=line_number,
-                    )
-                )
-                pending_block = None
-                continue
-
-        if pending_block is not None:
-            errors.append(
-                GraceParseIssue(
-                    code=parser_module.ParseErrorCode.ORPHAN_BLOCK_ANNOTATIONS,
-                    message=(
-                        f"block annotations for anchor {pending_block.anchor_id!r} "
-                        "do not bind to a supported Go entity"
-                    ),
-                    line=pending_block.anchor_line,
-                )
-            )
-
-        parser_module._finalize_module_annotations(module, errors)
-        if errors:
-            raise parser_module.GraceParseError(source_path, errors)
-
-        parsed_file = {
-            "module": module,
-            "blocks": tuple(blocks),
-        }
-        return GraceFileModel(
-            path=source_path,
-            module=self.extract_module_metadata(parsed_file),
-            blocks=self.extract_blocks(parsed_file),
-        )
+        return self._base.build_grace_file_model(file_path)
 
 
 # @grace.anchor grace.go_adapter._collect_definition_targets

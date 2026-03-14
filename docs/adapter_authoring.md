@@ -75,6 +75,8 @@ Every adapter must:
    - `GraceModuleMetadata`
    - `GraceBlockMetadata`
 
+Where possible, implement the adapter as a `TreeSitterLanguageSpec` on top of the shared `TreeSitterAdapterBase` instead of writing a new parser loop from scratch.
+
 ## Unsupported Syntax Policy
 
 Unsupported syntax must behave predictably:
