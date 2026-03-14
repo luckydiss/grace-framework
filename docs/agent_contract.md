@@ -63,11 +63,14 @@ If no GRACE-annotated supported files are found, the command fails with:
 7. `grace query path <path> <source_anchor_id> <target_anchor_id> --json`
 8. `grace impact <path> <anchor_id> --json`
 9. `grace plan impact <path> <anchor_id> --json`
-10. `grace bootstrap <path> --preview --json`
-11. `grace bootstrap <path> --apply --json`
-12. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
-13. `grace patch <path> <anchor_id> <replacement_file> --json`
-14. `grace apply-plan <plan_file> --dry-run --json`
+10. `grace adapter probe <file> --json`
+11. `grace adapter gaps <path> --json`
+12. `grace adapter eval <path> --json`
+13. `grace bootstrap <path> --preview --json`
+14. `grace bootstrap <path> --apply --json`
+15. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
+16. `grace patch <path> <anchor_id> <replacement_file> --json`
+17. `grace apply-plan <plan_file> --dry-run --json`
 15. `grace apply-plan <plan_file> --json`
 16. `grace validate <path> --json`
 17. `grace lint <path> --json`
@@ -96,6 +99,14 @@ For unannotated or partially annotated repositories, prepend:
 2. `grace lint <path> --json`
 
 The expected contract is that `bootstrap` only creates deterministic placeholders. Real semantic text still belongs to later read/plan/patch work.
+
+Before bootstrap or framework extension work begins, agents may prepend:
+
+1. `grace adapter probe <file> --json`
+2. `grace adapter gaps <path> --json`
+3. `grace adapter eval <path> --json`
+
+These commands are read-only. They classify language-pack coverage and file-policy verdicts, but they do not change parser, bootstrap, or patch semantics.
 
 Repository-root policy:
 

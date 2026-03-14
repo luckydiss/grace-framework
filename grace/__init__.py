@@ -80,11 +80,13 @@ from grace.validator import (
 
 
 # @grace.anchor grace.api._public_api
-# @grace.complexity 6
-# @grace.belief The public API needs to expose file-policy primitives because agents will use them to reason about bootstrap safety before deciding whether a new repository requires framework extension work.
-# @grace.links grace.api.__getattr__
+# @grace.complexity 2
+# @grace.belief Public API exports should grow monotonically when new deterministic diagnostics become first-class runtime surfaces.
 def _public_api() -> tuple[str, ...]:
     return (
+        "AdapterEval",
+        "AdapterGap",
+        "AdapterProbe",
         "ApplyPlanFailure",
         "ApplyPlanFailureStage",
         "ApplyPlanResult",
@@ -153,7 +155,9 @@ def _public_api() -> tuple[str, ...]:
         "build_plan_skeleton",
         "build_treesitter_pack",
         "build_project_map",
+        "collect_adapter_gaps",
         "collect_patch_targets",
+        "evaluate_adapter_surface",
         "extract_anchor_annotations",
         "extract_anchor_code",
         "filter_self_anchor",
@@ -172,6 +176,7 @@ def _public_api() -> tuple[str, ...]:
         "patch_block",
         "plan_from_impact",
         "plan_to_dict",
+        "probe_adapter",
         "query_anchor",
         "query_anchors",
         "query_dependents",
@@ -190,9 +195,8 @@ def _public_api() -> tuple[str, ...]:
 
 
 # @grace.anchor grace.api.__getattr__
-# @grace.complexity 7
-# @grace.belief Public lazy exports need to stay explicit even as the framework grows, because shell-driven agents rely on predictable import surfaces rather than wildcard module introspection.
-# @grace.links grace.api._public_api
+# @grace.complexity 5
+# @grace.belief Lazy exports keep import costs stable while still surfacing adapter diagnostics as first-class APIs for agents and tests.
 def __getattr__(name: str) -> object:
     if name in {
         "FallbackTextAdapter",
@@ -256,6 +260,32 @@ def __getattr__(name: str) -> object:
             "get_registered_language_packs": get_registered_language_packs,
             "register_language_pack": register_language_pack,
             "resolve_file_policy": resolve_file_policy,
+        }
+        return exported[name]
+    if name in {
+        "AdapterEval",
+        "AdapterGap",
+        "AdapterProbe",
+        "collect_adapter_gaps",
+        "evaluate_adapter_surface",
+        "probe_adapter",
+    }:
+        from grace.adapter_tools import (
+            AdapterEval,
+            AdapterGap,
+            AdapterProbe,
+            collect_adapter_gaps,
+            evaluate_adapter_surface,
+            probe_adapter,
+        )
+
+        exported = {
+            "AdapterEval": AdapterEval,
+            "AdapterGap": AdapterGap,
+            "AdapterProbe": AdapterProbe,
+            "collect_adapter_gaps": collect_adapter_gaps,
+            "evaluate_adapter_surface": evaluate_adapter_surface,
+            "probe_adapter": probe_adapter,
         }
         return exported[name]
     if name in {

@@ -20,6 +20,7 @@ The Go pilot adapter lives in [docs/go_adapter.md](C:\Users\luckydiss\Documents\
 The shared data-driven adapter architecture lives in [docs/universal_language_integration.md](C:\Users\luckydiss\Documents\grace_framework\docs\universal_language_integration.md).
 The declarative language-pack registry lives in [docs/language_packs.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_packs.md).
 The deterministic file-policy layer lives in [docs/file_policy.md](C:\Users\luckydiss\Documents\grace_framework\docs\file_policy.md).
+The adapter probe and gap diagnostics live in [docs/adapter_probe.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_probe.md).
 The adapter compatibility matrix lives in [docs/adapter_compatibility.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_compatibility.md).
 The release hardening gates live in [docs/release_criteria.md](C:\Users\luckydiss\Documents\grace_framework\docs\release_criteria.md).
 The deterministic path-query layer lives in [docs/path_query.md](C:\Users\luckydiss\Documents\grace_framework\docs\path_query.md).
@@ -94,6 +95,16 @@ GRACE now classifies repository files before bootstrap:
 
 Repo roots can refine this with `[tool.grace.file_policy]` in `pyproject.toml`.
 This lets large mixed repositories stay deterministic without forcing bootstrap into `.json`, `.md`, `dist/`, or `generated/` trees.
+
+## Adapter Diagnostics
+
+GRACE now includes deterministic adapter diagnostics for unfamiliar repositories:
+
+- `grace adapter probe <file>` reports language-pack routing, selected adapter class, file class, and policy verdict
+- `grace adapter gaps <path>` produces a deterministic backlog of `preview_only`, `unsupported`, `ignored`, or fallback-routed files
+- `grace adapter eval <path>` summarizes repository coverage so an agent can decide whether bootstrap can start immediately or framework extension work is required first
+
+This makes repository onboarding explicit: an agent can inspect coverage gaps before attempting bootstrap or new language-pack work.
 
 ## Bootstrap Layer
 

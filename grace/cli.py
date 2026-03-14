@@ -1534,12 +1534,15 @@ def apply_plan_command(plan_file: Path, dry_run: bool, preview: bool, as_json: b
 
 
 # @grace.anchor grace.cli.main
-# @grace.complexity 3
-# @grace.links grace.clean_command.clean_command, grace.bootstrap_command.bootstrap_command
+# @grace.complexity 2
+# @grace.belief CLI entrypoint should lazily wire optional read-only command groups so self-hosted imports stay cheap and command registration remains deterministic.
 def main(argv: list[str] | None = None) -> int:
+    from grace.adapter_command import adapter_group
     from grace.bootstrap_command import bootstrap_command
     from grace.clean_command import clean_command
 
+    if "adapter" not in app.commands:
+        app.add_command(adapter_group, name="adapter")
     if "bootstrap" not in app.commands:
         app.add_command(bootstrap_command, name="bootstrap")
     if "clean" not in app.commands:

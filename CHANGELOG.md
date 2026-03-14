@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added `grace.adapter_tools` plus `grace adapter probe/gaps/eval` so agents can inspect language-pack routing, file-policy verdicts, and repository coverage gaps before bootstrap or extension work.
+- Added `docs/adapter_probe.md` and focused runtime/CLI coverage for deterministic adapter diagnostics.
 - Added `grace.file_policy` plus `[tool.grace.file_policy]` overrides so repositories can classify files as `safe_apply`, `preview_only`, `unsupported`, or `ignore` before bootstrap.
 - Added `docs/file_policy.md` and policy-focused tests for bootstrap safety and repo-config overrides.
 - Added declarative `GraceLanguagePack` / `GraceLanguagePackStatus` metadata plus `grace.spec_registry` so built-in language routing is pack-driven instead of branch-driven.

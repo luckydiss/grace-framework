@@ -270,6 +270,32 @@ Outcome:
 
 GRACE can now distinguish bootstrap-safe code from preview-only, unsupported, or ignored files before mutation begins.
 
+## v1.3 - Adapter Probe / Gaps / Eval CLI
+
+Goal:
+
+Give agents deterministic diagnostics for unfamiliar repositories before bootstrap or framework-extension work begins.
+
+Delivered scope:
+
+- added `grace.adapter_tools` for file-level probe, repo-level gap collection, and adapter-surface evaluation
+- added `grace adapter probe <file>`
+- added `grace adapter gaps <path>`
+- added `grace adapter eval <path>`
+- added focused runtime and CLI coverage
+- added `docs/adapter_probe.md`
+
+Outcome:
+
+Agents can now inspect pack routing, file-policy verdicts, and repo-level coverage gaps before they attempt bootstrap or new language-pack work.
+
+Explicit non-goals for this stage:
+
+- new adapter runtimes
+- construct-pack expansion
+- parser or patch semantics changes
+- repository mutation beyond existing bootstrap and patch workflows
+
 Explicit non-goals for this stage:
 
 - runtime feature expansion
