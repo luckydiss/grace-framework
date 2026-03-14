@@ -80,7 +80,9 @@ from grace.validator import (
 
 
 # @grace.anchor grace.api._public_api
-# @grace.complexity 4
+# @grace.complexity 6
+# @grace.belief The public API needs to expose file-policy primitives because agents will use them to reason about bootstrap safety before deciding whether a new repository requires framework extension work.
+# @grace.links grace.api.__getattr__
 def _public_api() -> tuple[str, ...]:
     return (
         "ApplyPlanFailure",
@@ -93,7 +95,10 @@ def _public_api() -> tuple[str, ...]:
         "GoAdapter",
         "GRACE_MAP_VERSION",
         "GraceBlockMetadata",
+        "GraceFileClass",
         "GraceFileModel",
+        "GraceFilePolicy",
+        "GraceFilePolicyVerdict",
         "GraceLanguageAdapter",
         "GraceLanguagePack",
         "GraceLanguagePackStatus",
@@ -177,6 +182,7 @@ def _public_api() -> tuple[str, ...]:
         "query_path_edge_types",
         "read_anchor_context",
         "register_language_pack",
+        "resolve_file_policy",
         "try_parse_python_file",
         "validate_file",
         "validate_project",
@@ -184,12 +190,16 @@ def _public_api() -> tuple[str, ...]:
 
 
 # @grace.anchor grace.api.__getattr__
-# @grace.complexity 6
-# @grace.belief Public lazy exports should stay centralized around declarative pack and adapter APIs so downstream tooling can introspect extension surfaces without importing unrelated runtime modules eagerly.
+# @grace.complexity 7
+# @grace.belief Public lazy exports need to stay explicit even as the framework grows, because shell-driven agents rely on predictable import surfaces rather than wildcard module introspection.
+# @grace.links grace.api._public_api
 def __getattr__(name: str) -> object:
     if name in {
         "FallbackTextAdapter",
         "GoAdapter",
+        "GraceFileClass",
+        "GraceFilePolicy",
+        "GraceFilePolicyVerdict",
         "GraceLanguageAdapter",
         "GraceLanguagePack",
         "GraceLanguagePackStatus",
@@ -204,8 +214,10 @@ def __getattr__(name: str) -> object:
         "get_language_pack_for_path",
         "get_registered_language_packs",
         "register_language_pack",
+        "resolve_file_policy",
     }:
         from grace.fallback_adapter import FallbackTextAdapter
+        from grace.file_policy import GraceFileClass, GraceFilePolicy, GraceFilePolicyVerdict, resolve_file_policy
         from grace.go_adapter import GoAdapter
         from grace.language_adapter import GraceLanguageAdapter, get_language_adapter_for_path
         from grace.language_pack import GraceLanguagePack, GraceLanguagePackStatus, build_treesitter_pack
@@ -226,6 +238,9 @@ def __getattr__(name: str) -> object:
         exported = {
             "FallbackTextAdapter": FallbackTextAdapter,
             "GoAdapter": GoAdapter,
+            "GraceFileClass": GraceFileClass,
+            "GraceFilePolicy": GraceFilePolicy,
+            "GraceFilePolicyVerdict": GraceFilePolicyVerdict,
             "GraceLanguageAdapter": GraceLanguageAdapter,
             "GraceLanguagePack": GraceLanguagePack,
             "GraceLanguagePackStatus": GraceLanguagePackStatus,
@@ -240,6 +255,7 @@ def __getattr__(name: str) -> object:
             "get_language_pack_for_path": get_language_pack_for_path,
             "get_registered_language_packs": get_registered_language_packs,
             "register_language_pack": register_language_pack,
+            "resolve_file_policy": resolve_file_policy,
         }
         return exported[name]
     if name in {

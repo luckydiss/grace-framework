@@ -81,6 +81,19 @@ To add a new language later:
 
 Current runtime support includes Python plus limited `.ts` and `.go` pilots, backed by a shared Tree-sitter engine, a declarative pack registry, and a text fallback for unsupported suffixes.
 
+## File Policy Boundary
+
+Language packs decide which adapter handles a suffix.
+File policy decides whether a file is:
+
+- `safe_apply`
+- `preview_only`
+- `unsupported`
+- `ignore`
+
+This keeps bootstrap deterministic for mixed repositories where some files are code, some are data, and some are generated output.
+The normative current reference is `docs/file_policy.md`.
+
 ## Adapter Authoring Workflow
 
 The normative implementation checklist for future adapters lives in `docs/adapter_authoring.md`.

@@ -252,6 +252,24 @@ Outcome:
 
 GRACE still preserves the same core semantic contracts, but adapter routing now scales through pack registration instead of hard-coded branching.
 
+## v1.2 - File Policy Layer
+
+Goal:
+
+Classify repository files into deterministic bootstrap-safety buckets so GRACE can onboard mixed repositories without trying to annotate data files or generated output.
+
+Delivered scope:
+
+- added `grace.file_policy`
+- added repo-level file-policy overrides under `[tool.grace.file_policy]`
+- connected bootstrap candidate discovery to `safe_apply` policy only
+- taught repo-root scope filtering to respect configured `ignore` and `generated` paths
+- added focused tests and `docs/file_policy.md`
+
+Outcome:
+
+GRACE can now distinguish bootstrap-safe code from preview-only, unsupported, or ignored files before mutation begins.
+
 Explicit non-goals for this stage:
 
 - runtime feature expansion

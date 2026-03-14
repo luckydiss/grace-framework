@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added `grace.file_policy` plus `[tool.grace.file_policy]` overrides so repositories can classify files as `safe_apply`, `preview_only`, `unsupported`, or `ignore` before bootstrap.
+- Added `docs/file_policy.md` and policy-focused tests for bootstrap safety and repo-config overrides.
 - Added declarative `GraceLanguagePack` / `GraceLanguagePackStatus` metadata plus `grace.spec_registry` so built-in language routing is pack-driven instead of branch-driven.
 - Added `docs/language_packs.md` and runtime coverage for built-in Python, TypeScript, and Go language packs.
 - Added a shared data-driven `TreeSitterAdapterBase` and `TreeSitterLanguageSpec` so Python, TypeScript, and Go can reuse one AST-driven execution engine instead of duplicating parser loops per language.

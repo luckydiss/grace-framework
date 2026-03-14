@@ -19,6 +19,7 @@ The TypeScript pilot adapter lives in [docs/typescript_adapter.md](C:\Users\luck
 The Go pilot adapter lives in [docs/go_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\go_adapter.md).
 The shared data-driven adapter architecture lives in [docs/universal_language_integration.md](C:\Users\luckydiss\Documents\grace_framework\docs\universal_language_integration.md).
 The declarative language-pack registry lives in [docs/language_packs.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_packs.md).
+The deterministic file-policy layer lives in [docs/file_policy.md](C:\Users\luckydiss\Documents\grace_framework\docs\file_policy.md).
 The adapter compatibility matrix lives in [docs/adapter_compatibility.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_compatibility.md).
 The release hardening gates live in [docs/release_criteria.md](C:\Users\luckydiss\Documents\grace_framework\docs\release_criteria.md).
 The deterministic path-query layer lives in [docs/path_query.md](C:\Users\luckydiss\Documents\grace_framework\docs\path_query.md).
@@ -81,6 +82,18 @@ GRACE currently supports:
 
 All three adapters normalize into the same `GraceFileModel` contract, so validator, linter, map, query, impact, read, planner, and patch layers remain unchanged.
 Adapter growth is now guided by a reusable authoring/test workflow, a declarative language-pack registry, and a shared Tree-sitter execution engine rather than one-off per-language parser loops.
+
+## File Policy Layer
+
+GRACE now classifies repository files before bootstrap:
+
+- `safe_apply` for bootstrap-safe code handled by registered language packs
+- `preview_only` for code-like suffixes that still need construct or language-pack work
+- `unsupported` for data and docs formats without a deterministic inline comment-host policy
+- `ignore` for generated or repository-noise paths
+
+Repo roots can refine this with `[tool.grace.file_policy]` in `pyproject.toml`.
+This lets large mixed repositories stay deterministic without forcing bootstrap into `.json`, `.md`, `dist/`, or `generated/` trees.
 
 ## Bootstrap Layer
 

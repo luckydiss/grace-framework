@@ -14,15 +14,29 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 # @grace.anchor grace.repo_config.GraceRepoConfig
-# @grace.complexity 1
+# @grace.complexity 4
+# @grace.belief Repo-level file policy only scales if include and exclude stay separate from bootstrap-safety overrides, so config needs explicit pattern buckets rather than overloaded branch logic.
+# @grace.links grace.repo_config.load_repo_config
 class GraceRepoConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     root: Path
     include: tuple[str, ...] = Field(default_factory=tuple)
     exclude: tuple[str, ...] = Field(default_factory=tuple)
+    ignore: tuple[str, ...] = Field(default_factory=tuple)
+    generated: tuple[str, ...] = Field(default_factory=tuple)
+    preview_only: tuple[str, ...] = Field(default_factory=tuple)
+    unsupported: tuple[str, ...] = Field(default_factory=tuple)
 
-    @field_validator("include", "exclude", mode="before")
+    @field_validator(
+        "include",
+        "exclude",
+        "ignore",
+        "generated",
+        "preview_only",
+        "unsupported",
+        mode="before",
+    )
     @classmethod
     def _coerce_patterns(cls, value: object) -> object:
         if value is None:
@@ -33,7 +47,8 @@ class GraceRepoConfig(BaseModel):
 
 
 # @grace.anchor grace.repo_config.load_repo_config
-# @grace.complexity 4
+# @grace.complexity 3
+# @grace.belief Repo config loading must keep scope and file-policy overrides in one deterministic root document so agents do not split repository policy across multiple implicit sources.
 def load_repo_config(path: str | Path) -> GraceRepoConfig | None:
     candidate = Path(path).expanduser().resolve()
     search_root = candidate if candidate.is_dir() else candidate.parent
@@ -47,10 +62,15 @@ def load_repo_config(path: str | Path) -> GraceRepoConfig | None:
         grace_section = payload.get("tool", {}).get("grace")
         if grace_section is None:
             continue
+        file_policy_section = grace_section.get("file_policy") or {}
         return GraceRepoConfig(
             root=current_dir,
             include=_normalize_patterns(grace_section.get("include")),
             exclude=_normalize_patterns(grace_section.get("exclude")),
+            ignore=_normalize_patterns(file_policy_section.get("ignore")),
+            generated=_normalize_patterns(file_policy_section.get("generated")),
+            preview_only=_normalize_patterns(file_policy_section.get("preview_only")),
+            unsupported=_normalize_patterns(file_policy_section.get("unsupported")),
         )
 
     return None
@@ -58,6 +78,7 @@ def load_repo_config(path: str | Path) -> GraceRepoConfig | None:
 
 # @grace.anchor grace.repo_config.candidate_in_repo_scope
 # @grace.complexity 3
+# @grace.belief Repo-root discovery should deterministically exclude configured ignore and generated paths so repository-scale commands stay green without per-command path curation.
 def candidate_in_repo_scope(
     config: GraceRepoConfig | None,
     requested_path: str | Path,
@@ -84,6 +105,10 @@ def candidate_in_repo_scope(
     if config.include and not _matches_any(relative_path, config.include):
         return False
     if config.exclude and _matches_any(relative_path, config.exclude):
+        return False
+    if config.ignore and _matches_any(relative_path, config.ignore):
+        return False
+    if config.generated and _matches_any(relative_path, config.generated):
         return False
     return True
 

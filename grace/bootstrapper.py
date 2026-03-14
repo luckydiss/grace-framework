@@ -123,8 +123,11 @@ BootstrapResult = BootstrapSuccess | BootstrapFailure
 
 # @grace.anchor grace.bootstrapper.discover_bootstrap_candidates
 # @grace.complexity 5
-# @grace.links grace.language_adapter.get_language_adapter_for_path
+# @grace.belief Bootstrap only stays repo-safe if candidate discovery consults deterministic file policy before asking adapters to scaffold annotations into mixed code, docs, data, and generated trees.
+# @grace.links grace.file_policy.resolve_file_policy
 def discover_bootstrap_candidates(path: str | Path) -> tuple[Path, ...]:
+    from grace.file_policy import GraceFilePolicyVerdict, resolve_file_policy
+
     resolved_path = Path(path).expanduser().resolve()
     try:
         repo_config = _load_repo_config(resolved_path)
@@ -132,6 +135,12 @@ def discover_bootstrap_candidates(path: str | Path) -> tuple[Path, ...]:
         raise ValueError(str(exc)) from exc
 
     if resolved_path.is_file():
+        policy = resolve_file_policy(resolved_path, repo_config)
+        if policy.verdict is not GraceFilePolicyVerdict.SAFE_APPLY:
+            raise ValueError(
+                f"{resolved_path} is not safe for GRACE bootstrap: "
+                f"{policy.verdict.value} ({policy.reason})"
+            )
         _get_language_adapter_for_path(resolved_path)
         return (resolved_path,)
 
@@ -154,6 +163,11 @@ def discover_bootstrap_candidates(path: str | Path) -> tuple[Path, ...]:
                 candidate_path.read_text(encoding="utf-8")
             except (OSError, UnicodeDecodeError):
                 continue
+
+            policy = resolve_file_policy(candidate_path, repo_config)
+            if policy.verdict is not GraceFilePolicyVerdict.SAFE_APPLY:
+                continue
+
             try:
                 _get_language_adapter_for_path(candidate_path)
             except ValueError:
