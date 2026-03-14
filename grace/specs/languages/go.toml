@@ -1,0 +1,27 @@
+language_name = "go"
+file_extensions = [".go"]
+status = "pilot"
+bootstrap_safe = true
+adapter_factory = "grace.go_adapter:GoAdapter"
+line_comment_prefixes = ["//"]
+
+[grammar]
+provider = "python_callable"
+target = "tree_sitter_go:language"
+
+[[queries]]
+query = "(source_file (function_declaration name: (identifier) @name) @block)"
+kind = "function"
+symbol_capture = "name"
+
+[[queries]]
+query = "(source_file (method_declaration receiver: (parameter_list (parameter_declaration type: (_) @owner)) name: (field_identifier) @name) @block)"
+kind = "method"
+symbol_capture = "name"
+owner_capture = "owner"
+qualified_name_template = "{owner_name}.{symbol_name}"
+
+[[queries]]
+query = "(source_file (type_declaration (type_spec name: (type_identifier) @name type: (struct_type)) @block))"
+kind = "class"
+symbol_capture = "name"

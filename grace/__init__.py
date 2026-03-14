@@ -98,6 +98,7 @@ def _public_api() -> tuple[str, ...]:
         "FallbackTextAdapter",
         "GoAdapter",
         "GRACE_MAP_VERSION",
+        "GrammarInstallRecord",
         "GraceBlockMetadata",
         "GraceConstructPack",
         "GraceFileClass",
@@ -154,6 +155,7 @@ def _public_api() -> tuple[str, ...]:
         "ValidationSuccess",
         "apply_construct_packs",
         "apply_patch_plan",
+        "build_grammar_from_source",
         "build_anchor_neighbors",
         "build_file_map",
         "build_plan_skeleton",
@@ -174,10 +176,17 @@ def _public_api() -> tuple[str, ...]:
         "get_registered_language_packs",
         "impact_direct",
         "impact_summary",
+        "install_grammar_record",
         "impact_transitive",
         "lint_file",
         "lint_project",
+        "list_installed_grammars",
         "load_patch_plan",
+        "load_builtin_construct_packs",
+        "load_builtin_language_pack",
+        "load_installed_grammar_record",
+        "load_registered_builtin_language_packs",
+        "load_repo_spec_paths",
         "map_to_dict",
         "parse_python_file",
         "patch_block",
@@ -196,6 +205,7 @@ def _public_api() -> tuple[str, ...]:
         "register_construct_pack",
         "register_language_pack",
         "resolve_file_policy",
+        "resolve_grammar_cache_dir",
         "try_parse_python_file",
         "validate_file",
         "validate_project",
@@ -209,6 +219,7 @@ def __getattr__(name: str) -> object:
     if name in {
         "FallbackTextAdapter",
         "GoAdapter",
+        "GrammarInstallRecord",
         "GraceConstructPack",
         "GraceFileClass",
         "GraceFilePolicy",
@@ -223,24 +234,47 @@ def __getattr__(name: str) -> object:
         "TypeScriptAdapter",
         "apply_construct_packs",
         "build_treesitter_pack",
+        "build_grammar_from_source",
         "get_construct_pack",
         "get_construct_packs",
         "get_language_adapter_for_path",
         "get_language_pack",
         "get_language_pack_for_path",
         "get_registered_language_packs",
+        "install_grammar_record",
+        "list_installed_grammars",
+        "load_builtin_construct_packs",
+        "load_builtin_language_pack",
+        "load_installed_grammar_record",
+        "load_registered_builtin_language_packs",
+        "load_repo_spec_paths",
         "register_construct_pack",
         "register_language_pack",
         "resolve_file_policy",
+        "resolve_grammar_cache_dir",
     }:
         from grace.construct_pack import GraceConstructPack, apply_construct_packs
         from grace.construct_registry import get_construct_pack, get_construct_packs, register_construct_pack
         from grace.fallback_adapter import FallbackTextAdapter
         from grace.file_policy import GraceFileClass, GraceFilePolicy, GraceFilePolicyVerdict, resolve_file_policy
         from grace.go_adapter import GoAdapter
+        from grace.grammar_manager import (
+            GrammarInstallRecord,
+            build_grammar_from_source,
+            install_grammar_record,
+            list_installed_grammars,
+            load_installed_grammar_record,
+            resolve_grammar_cache_dir,
+        )
         from grace.language_adapter import GraceLanguageAdapter, get_language_adapter_for_path
         from grace.language_pack import GraceLanguagePack, GraceLanguagePackStatus, build_treesitter_pack
         from grace.python_adapter import PythonAdapter
+        from grace.spec_loader import (
+            load_builtin_construct_packs,
+            load_builtin_language_pack,
+            load_registered_builtin_language_packs,
+            load_repo_spec_paths,
+        )
         from grace.spec_registry import (
             get_language_pack,
             get_language_pack_for_path,
@@ -257,6 +291,7 @@ def __getattr__(name: str) -> object:
         exported = {
             "FallbackTextAdapter": FallbackTextAdapter,
             "GoAdapter": GoAdapter,
+            "GrammarInstallRecord": GrammarInstallRecord,
             "GraceConstructPack": GraceConstructPack,
             "GraceFileClass": GraceFileClass,
             "GraceFilePolicy": GraceFilePolicy,
@@ -270,6 +305,7 @@ def __getattr__(name: str) -> object:
             "TreeSitterLanguageSpec": TreeSitterLanguageSpec,
             "TypeScriptAdapter": TypeScriptAdapter,
             "apply_construct_packs": apply_construct_packs,
+            "build_grammar_from_source": build_grammar_from_source,
             "build_treesitter_pack": build_treesitter_pack,
             "get_construct_pack": get_construct_pack,
             "get_construct_packs": get_construct_packs,
@@ -277,9 +313,17 @@ def __getattr__(name: str) -> object:
             "get_language_pack": get_language_pack,
             "get_language_pack_for_path": get_language_pack_for_path,
             "get_registered_language_packs": get_registered_language_packs,
+            "install_grammar_record": install_grammar_record,
+            "list_installed_grammars": list_installed_grammars,
+            "load_builtin_construct_packs": load_builtin_construct_packs,
+            "load_builtin_language_pack": load_builtin_language_pack,
+            "load_installed_grammar_record": load_installed_grammar_record,
+            "load_registered_builtin_language_packs": load_registered_builtin_language_packs,
+            "load_repo_spec_paths": load_repo_spec_paths,
             "register_construct_pack": register_construct_pack,
             "register_language_pack": register_language_pack,
             "resolve_file_policy": resolve_file_policy,
+            "resolve_grammar_cache_dir": resolve_grammar_cache_dir,
         }
         return exported[name]
     if name in {

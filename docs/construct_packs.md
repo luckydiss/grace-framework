@@ -1,6 +1,6 @@
 # Construct Packs
 
-GRACE `v1.4` adds declarative construct packs on top of language packs.
+GRACE `v1.4+` adds declarative construct packs on top of language packs.
 
 ## Purpose
 
@@ -19,6 +19,12 @@ Construct packs answer:
 This keeps extension work scoped to missing shapes instead of forcing a full new adapter.
 
 ## Current model
+
+Construct packs are loaded from external TOML files:
+
+- built-in files in `grace/specs/constructs/<language>/*.toml`
+- repo-local files in `.grace/specs/constructs/<language>/*.toml`
+- optional extra directories from `[tool.grace.specs.construct_dirs]`
 
 A construct pack may extend:
 

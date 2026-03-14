@@ -1,7 +1,7 @@
 # @grace.module grace.construct_registry
-# @grace.purpose Register declarative construct packs so agents can extend language coverage through metadata instead of one-off adapter code.
+# @grace.purpose Register declarative construct packs so agents can extend language coverage through external metadata rather than in-code query builders.
 # @grace.interfaces register_construct_pack, get_construct_pack, get_construct_packs
-# @grace.invariant Construct-pack registration must remain deterministic and language-scoped; default packs should bootstrap once and return stable ordering by pack name.
+# @grace.invariant Built-in construct packs are loaded from external TOML specs exactly once and remain deterministic by language name and pack name.
 
 from __future__ import annotations
 
@@ -35,47 +35,6 @@ def get_construct_packs(language_name: str) -> tuple[GraceConstructPack, ...]:
     return tuple(packs[name] for name in sorted(packs))
 
 
-def _build_typescript_tsx_function_components_pack() -> GraceConstructPack:
-    from tree_sitter_typescript import language_tsx
-
-    from grace.models import BlockKind
-    from grace.treesitter_base import TreeSitterBlockQuerySpec
-
-    return GraceConstructPack(
-        pack_name="typescript.tsx_function_components",
-        language_name="typescript",
-        additional_file_extensions=(".tsx",),
-        override_language_factory=language_tsx,
-        additional_block_query_specs=(
-            TreeSitterBlockQuerySpec(
-                query="(program (export_statement declaration: (function_declaration name: (identifier) @name) @block))",
-                kind=BlockKind.FUNCTION,
-                symbol_capture="name",
-                promote_async_kind=BlockKind.ASYNC_FUNCTION,
-            ),
-            TreeSitterBlockQuerySpec(
-                query="(program (export_statement declaration: (lexical_declaration (variable_declarator name: (identifier) @name value: (arrow_function) @block))))",
-                kind=BlockKind.FUNCTION,
-                symbol_capture="name",
-                promote_async_kind=BlockKind.ASYNC_FUNCTION,
-                line_start_capture="block",
-            ),
-            TreeSitterBlockQuerySpec(
-                query="(program (export_statement declaration: (class_declaration name: (type_identifier) @name) @block))",
-                kind=BlockKind.CLASS,
-                symbol_capture="name",
-            ),
-            TreeSitterBlockQuerySpec(
-                query="(program (export_statement declaration: (lexical_declaration (variable_declarator name: (identifier) @owner value: (object (method_definition name: (property_identifier) @name) @block)))))",
-                kind=BlockKind.METHOD,
-                symbol_capture="name",
-                owner_capture="owner",
-                qualified_name_template="{owner_name}.{symbol_name}",
-            ),
-        ),
-    )
-
-
 # @grace.anchor grace.construct_registry._ensure_default_construct_packs
 # @grace.complexity 2
 def _ensure_default_construct_packs() -> None:
@@ -83,7 +42,11 @@ def _ensure_default_construct_packs() -> None:
     if _DEFAULT_CONSTRUCT_PACKS_REGISTERED:
         return
 
-    register_construct_pack(_build_typescript_tsx_function_components_pack())
+    from grace.spec_loader import load_builtin_construct_packs, load_registered_builtin_language_packs
+
+    for language_pack in load_registered_builtin_language_packs():
+        for construct_pack in load_builtin_construct_packs(language_pack.language_name):
+            register_construct_pack(construct_pack)
     _DEFAULT_CONSTRUCT_PACKS_REGISTERED = True
 
 

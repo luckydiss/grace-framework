@@ -1,0 +1,43 @@
+language_name = "typescript"
+file_extensions = [".ts"]
+status = "pilot"
+bootstrap_safe = true
+adapter_factory = "grace.typescript_adapter:TypeScriptAdapter"
+line_comment_prefixes = ["//"]
+block_comment_delimiters = [["/*", "*/"]]
+
+[grammar]
+provider = "python_callable"
+target = "tree_sitter_typescript:language_typescript"
+
+[[queries]]
+query = "(program (function_declaration name: (identifier) @name) @block)"
+kind = "function"
+symbol_capture = "name"
+promote_async_kind = "async_function"
+
+[[queries]]
+query = "(program (lexical_declaration (variable_declarator name: (identifier) @name value: (arrow_function) @block)))"
+kind = "function"
+symbol_capture = "name"
+line_start_capture = "block"
+promote_async_kind = "async_function"
+
+[[queries]]
+query = "(program (class_declaration name: (type_identifier) @name) @block)"
+kind = "class"
+symbol_capture = "name"
+
+[[queries]]
+query = "(class_declaration name: (type_identifier) @owner body: (class_body (method_definition name: (property_identifier) @name) @block))"
+kind = "method"
+symbol_capture = "name"
+owner_capture = "owner"
+qualified_name_template = "{owner_name}.{symbol_name}"
+
+[[queries]]
+query = "(program (lexical_declaration (variable_declarator name: (identifier) @owner value: (object (method_definition name: (property_identifier) @name) @block))))"
+kind = "method"
+symbol_capture = "name"
+owner_capture = "owner"
+qualified_name_template = "{owner_name}.{symbol_name}"

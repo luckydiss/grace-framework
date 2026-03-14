@@ -305,6 +305,27 @@ Outcome:
 
 Agents can now distinguish between general adapter coverage and actual bootstrap readiness before they mutate a mixed repository.
 
+## v1.6 - External Spec Loader
+
+Goal:
+
+Move built-in language and construct packs out of Python registry code and into external TOML spec files so repositories can extend GRACE without editing core modules.
+
+Delivered scope:
+
+- added `grace/spec_loader.py`
+- added built-in TOML language specs under `grace/specs/languages/`
+- added built-in TOML construct specs under `grace/specs/constructs/`
+- added repo-local spec discovery under `.grace/specs/...`
+- added `[tool.grace.specs]` and `[tool.grace.grammar]` repo config support
+- added `grace/grammar_manager.py` and `grace/grammar_command.py`
+- added `grace grammar list/install/build`
+- added focused loader, repo-local spec, and grammar tests
+
+Outcome:
+
+GRACE now supports zero-code language and construct extension through external spec files plus explicit grammar records, while keeping core parser semantics unchanged.
+
 ## v1.3 - Adapter Probe / Gaps / Eval CLI
 
 Goal:

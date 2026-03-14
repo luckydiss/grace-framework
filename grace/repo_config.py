@@ -27,6 +27,9 @@ class GraceRepoConfig(BaseModel):
     generated: tuple[str, ...] = Field(default_factory=tuple)
     preview_only: tuple[str, ...] = Field(default_factory=tuple)
     unsupported: tuple[str, ...] = Field(default_factory=tuple)
+    language_spec_dirs: tuple[str, ...] = Field(default_factory=tuple)
+    construct_spec_dirs: tuple[str, ...] = Field(default_factory=tuple)
+    grammar_cache_dir: str = ".grace/grammars"
 
     @field_validator(
         "include",
@@ -35,6 +38,8 @@ class GraceRepoConfig(BaseModel):
         "generated",
         "preview_only",
         "unsupported",
+        "language_spec_dirs",
+        "construct_spec_dirs",
         mode="before",
     )
     @classmethod
@@ -63,6 +68,8 @@ def load_repo_config(path: str | Path) -> GraceRepoConfig | None:
         if grace_section is None:
             continue
         file_policy_section = grace_section.get("file_policy") or {}
+        specs_section = grace_section.get("specs") or {}
+        grammar_section = grace_section.get("grammar") or {}
         return GraceRepoConfig(
             root=current_dir,
             include=_normalize_patterns(grace_section.get("include")),
@@ -71,6 +78,9 @@ def load_repo_config(path: str | Path) -> GraceRepoConfig | None:
             generated=_normalize_patterns(file_policy_section.get("generated")),
             preview_only=_normalize_patterns(file_policy_section.get("preview_only")),
             unsupported=_normalize_patterns(file_policy_section.get("unsupported")),
+            language_spec_dirs=_normalize_patterns(specs_section.get("language_dirs")),
+            construct_spec_dirs=_normalize_patterns(specs_section.get("construct_dirs")),
+            grammar_cache_dir=str(grammar_section.get("cache_dir") or ".grace/grammars"),
         )
 
     return None

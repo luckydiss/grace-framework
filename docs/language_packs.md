@@ -1,10 +1,16 @@
 # Language Packs
 
-GRACE `v1.1` introduces declarative language packs as the next step after the shared Tree-sitter adapter base.
+GRACE `v1.1+` introduces declarative language packs loaded from TOML spec files as the next step after the shared Tree-sitter adapter base.
 
 ## Purpose
 
 Language packs make adapter selection spec-driven instead of branch-driven.
+
+The runtime source of those packs is now external:
+
+- built-in files in `grace/specs/languages/*.toml`
+- repo-local files in `.grace/specs/languages/*.toml`
+- optional extra directories from `[tool.grace.specs.language_dirs]`
 
 They are intended to reduce the work needed to onboard new languages or refine existing ones without changing GRACE core semantics.
 When the base language already exists and only specific shapes are missing, GRACE now prefers a construct pack layered on top of the language pack instead of a new adapter.
@@ -34,9 +40,9 @@ Unknown suffixes still route through the deterministic fallback adapter.
 
 Before language packs, adapter selection lived in bespoke hard-coded dispatch.
 
-With packs:
+With external packs:
 
-- language metadata is centralized
+- language metadata is centralized in TOML specs rather than Python builder functions
 - dispatch can stay generic
 - wrapper adapters can reuse the same shared pack definition
 - construct packs can extend the language surface without forking the base adapter

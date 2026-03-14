@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added `grace.spec_loader` plus built-in TOML specs under `grace/specs/` so language and construct routing now come from external files instead of Python builder functions.
+- Added repo-local spec discovery under `.grace/specs/...` plus `[tool.grace.specs]` / `[tool.grace.grammar]` config support for zero-code extension workflows.
+- Added `grace.grammar_manager`, `grace.grammar_command`, and `grace grammar list/install/build` for explicit grammar cache management.
+- Added `docs/external_specs.md` and focused loader, repo-local spec, and grammar tests.
 - Added `grace.bootstrap_safety` plus `grace adapter safety` so agents can measure immediate bootstrap readiness and see exactly which files still block safe scaffold apply.
 - Added `docs/bootstrap_safety.md` and focused runtime/CLI coverage for deterministic bootstrap safety reporting.
 - Added `grace.construct_pack` and `grace.construct_registry` so missing language shapes can be onboarded declaratively as construct packs instead of bespoke adapter rewrites.

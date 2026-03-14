@@ -1540,6 +1540,7 @@ def main(argv: list[str] | None = None) -> int:
     from grace.adapter_command import adapter_group
     from grace.bootstrap_command import bootstrap_command
     from grace.clean_command import clean_command
+    from grace.grammar_command import grammar_group
 
     if "adapter" not in app.commands:
         app.add_command(adapter_group, name="adapter")
@@ -1547,6 +1548,8 @@ def main(argv: list[str] | None = None) -> int:
         app.add_command(bootstrap_command, name="bootstrap")
     if "clean" not in app.commands:
         app.add_command(clean_command, name="clean")
+    if "grammar" not in app.commands:
+        app.add_command(grammar_group, name="grammar")
     try:
         app.main(args=argv, prog_name="grace", standalone_mode=False)
     except click.ClickException as error:

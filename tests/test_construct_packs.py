@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from grace.construct_pack import apply_construct_packs
 from grace.construct_registry import get_construct_pack, get_construct_packs
-from grace.spec_registry import _build_typescript_pack, get_language_pack, get_language_pack_for_path
+from grace.spec_loader import load_builtin_language_pack
+from grace.spec_registry import get_language_pack, get_language_pack_for_path
 
 
 def test_construct_registry_exposes_builtin_typescript_tsx_pack() -> None:
@@ -19,9 +19,7 @@ def test_construct_registry_returns_deterministic_order() -> None:
 
 
 def test_apply_construct_packs_extends_typescript_spec_for_tsx() -> None:
-    typescript_pack = _build_typescript_pack()
-    base_spec = typescript_pack.base_adapter_factory().spec
-    merged = apply_construct_packs(base_spec, get_construct_packs("typescript"))
+    merged = load_builtin_language_pack("typescript").base_adapter_factory().spec
 
     assert ".ts" in merged.file_extensions
     assert ".tsx" in merged.file_extensions

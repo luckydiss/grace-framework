@@ -9,7 +9,21 @@ def test_load_repo_config_reads_tool_grace_from_nearest_pyproject(tmp_path: Path
     repo_dir = tmp_path.parent / f"{tmp_path.name}_repo_config"
     repo_dir.mkdir(parents=True, exist_ok=True)
     (repo_dir / "pyproject.toml").write_text(
-        "[tool.grace]\ninclude = [\"grace/**\"]\nexclude = [\"examples/parity/**\"]\n",
+        "\n".join(
+            [
+                "[tool.grace]",
+                'include = ["grace/**"]',
+                'exclude = ["examples/parity/**"]',
+                "",
+                "[tool.grace.specs]",
+                'language_dirs = ["custom/languages"]',
+                'construct_dirs = ["custom/constructs"]',
+                "",
+                "[tool.grace.grammar]",
+                'cache_dir = ".cache/grammars"',
+            ]
+        )
+        + "\n",
         encoding="utf-8",
     )
     nested_dir = repo_dir / "grace"
@@ -21,6 +35,9 @@ def test_load_repo_config_reads_tool_grace_from_nearest_pyproject(tmp_path: Path
     assert config.root == repo_dir.resolve()
     assert config.include == ("grace/**",)
     assert config.exclude == ("examples/parity/**",)
+    assert config.language_spec_dirs == ("custom/languages",)
+    assert config.construct_spec_dirs == ("custom/constructs",)
+    assert config.grammar_cache_dir == ".cache/grammars"
 
 
 def test_candidate_in_repo_scope_applies_exclude_at_repo_root_only() -> None:

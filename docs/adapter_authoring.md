@@ -34,13 +34,15 @@ The core remains responsible for:
 For a new adapter, follow this sequence:
 
 1. Create the adapter module.
-2. Implement `GraceLanguageAdapter`.
-3. Add adapter dispatch in `get_language_adapter_for_path(...)`.
-4. Add a small language-specific example.
-5. Add parity fixtures under `examples/parity/<language>/`.
-6. Add adapter-specific tests.
-7. Plug the adapter into the shared conformance and parity harness.
-8. Update compatibility docs and release notes.
+2. Add or update a TOML language pack under `grace/specs/languages/` or `.grace/specs/languages/`.
+3. Add construct packs under `grace/specs/constructs/<language>/` or `.grace/specs/constructs/<language>/` if the language needs extra shapes or suffixes.
+4. Implement `GraceLanguageAdapter` only when the shared Tree-sitter base or fallback adapter is insufficient.
+5. Add adapter dispatch only if you are introducing a new wrapper adapter type rather than a spec-only extension.
+6. Add a small language-specific example.
+7. Add parity fixtures under `examples/parity/<language>/`.
+8. Add adapter-specific tests.
+9. Plug the adapter into the shared conformance and parity harness.
+10. Update compatibility docs and release notes.
 
 ## Minimum Viable Adapter
 

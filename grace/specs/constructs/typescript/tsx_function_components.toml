@@ -1,0 +1,32 @@
+pack_name = "typescript.tsx_function_components"
+language_name = "typescript"
+additional_file_extensions = [".tsx"]
+
+[override_grammar]
+provider = "python_callable"
+target = "tree_sitter_typescript:language_tsx"
+
+[[queries]]
+query = "(program (export_statement declaration: (function_declaration name: (identifier) @name) @block))"
+kind = "function"
+symbol_capture = "name"
+promote_async_kind = "async_function"
+
+[[queries]]
+query = "(program (export_statement declaration: (lexical_declaration (variable_declarator name: (identifier) @name value: (arrow_function) @block))))"
+kind = "function"
+symbol_capture = "name"
+line_start_capture = "block"
+promote_async_kind = "async_function"
+
+[[queries]]
+query = "(program (export_statement declaration: (class_declaration name: (type_identifier) @name) @block))"
+kind = "class"
+symbol_capture = "name"
+
+[[queries]]
+query = "(program (export_statement declaration: (lexical_declaration (variable_declarator name: (identifier) @owner value: (object (method_definition name: (property_identifier) @name) @block)))))"
+kind = "method"
+symbol_capture = "name"
+owner_capture = "owner"
+qualified_name_template = "{owner_name}.{symbol_name}"

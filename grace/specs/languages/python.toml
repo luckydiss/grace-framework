@@ -1,0 +1,51 @@
+language_name = "python"
+file_extensions = [".py"]
+status = "reference"
+bootstrap_safe = true
+adapter_factory = "grace.python_adapter:PythonAdapter"
+line_comment_prefixes = ["#"]
+
+[grammar]
+provider = "python_callable"
+target = "tree_sitter_python:language"
+
+[[queries]]
+query = "(module (decorated_definition definition: (function_definition name: (identifier) @name) @block) @line_start)"
+kind = "function"
+symbol_capture = "name"
+block_capture = "block"
+line_start_capture = "line_start"
+promote_async_kind = "async_function"
+
+[[queries]]
+query = "(module (function_definition name: (identifier) @name) @block)"
+kind = "function"
+symbol_capture = "name"
+block_capture = "block"
+promote_async_kind = "async_function"
+
+[[queries]]
+query = "(module (decorated_definition definition: (class_definition name: (identifier) @name) @block) @line_start)"
+kind = "class"
+symbol_capture = "name"
+line_start_capture = "line_start"
+
+[[queries]]
+query = "(module (class_definition name: (identifier) @name) @block)"
+kind = "class"
+symbol_capture = "name"
+
+[[queries]]
+query = "(class_definition name: (identifier) @owner body: (block (decorated_definition definition: (function_definition name: (identifier) @name) @block) @line_start))"
+kind = "method"
+symbol_capture = "name"
+owner_capture = "owner"
+line_start_capture = "line_start"
+qualified_name_template = "{owner_name}.{symbol_name}"
+
+[[queries]]
+query = "(class_definition name: (identifier) @owner body: (block (function_definition name: (identifier) @name) @block))"
+kind = "method"
+symbol_capture = "name"
+owner_capture = "owner"
+qualified_name_template = "{owner_name}.{symbol_name}"
