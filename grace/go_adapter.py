@@ -20,55 +20,17 @@ TYPE_DECL_RE = re.compile(r"^\s*type\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s+struct
 
 
 # @grace.anchor grace.go_adapter.GoAdapter
-# @grace.complexity 6
-# @grace.belief Go should move off regex-driven target collection and onto the same declarative Tree-sitter engine as the other adapters so the third language proves the architecture scales without bespoke parser loops.
-# @grace.links grace.treesitter_base.TreeSitterAdapterBase, grace.treesitter_base.TreeSitterLanguageSpec
+# @grace.complexity 4
+# @grace.belief Go should now resolve through the same declarative pack registry as Python and TypeScript so scaling to further languages means adding pack metadata rather than new hard-coded dispatch and wrapper setup.
+# @grace.links grace.spec_registry.get_language_pack
 class GoAdapter(GraceLanguageAdapter):
     language_name = "go"
     file_extensions = (".go",)
 
     def __init__(self) -> None:
-        from tree_sitter_go import language as language_go
+        from grace.spec_registry import get_language_pack
 
-        from grace.treesitter_base import (
-            TreeSitterAdapterBase,
-            TreeSitterBlockQuerySpec,
-            TreeSitterLanguageSpec,
-        )
-
-        spec = TreeSitterLanguageSpec(
-            language_name="go",
-            file_extensions=(".go",),
-            language_factory=language_go,
-            line_comment_prefixes=("//",),
-            block_query_specs=(
-                TreeSitterBlockQuerySpec(
-                    query="(source_file (function_declaration name: (identifier) @name) @block)",
-                    kind=BlockKind.FUNCTION,
-                    symbol_capture="name",
-                ),
-                TreeSitterBlockQuerySpec(
-                    query="(source_file (method_declaration receiver: (parameter_list (parameter_declaration type: (pointer_type (type_identifier) @owner))) name: (field_identifier) @name) @block)",
-                    kind=BlockKind.METHOD,
-                    symbol_capture="name",
-                    owner_capture="owner",
-                    qualified_name_template="{owner_name}.{symbol_name}",
-                ),
-                TreeSitterBlockQuerySpec(
-                    query="(source_file (method_declaration receiver: (parameter_list (parameter_declaration type: (type_identifier) @owner)) name: (field_identifier) @name) @block)",
-                    kind=BlockKind.METHOD,
-                    symbol_capture="name",
-                    owner_capture="owner",
-                    qualified_name_template="{owner_name}.{symbol_name}",
-                ),
-                TreeSitterBlockQuerySpec(
-                    query="(source_file (type_declaration (type_spec name: (type_identifier) @name type: (struct_type)) @block))",
-                    kind=BlockKind.CLASS,
-                    symbol_capture="name",
-                ),
-            ),
-        )
-        self._base = TreeSitterAdapterBase(spec)
+        self._base = get_language_pack("go").base_adapter_factory()
         self.language_name = self._base.language_name
         self.file_extensions = self._base.file_extensions
 
@@ -94,8 +56,8 @@ class GoAdapter(GraceLanguageAdapter):
 
     # @grace.anchor grace.go_adapter.GoAdapter.build_grace_file_model
     # @grace.complexity 6
-    # @grace.belief Go now reuses the same declarative Tree-sitter engine as Python and TypeScript, so adding new languages no longer requires copying the module and block annotation state machine.
-    # @grace.links grace.treesitter_base.TreeSitterAdapterBase
+    # @grace.belief Go should now resolve through the same declarative pack registry as Python and TypeScript so scaling to further languages means adding pack metadata rather than new hard-coded dispatch and wrapper setup.
+    # @grace.links grace.spec_registry.get_language_pack
     def build_grace_file_model(self, file_path: str | Path):
         return self._base.build_grace_file_model(file_path)
 

@@ -234,6 +234,24 @@ Focus:
 - artifact policy clarification
 - release-prep regression checks on docs and public framing
 
+## v1.1 - Declarative Language Packs
+
+Goal:
+
+Replace branch-driven adapter dispatch with a declarative language-pack registry so future language onboarding can scale through metadata rather than bespoke core edits.
+
+Delivered scope:
+
+- added `grace.language_pack` as the pack metadata contract
+- added `grace.spec_registry` for built-in pack registration and extension-based dispatch
+- migrated Python, TypeScript, and Go dispatch through declarative packs while preserving wrapper adapter compatibility
+- added `docs/language_packs.md`
+- added `tests/test_language_packs.py`
+
+Outcome:
+
+GRACE still preserves the same core semantic contracts, but adapter routing now scales through pack registration instead of hard-coded branching.
+
 Explicit non-goals for this stage:
 
 - runtime feature expansion

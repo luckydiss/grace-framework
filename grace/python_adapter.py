@@ -14,73 +14,17 @@ from grace.models import GraceBlockMetadata, GraceParseIssue, ParseErrorCode
 
 
 # @grace.anchor grace.python_adapter.PythonAdapter
-# @grace.complexity 6
-# @grace.belief Python should share the declarative Tree-sitter execution path with the other adapters, but decorated definitions must still bind to the underlying function or class node so async promotion and line spans remain correct.
-# @grace.links grace.treesitter_base.TreeSitterAdapterBase
+# @grace.complexity 4
+# @grace.belief Python should now consume the same registry-backed declarative pack path as the other adapters so adding or refining language support means editing pack metadata rather than hard-coding another wrapper-local spec.
+# @grace.links grace.spec_registry.get_language_pack
 class PythonAdapter(GraceLanguageAdapter):
     language_name = "python"
     file_extensions = (".py",)
 
     def __init__(self) -> None:
-        from tree_sitter_python import language as language_python
+        from grace.spec_registry import get_language_pack
 
-        from grace.models import BlockKind
-        from grace.treesitter_base import (
-            TreeSitterAdapterBase,
-            TreeSitterBlockQuerySpec,
-            TreeSitterLanguageSpec,
-        )
-
-        spec = TreeSitterLanguageSpec(
-            language_name="python",
-            file_extensions=(".py",),
-            language_factory=language_python,
-            line_comment_prefixes=("#",),
-            block_query_specs=(
-                TreeSitterBlockQuerySpec(
-                    query="(module (decorated_definition definition: (function_definition name: (identifier) @name) @block) @line_start)",
-                    kind=BlockKind.FUNCTION,
-                    symbol_capture="name",
-                    block_capture="block",
-                    line_start_capture="line_start",
-                    promote_async_kind=BlockKind.ASYNC_FUNCTION,
-                ),
-                TreeSitterBlockQuerySpec(
-                    query="(module (function_definition name: (identifier) @name) @block)",
-                    kind=BlockKind.FUNCTION,
-                    symbol_capture="name",
-                    block_capture="block",
-                    promote_async_kind=BlockKind.ASYNC_FUNCTION,
-                ),
-                TreeSitterBlockQuerySpec(
-                    query="(module (decorated_definition definition: (class_definition name: (identifier) @name) @block) @line_start)",
-                    kind=BlockKind.CLASS,
-                    symbol_capture="name",
-                    line_start_capture="line_start",
-                ),
-                TreeSitterBlockQuerySpec(
-                    query="(module (class_definition name: (identifier) @name) @block)",
-                    kind=BlockKind.CLASS,
-                    symbol_capture="name",
-                ),
-                TreeSitterBlockQuerySpec(
-                    query="(class_definition name: (identifier) @owner body: (block (decorated_definition definition: (function_definition name: (identifier) @name) @block) @line_start))",
-                    kind=BlockKind.METHOD,
-                    symbol_capture="name",
-                    owner_capture="owner",
-                    line_start_capture="line_start",
-                    qualified_name_template="{owner_name}.{symbol_name}",
-                ),
-                TreeSitterBlockQuerySpec(
-                    query="(class_definition name: (identifier) @owner body: (block (function_definition name: (identifier) @name) @block))",
-                    kind=BlockKind.METHOD,
-                    symbol_capture="name",
-                    owner_capture="owner",
-                    qualified_name_template="{owner_name}.{symbol_name}",
-                ),
-            ),
-        )
-        self._base = TreeSitterAdapterBase(spec)
+        self._base = get_language_pack("python").base_adapter_factory()
         self.language_name = self._base.language_name
         self.file_extensions = self._base.file_extensions
 
@@ -106,8 +50,8 @@ class PythonAdapter(GraceLanguageAdapter):
 
     # @grace.anchor grace.python_adapter.PythonAdapter.build_grace_file_model
     # @grace.complexity 6
-    # @grace.belief Python now exercises the same declarative Tree-sitter execution path as other adapters so future languages can be added by spec instead of by copying parser loops.
-    # @grace.links grace.treesitter_base.TreeSitterAdapterBase
+    # @grace.belief Python should now consume the same registry-backed declarative pack path as the other adapters so adding or refining language support means editing pack metadata rather than hard-coding another wrapper-local spec.
+    # @grace.links grace.spec_registry.get_language_pack
     def build_grace_file_model(self, file_path: str | Path):
         return self._base.build_grace_file_model(file_path)
 

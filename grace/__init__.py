@@ -80,7 +80,7 @@ from grace.validator import (
 
 
 # @grace.anchor grace.api._public_api
-# @grace.complexity 3
+# @grace.complexity 4
 def _public_api() -> tuple[str, ...]:
     return (
         "ApplyPlanFailure",
@@ -95,6 +95,8 @@ def _public_api() -> tuple[str, ...]:
         "GraceBlockMetadata",
         "GraceFileModel",
         "GraceLanguageAdapter",
+        "GraceLanguagePack",
+        "GraceLanguagePackStatus",
         "GraceMap",
         "GraceMapAnchor",
         "GraceMapEdge",
@@ -144,12 +146,16 @@ def _public_api() -> tuple[str, ...]:
         "build_anchor_neighbors",
         "build_file_map",
         "build_plan_skeleton",
+        "build_treesitter_pack",
         "build_project_map",
         "collect_patch_targets",
         "extract_anchor_annotations",
         "extract_anchor_code",
         "filter_self_anchor",
         "get_language_adapter_for_path",
+        "get_language_pack",
+        "get_language_pack_for_path",
+        "get_registered_language_packs",
         "impact_direct",
         "impact_summary",
         "impact_transitive",
@@ -170,6 +176,7 @@ def _public_api() -> tuple[str, ...]:
         "query_path",
         "query_path_edge_types",
         "read_anchor_context",
+        "register_language_pack",
         "try_parse_python_file",
         "validate_file",
         "validate_project",
@@ -178,23 +185,37 @@ def _public_api() -> tuple[str, ...]:
 
 # @grace.anchor grace.api.__getattr__
 # @grace.complexity 6
-# @grace.belief The public API export surface should stay lazy even as new adapter primitives are added, so imports remain predictable for CLI and test workflows.
+# @grace.belief Public lazy exports should stay centralized around declarative pack and adapter APIs so downstream tooling can introspect extension surfaces without importing unrelated runtime modules eagerly.
 def __getattr__(name: str) -> object:
     if name in {
         "FallbackTextAdapter",
         "GoAdapter",
         "GraceLanguageAdapter",
+        "GraceLanguagePack",
+        "GraceLanguagePackStatus",
         "PythonAdapter",
         "TreeSitterAdapterBase",
         "TreeSitterBlockQuerySpec",
         "TreeSitterLanguageSpec",
         "TypeScriptAdapter",
+        "build_treesitter_pack",
         "get_language_adapter_for_path",
+        "get_language_pack",
+        "get_language_pack_for_path",
+        "get_registered_language_packs",
+        "register_language_pack",
     }:
         from grace.fallback_adapter import FallbackTextAdapter
         from grace.go_adapter import GoAdapter
         from grace.language_adapter import GraceLanguageAdapter, get_language_adapter_for_path
+        from grace.language_pack import GraceLanguagePack, GraceLanguagePackStatus, build_treesitter_pack
         from grace.python_adapter import PythonAdapter
+        from grace.spec_registry import (
+            get_language_pack,
+            get_language_pack_for_path,
+            get_registered_language_packs,
+            register_language_pack,
+        )
         from grace.treesitter_base import (
             TreeSitterAdapterBase,
             TreeSitterBlockQuerySpec,
@@ -206,12 +227,19 @@ def __getattr__(name: str) -> object:
             "FallbackTextAdapter": FallbackTextAdapter,
             "GoAdapter": GoAdapter,
             "GraceLanguageAdapter": GraceLanguageAdapter,
+            "GraceLanguagePack": GraceLanguagePack,
+            "GraceLanguagePackStatus": GraceLanguagePackStatus,
             "PythonAdapter": PythonAdapter,
             "TreeSitterAdapterBase": TreeSitterAdapterBase,
             "TreeSitterBlockQuerySpec": TreeSitterBlockQuerySpec,
             "TreeSitterLanguageSpec": TreeSitterLanguageSpec,
             "TypeScriptAdapter": TypeScriptAdapter,
+            "build_treesitter_pack": build_treesitter_pack,
             "get_language_adapter_for_path": get_language_adapter_for_path,
+            "get_language_pack": get_language_pack,
+            "get_language_pack_for_path": get_language_pack_for_path,
+            "get_registered_language_packs": get_registered_language_packs,
+            "register_language_pack": register_language_pack,
         }
         return exported[name]
     if name in {

@@ -63,30 +63,16 @@ class GraceLanguageAdapter(ABC):
 
 
 # @grace.anchor grace.language_adapter.get_language_adapter_for_path
-# @grace.complexity 4
-# @grace.links grace.fallback_adapter.FallbackTextAdapter
+# @grace.complexity 3
+# @grace.belief Adapter selection should resolve through the declarative language pack registry so new languages can be added by pack metadata instead of hard-coded suffix branches.
+# @grace.links grace.spec_registry.get_language_pack_for_path
 def get_language_adapter_for_path(path: str | Path) -> GraceLanguageAdapter:
+    from grace.spec_registry import get_language_pack_for_path
+
     source_path = Path(path)
-    suffix = source_path.suffix.lower()
-
-    if suffix == ".py":
-        global _PYTHON_ADAPTER_CLASS
-        if _PYTHON_ADAPTER_CLASS is None:
-            from grace.python_adapter import PythonAdapter
-
-            _PYTHON_ADAPTER_CLASS = PythonAdapter
-
-        return _PYTHON_ADAPTER_CLASS()
-
-    if suffix == ".ts":
-        from grace.typescript_adapter import TypeScriptAdapter
-
-        return TypeScriptAdapter()
-
-    if suffix == ".go":
-        from grace.go_adapter import GoAdapter
-
-        return GoAdapter()
+    pack = get_language_pack_for_path(source_path)
+    if pack is not None:
+        return pack.adapter_factory()
 
     from grace.fallback_adapter import FallbackTextAdapter
 

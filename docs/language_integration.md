@@ -57,13 +57,15 @@ The output must be compatible with `GraceFileModel`.
 
 ## Current Runtime Implementations
 
+- `grace/language_pack.py` defines the declarative language-pack contract.
+- `grace/spec_registry.py` registers the built-in Python, TypeScript, and Go packs and resolves adapters by file extension.
 - `grace/treesitter_base.py` provides the shared Tree-sitter execution engine and declarative language spec surface.
 - `grace/fallback_adapter.py` provides deterministic text fallback for unsupported suffixes.
 - `grace/python_adapter.py` is the reference adapter.
 - `grace/typescript_adapter.py` is the first non-Python pilot adapter.
 - `grace/go_adapter.py` is the second pilot adapter and keeps scope intentionally narrow.
 
-Python remains the normative reference implementation. The TypeScript and Go adapters prove the boundary with intentionally narrow construct coverage, while the fallback adapter keeps unsupported suffixes parseable without inventing new GRACE semantics.
+Python remains the normative reference implementation. The TypeScript and Go adapters prove the boundary with intentionally narrow construct coverage, while the fallback adapter keeps unsupported suffixes parseable without inventing new GRACE semantics. Adapter selection now routes through built-in language packs rather than hard-coded dispatch branches.
 
 ## Adding A New Language
 
@@ -75,9 +77,9 @@ To add a new language later:
 4. bind annotations to semantic entities
 5. compute block spans
 6. emit `GraceFileModel`
-7. register the adapter in language dispatch
+7. register the language pack in the spec registry
 
-Current runtime support includes Python plus limited `.ts` and `.go` pilots, backed by a shared Tree-sitter engine and a text fallback for unsupported suffixes.
+Current runtime support includes Python plus limited `.ts` and `.go` pilots, backed by a shared Tree-sitter engine, a declarative pack registry, and a text fallback for unsupported suffixes.
 
 ## Adapter Authoring Workflow
 

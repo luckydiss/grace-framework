@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added declarative `GraceLanguagePack` / `GraceLanguagePackStatus` metadata plus `grace.spec_registry` so built-in language routing is pack-driven instead of branch-driven.
+- Added `docs/language_packs.md` and runtime coverage for built-in Python, TypeScript, and Go language packs.
 - Added a shared data-driven `TreeSitterAdapterBase` and `TreeSitterLanguageSpec` so Python, TypeScript, and Go can reuse one AST-driven execution engine instead of duplicating parser loops per language.
 - Added `FallbackTextAdapter` for deterministic bootstrap parsing of unsupported suffixes without changing GRACE source-of-truth semantics.
 - Added preview-first `grace bootstrap` scaffolding with rollback-safe apply semantics for deterministic annotation bootstrapping of unannotated files and directories.

@@ -21,64 +21,17 @@ BLOCK_ANNOTATION_RE = re.compile(r"^\s*/\*\s*@grace\.(?P<name>[a-z_]+)(?:\s+(?P<
 
 
 # @grace.anchor grace.typescript_adapter.TypeScriptAdapter
-# @grace.complexity 6
-# @grace.belief TypeScript should stop owning its own annotation state machine and instead supply a declarative Tree-sitter spec so the adapter boundary scales to more languages without duplicating parser loops.
-# @grace.links grace.treesitter_base.TreeSitterAdapterBase, grace.treesitter_base.TreeSitterLanguageSpec
+# @grace.complexity 4
+# @grace.belief TypeScript should now reuse a registry-backed pack so future construct growth stays inside declarative specs rather than reintroducing wrapper-local parser configuration drift.
+# @grace.links grace.spec_registry.get_language_pack
 class TypeScriptAdapter(GraceLanguageAdapter):
     language_name = "typescript"
     file_extensions = (".ts",)
 
     def __init__(self) -> None:
-        from tree_sitter_typescript import language_typescript
+        from grace.spec_registry import get_language_pack
 
-        from grace.treesitter_base import (
-            TreeSitterAdapterBase,
-            TreeSitterBlockQuerySpec,
-            TreeSitterLanguageSpec,
-        )
-
-        spec = TreeSitterLanguageSpec(
-            language_name="typescript",
-            file_extensions=(".ts",),
-            language_factory=language_typescript,
-            line_comment_prefixes=("//",),
-            block_comment_delimiters=(("/*", "*/"),),
-            block_query_specs=(
-                TreeSitterBlockQuerySpec(
-                    query="(program (function_declaration name: (identifier) @name) @block)",
-                    kind=BlockKind.FUNCTION,
-                    symbol_capture="name",
-                    promote_async_kind=BlockKind.ASYNC_FUNCTION,
-                ),
-                TreeSitterBlockQuerySpec(
-                    query="(program (lexical_declaration (variable_declarator name: (identifier) @name value: (arrow_function) @block)))",
-                    kind=BlockKind.FUNCTION,
-                    symbol_capture="name",
-                    promote_async_kind=BlockKind.ASYNC_FUNCTION,
-                    line_start_capture="block",
-                ),
-                TreeSitterBlockQuerySpec(
-                    query="(program (class_declaration name: (type_identifier) @name) @block)",
-                    kind=BlockKind.CLASS,
-                    symbol_capture="name",
-                ),
-                TreeSitterBlockQuerySpec(
-                    query="(class_declaration name: (type_identifier) @owner body: (class_body (method_definition name: (property_identifier) @name) @block))",
-                    kind=BlockKind.METHOD,
-                    symbol_capture="name",
-                    owner_capture="owner",
-                    qualified_name_template="{owner_name}.{symbol_name}",
-                ),
-                TreeSitterBlockQuerySpec(
-                    query="(program (lexical_declaration (variable_declarator name: (identifier) @owner value: (object (method_definition name: (property_identifier) @name) @block))))",
-                    kind=BlockKind.METHOD,
-                    symbol_capture="name",
-                    owner_capture="owner",
-                    qualified_name_template="{owner_name}.{symbol_name}",
-                ),
-            ),
-        )
-        self._base = TreeSitterAdapterBase(spec)
+        self._base = get_language_pack("typescript").base_adapter_factory()
         self.language_name = self._base.language_name
         self.file_extensions = self._base.file_extensions
 
@@ -104,8 +57,8 @@ class TypeScriptAdapter(GraceLanguageAdapter):
 
     # @grace.anchor grace.typescript_adapter.TypeScriptAdapter.build_grace_file_model
     # @grace.complexity 6
-    # @grace.belief TypeScript now participates in the same data-driven Tree-sitter engine as Python and Go, so extending coverage becomes a matter of query specs instead of handwritten parser loops.
-    # @grace.links grace.treesitter_base.TreeSitterAdapterBase
+    # @grace.belief TypeScript should now reuse a registry-backed pack so future construct growth stays inside declarative specs rather than reintroducing wrapper-local parser configuration drift.
+    # @grace.links grace.spec_registry.get_language_pack
     def build_grace_file_model(self, file_path: str | Path):
         return self._base.build_grace_file_model(file_path)
 

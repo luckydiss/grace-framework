@@ -76,8 +76,8 @@ Every adapter must:
    - `GraceModuleMetadata`
    - `GraceBlockMetadata`
 
-Where possible, implement the adapter as a `TreeSitterLanguageSpec` on top of the shared `TreeSitterAdapterBase` instead of writing a new parser loop from scratch.
-This shared base also gives Tree-sitter-backed adapters deterministic bootstrap discovery without inventing a second per-language traversal path.
+Where possible, implement the language as a registered `GraceLanguagePack` backed by a `TreeSitterLanguageSpec` on top of the shared `TreeSitterAdapterBase` instead of writing a new parser loop from scratch.
+This shared base also gives Tree-sitter-backed adapters deterministic bootstrap discovery without inventing a second per-language traversal path, while the pack registry keeps runtime dispatch generic.
 
 ## Unsupported Syntax Policy
 
