@@ -21,6 +21,7 @@ The shared data-driven adapter architecture lives in [docs/universal_language_in
 The adapter compatibility matrix lives in [docs/adapter_compatibility.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_compatibility.md).
 The release hardening gates live in [docs/release_criteria.md](C:\Users\luckydiss\Documents\grace_framework\docs\release_criteria.md).
 The deterministic path-query layer lives in [docs/path_query.md](C:\Users\luckydiss\Documents\grace_framework\docs\path_query.md).
+The deterministic bootstrap scaffold layer lives in [docs/bootstrap_layer.md](C:\Users\luckydiss\Documents\grace_framework\docs\bootstrap_layer.md).
 The longer-term development plan lives in [docs/roadmap.md](C:\Users\luckydiss\Documents\grace_framework\docs\roadmap.md).
 
 ## Source Of Truth
@@ -48,6 +49,8 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 - `python_adapter`: reference adapter implemented on top of the shared Tree-sitter base.
 - `typescript_adapter`: pilot Tree-sitter-backed adapter for `.ts` files with module annotations, function declarations, async functions, arrow functions, classes, and object literal methods.
 - `go_adapter`: pilot Go adapter for `.go` files with module annotations, function declarations, receiver methods, and simple struct type declarations.
+- `bootstrapper`: generates deterministic scaffold annotations for unannotated files and directories.
+- `bootstrap_command`: exposes preview-first/apply bootstrap behavior through the CLI.
 - `validator`: enforces hard semantic and identity consistency on parsed GRACE objects.
 - `linter`: emits soft warnings for readability, maintainability, and machine-utility quality.
 - `map`: builds a derived semantic graph artifact from `GraceFileModel`, including repo-level cross-file anchor edges.
@@ -75,6 +78,17 @@ GRACE currently supports:
 
 All three adapters normalize into the same `GraceFileModel` contract, so validator, linter, map, query, impact, read, planner, and patch layers remain unchanged.
 Adapter growth is now guided by a reusable authoring/test workflow and a shared Tree-sitter execution engine rather than one-off per-language parser loops.
+
+## Bootstrap Layer
+
+GRACE now includes a deterministic scaffold layer for unannotated code:
+
+- `grace bootstrap <path>` previews scaffold changes by default
+- `grace bootstrap <path> --apply` writes annotations and validates before keeping them
+- scaffold placeholders always use `TODO` rather than guessed semantics
+- `lint` reports scaffold placeholders through `todo_placeholder` warnings so agents can turn them into a deterministic backlog
+
+Bootstrap is structural only. Meaningful `purpose`, `interfaces`, `invariant`, `belief`, and `links` still belong to a later read/plan/patch pass.
 
 ## Protocol Status
 
@@ -320,6 +334,14 @@ grace clean repo/ --dry-run --json
 grace clean repo/ --json
 ```
 
+Bootstrap an unannotated subtree:
+
+```bash
+grace bootstrap legacy_src/ --preview
+grace bootstrap legacy_src/ --apply --json
+grace lint legacy_src/ --json
+```
+
 ## Dogfood
 
 PowerShell:
@@ -358,6 +380,27 @@ grace clean grace --dry-run --json
 
 The longer workflow notes and dogfooding lessons are documented in [docs/self_hosting.md](C:\Users\luckydiss\Documents\grace_framework\docs\self_hosting.md).
 The agent workflow and baseline eval guidance are documented in [docs/agent_playbook.md](C:\Users\luckydiss\Documents\grace_framework\docs\agent_playbook.md).
+
+For an unannotated or partially annotated repository, start with:
+
+```bash
+grace bootstrap legacy_repo/ --apply --json
+grace lint legacy_repo/ --json
+```
+
+After bootstrap, the standard semantic loop resumes:
+
+```bash
+grace map legacy_repo/ --json
+grace query anchors legacy_repo/ --json
+grace read legacy_repo/ <anchor_id> --json
+grace impact legacy_repo/ <anchor_id> --json
+grace plan impact legacy_repo/ <anchor_id> --json
+grace apply-plan plan.json --dry-run --json
+grace apply-plan plan.json --json
+grace validate legacy_repo/ --json
+grace lint legacy_repo/ --json
+```
 
 - `pytest`
 - `parse`

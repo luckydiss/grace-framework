@@ -63,13 +63,15 @@ If no GRACE-annotated supported files are found, the command fails with:
 7. `grace query path <path> <source_anchor_id> <target_anchor_id> --json`
 8. `grace impact <path> <anchor_id> --json`
 9. `grace plan impact <path> <anchor_id> --json`
-10. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
-11. `grace patch <path> <anchor_id> <replacement_file> --json`
-12. `grace apply-plan <plan_file> --dry-run --json`
-13. `grace apply-plan <plan_file> --json`
-14. `grace validate <path> --json`
-15. `grace lint <path> --json`
-16. `grace clean <path> --dry-run --json`
+10. `grace bootstrap <path> --preview --json`
+11. `grace bootstrap <path> --apply --json`
+12. `grace patch <path> <anchor_id> <replacement_file> --dry-run --json`
+13. `grace patch <path> <anchor_id> <replacement_file> --json`
+14. `grace apply-plan <plan_file> --dry-run --json`
+15. `grace apply-plan <plan_file> --json`
+16. `grace validate <path> --json`
+17. `grace lint <path> --json`
+18. `grace clean <path> --dry-run --json`
 
 For self-hosted GRACE development, the preferred scope is the annotated `grace/` package:
 
@@ -87,6 +89,13 @@ For self-hosted GRACE development, the preferred scope is the annotated `grace/`
 
 This self-hosting loop is described in more detail in `docs/self_hosting.md`.
 The workflow guidance and eval framing for agents are documented in `docs/agent_playbook.md`.
+
+For unannotated or partially annotated repositories, prepend:
+
+1. `grace bootstrap <path> --apply --json`
+2. `grace lint <path> --json`
+
+The expected contract is that `bootstrap` only creates deterministic placeholders. Real semantic text still belongs to later read/plan/patch work.
 
 Repository-root policy:
 
@@ -125,6 +134,7 @@ For `map`:
 - `map`: `0` on success, non-zero on parse failure
 - `patch`: `0` on success, non-zero on patch failure
 - `apply-plan`: `0` on success, non-zero on plan-load failure or first patch failure
+- `bootstrap`: `0` on preview or apply success, non-zero on discovery, parse, write, or validation failure
 - `clean`: `0` on success, non-zero only when cleanup leaves failed artifact paths
 
 ## Command JSON Shapes
@@ -473,6 +483,45 @@ Success:
 }
 ```
 
+### `bootstrap --json`
+
+Preview success:
+
+```json
+{
+  "ok": true,
+  "command": "bootstrap",
+  "apply": false,
+  "path": "legacy_repo/",
+  "validated_file_count": 0,
+  "files": [
+    {
+      "path": "legacy_repo/pricing.py",
+      "module_id": "legacy_repo.pricing",
+      "header_added": true,
+      "generated_anchor_ids": [
+        "legacy_repo.pricing.run"
+      ]
+    }
+  ]
+}
+```
+
+Apply failure:
+
+```json
+{
+  "ok": false,
+  "command": "bootstrap",
+  "stage": "validate",
+  "path": "legacy_repo/",
+  "message": "Bootstrap validation failed",
+  "validation_messages": [],
+  "parse_failures": [],
+  "rollback_performed": true
+}
+```
+
 Failure:
 
 ```json
@@ -677,6 +726,7 @@ Failure:
 - Prefer `--json` for machine workflows.
 - For directory inputs, agents should treat discovered-file ordering as stable.
 - Treat `lint` warnings as advisory, not blocking.
+- Use `bootstrap --apply --json` only for structural initialization of unannotated code; do not treat TODO placeholders as completed semantics.
 - Treat `patch --dry-run` as preflight, not as an applied change.
 - Treat `apply-plan --dry-run` as plan-level preflight, not as an applied change.
 - Use `read --json` to load one semantic block before patching instead of reading a whole file.

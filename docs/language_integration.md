@@ -30,6 +30,7 @@ The adapter boundary guarantees that Python, TypeScript, and Go all normalize in
 - supported block kinds map into the existing GRACE `BlockKind` set
 - deterministic spans and anchor ordering remain adapter responsibilities
 - unsupported syntax must stay inert unless GRACE annotations attempt to bind to it
+- bootstrap discovery of unannotated blocks must stay deterministic and adapter-bounded
 
 ## Adapter Responsibilities
 
@@ -40,6 +41,7 @@ A language adapter is responsible for:
 - binding annotations to semantic entities
 - computing block spans
 - emitting a `GraceFileModel`-compatible structure
+- exposing deterministic unannotated block discovery for bootstrap scaffolding
 
 ## Adapter Contract
 
@@ -90,6 +92,7 @@ In practice, a new adapter should be introduced with:
 5. conformance coverage
 6. eval coverage
 7. compatibility/docs updates
+8. bootstrap discovery behavior documented
 
 ## Important Non-Goals
 

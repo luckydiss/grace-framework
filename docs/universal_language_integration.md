@@ -29,6 +29,7 @@ Each Tree-sitter-backed language supplies:
 - comment-host policy
 - query specs for supported block kinds
 - capture names for symbol, owner, and async state
+- enough metadata for deterministic bootstrap discovery through the shared base
 
 ### FallbackTextAdapter
 
@@ -45,9 +46,10 @@ Its role is bootstrap safety, not rich language coverage.
 
 ## Current Direction
 
-- Python should move from imperative parsing into the shared Tree-sitter base while remaining the reference implementation.
-- TypeScript and Go should migrate from bespoke block collectors into declarative specs on top of the same engine.
-- Unsupported or not-yet-integrated languages should fall back to the text adapter rather than immediately failing adapter selection.
+- Python is the reference adapter on top of the shared Tree-sitter base.
+- TypeScript and Go are pilot adapters on the same shared engine.
+- Unsupported or not-yet-integrated languages fall back to the text adapter rather than immediately failing adapter selection.
+- Bootstrap uses this same boundary: Tree-sitter-backed adapters expose unannotated block discovery through the shared base, while unsupported suffixes fall back to deterministic text-only discovery.
 
 ## Non-goals
 

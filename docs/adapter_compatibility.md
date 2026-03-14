@@ -14,6 +14,7 @@ This matrix records current GRACE adapter coverage after the TypeScript pilot, t
 | Object methods | Unsupported | Supported | Not applicable |
 | JSX / TSX | Not applicable | Unsupported | Not applicable |
 | Interface declarations as semantic blocks | Not applicable | Not applicable | Unsupported |
+| Bootstrap discovery | Supported via shared Tree-sitter base | Supported via shared Tree-sitter base | Supported via shared Tree-sitter base |
 
 ## Notes
 
@@ -22,6 +23,7 @@ This matrix records current GRACE adapter coverage after the TypeScript pilot, t
 - Go remains a pilot adapter with deliberately narrow function/method plus struct-type coverage.
 - Python, TypeScript, and Go now reuse a shared Tree-sitter execution engine with language-specific declarative specs.
 - Unknown suffixes route through a deterministic fallback adapter instead of failing adapter lookup immediately.
+- Bootstrap scaffolding relies on the same adapter boundary: supported languages expose unannotated block discovery through the shared base, while unsupported suffixes fall back to deterministic text discovery.
 - Unsupported constructs must not break parsing if they do not contain GRACE annotations.
 - If GRACE annotations target an unsupported construct and no supported semantic entity can bind them, parsing must fail predictably.
 

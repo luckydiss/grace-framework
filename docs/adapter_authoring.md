@@ -15,6 +15,7 @@ The adapter layer is responsible for:
 - binding annotations to supported semantic entities
 - computing deterministic semantic block spans
 - emitting `GraceFileModel`-compatible output
+- exposing deterministic unannotated block discovery for bootstrap scaffolding
 
 The core remains responsible for:
 
@@ -76,6 +77,7 @@ Every adapter must:
    - `GraceBlockMetadata`
 
 Where possible, implement the adapter as a `TreeSitterLanguageSpec` on top of the shared `TreeSitterAdapterBase` instead of writing a new parser loop from scratch.
+This shared base also gives Tree-sitter-backed adapters deterministic bootstrap discovery without inventing a second per-language traversal path.
 
 ## Unsupported Syntax Policy
 
@@ -163,6 +165,7 @@ Before merging a new adapter:
 - shared conformance harness updated
 - shared parity coverage updated
 - shared eval coverage updated
+- bootstrap discovery verified
 - compatibility matrix updated
 - language-specific adapter doc added
 - changelog updated

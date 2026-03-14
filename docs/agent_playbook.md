@@ -6,7 +6,7 @@ This playbook defines the canonical workflow and the baseline eval expectations 
 
 ## Canonical Loop
 
-The standard loop is:
+For an already annotated GRACE-native repository, the standard loop is:
 
 `map -> query -> read -> impact -> plan -> apply-plan -> validate -> lint`
 
@@ -25,6 +25,32 @@ grace lint grace --json
 grace clean grace --dry-run --json
 ```
 
+## Bootstrap Loop
+
+For an unannotated or partially annotated repository, start with:
+
+`bootstrap -> lint -> read -> impact -> plan -> apply-plan -> validate -> lint`
+
+The recommended commands are:
+
+```bash
+grace bootstrap legacy_repo/ --apply --json
+grace lint legacy_repo/ --json
+grace read legacy_repo/ <anchor_id> --json
+grace impact legacy_repo/ <anchor_id> --json
+grace plan impact legacy_repo/ <anchor_id> --json
+grace apply-plan plan.json --dry-run --json
+grace apply-plan plan.json --json
+grace validate legacy_repo/ --json
+grace lint legacy_repo/ --json
+```
+
+The expected interpretation is:
+
+- `bootstrap` creates only deterministic scaffold placeholders
+- `lint` surfaces `todo_placeholder` warnings as the semantic backlog
+- the agent then fills those placeholders through normal read/impact/plan/patch discipline
+
 ## Operating Rules
 
 - Treat inline GRACE annotations as the only source of truth.
@@ -33,6 +59,7 @@ grace clean grace --dry-run --json
 - Prefer atomic anchor-driven patches over whole-file rewrites.
 - Treat `validate` as blocking and `lint` as advisory unless a project policy says otherwise.
 - Use `clean --dry-run` to inspect leftover GRACE temp artifacts before they pollute later discovery or graph export.
+- Treat `bootstrap` as structural initialization only, never as semantic completion.
 
 ## Self-Hosted Scope
 

@@ -37,6 +37,40 @@ grace validate src
 grace lint src
 ```
 
+For a single file, bootstrap derives the scaffold identity from the file scope.
+If the relative path would produce only one segment, bootstrap prefixes the scope directory name so the generated `module_id` remains a valid dotted semantic path.
+
+Example:
+
+```bash
+grace bootstrap services/pricing.py --apply --json
+```
+
+Possible scaffold result:
+
+- module id: `services.pricing`
+- anchor id: `services.pricing.run`
+
+## Audit Surface
+
+`bootstrap --json` returns an audit-friendly result:
+
+- file path
+- generated `module_id`
+- whether a header was added
+- generated anchor ids
+- validated file count for apply mode
+
+This keeps bootstrap reversible and machine-readable in the same spirit as patch/apply-plan.
+
+## Follow-up Workflow
+
+After bootstrap, the normal next step is:
+
+1. `grace lint <path> --json`
+2. inspect `todo_placeholder` warnings
+3. use `read -> impact -> plan -> apply-plan` to replace placeholders with real semantics
+
 ## What Bootstrap Does Not Do
 
 - It does not generate real purpose text.

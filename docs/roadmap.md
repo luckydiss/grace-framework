@@ -128,9 +128,9 @@ For an existing repository:
 
 map -> inspect -> select anchors -> patch/plan -> validate -> lint -> repeat
 
-For future bootstrap mode:
+For an unannotated or partially annotated repository:
 
-project spec -> scaffold -> map -> patch loop -> validate -> lint
+bootstrap -> lint -> map -> query -> read -> impact -> plan -> apply-plan -> validate -> lint
 
 GRACE should not encourage rewriting whole files.
 
