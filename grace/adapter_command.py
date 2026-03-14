@@ -93,7 +93,6 @@ def eval_command(path: Path, as_json: bool) -> None:
         return
 
     click.echo(
-        f"Adapter eval for {evaluation.path}: {evaluation.file_count} file(s), "
+        f"Adapter eval for {evaluation.requested_path}: {evaluation.file_count} file(s), "
         f"{sum(evaluation.gap_counts.values())} gap(s)"
     )
-

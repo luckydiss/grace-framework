@@ -57,8 +57,8 @@ def test_cli_adapter_gaps_json_reports_non_green_files(tmp_path: Path) -> None:
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
     assert payload["action"] == "gaps"
-    assert payload["gap_count"] == 2
-    assert [gap["gap_kind"] for gap in payload["gaps"]] == ["preview_only", "unsupported"]
+    assert payload["gap_count"] == 1
+    assert [gap["gap_kind"] for gap in payload["gaps"]] == ["unsupported"]
 
 
 def test_cli_adapter_eval_json_summarizes_scope(tmp_path: Path) -> None:
@@ -81,7 +81,22 @@ def test_cli_adapter_eval_json_summarizes_scope(tmp_path: Path) -> None:
     assert payload["action"] == "eval"
     assert payload["file_count"] == 3
     assert payload["verdict_counts"] == {
-        "preview_only": 1,
-        "safe_apply": 1,
+        "safe_apply": 2,
         "unsupported": 1,
     }
+
+
+def test_cli_adapter_eval_plain_text_succeeds(tmp_path: Path) -> None:
+    workspace = writable_dir(tmp_path, "cli_adapter_eval_plain")
+    write_text(workspace / "service.py", "def run() -> int:\n    return 1\n")
+
+    result = subprocess.run(
+        [sys.executable, "-m", "grace.cli", "adapter", "eval", str(workspace)],
+        cwd=Path(__file__).resolve().parents[1],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "Adapter eval for" in result.stdout

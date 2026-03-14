@@ -24,7 +24,7 @@ def test_registered_python_pack_is_safe_apply(tmp_path: Path) -> None:
     assert policy.language_name == "python"
 
 
-def test_tsx_defaults_to_preview_only_without_registered_pack(tmp_path: Path) -> None:
+def test_tsx_routes_to_safe_apply_via_construct_pack(tmp_path: Path) -> None:
     workspace = writable_dir(tmp_path, "file_policy_tsx")
     path = (workspace / "App.tsx").resolve()
     path.write_text("export const App = () => <div />;\n", encoding="utf-8")
@@ -32,7 +32,8 @@ def test_tsx_defaults_to_preview_only_without_registered_pack(tmp_path: Path) ->
     policy = resolve_file_policy(path)
 
     assert policy.file_class is GraceFileClass.CODE
-    assert policy.verdict is GraceFilePolicyVerdict.PREVIEW_ONLY
+    assert policy.verdict is GraceFilePolicyVerdict.SAFE_APPLY
+    assert policy.language_name == "typescript"
 
 
 def test_json_defaults_to_unsupported_data_file(tmp_path: Path) -> None:

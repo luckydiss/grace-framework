@@ -129,14 +129,17 @@ def _build_python_pack() -> GraceLanguagePack:
 
 
 # @grace.anchor grace.spec_registry._build_typescript_pack
-# @grace.complexity 5
+# @grace.complexity 6
+# @grace.belief TypeScript should absorb frontend-specific construct growth declaratively, so TSX and future shapes land as mergeable construct packs instead of wrapper-local AST logic.
 def _build_typescript_pack() -> GraceLanguagePack:
     from tree_sitter_typescript import language_typescript
 
+    from grace.construct_pack import apply_construct_packs
+    from grace.construct_registry import get_construct_packs
     from grace.models import BlockKind
     from grace.treesitter_base import TreeSitterBlockQuerySpec, TreeSitterLanguageSpec
 
-    def spec_factory() -> TreeSitterLanguageSpec:
+    def base_spec_factory() -> TreeSitterLanguageSpec:
         return TreeSitterLanguageSpec(
             language_name="typescript",
             file_extensions=(".ts",),
@@ -179,12 +182,23 @@ def _build_typescript_pack() -> GraceLanguagePack:
             ),
         )
 
+    construct_packs = get_construct_packs("typescript")
+    construct_pack_names = tuple(pack.pack_name for pack in construct_packs)
+
+    def spec_factory() -> TreeSitterLanguageSpec:
+        return apply_construct_packs(base_spec_factory(), construct_packs)
+
+    merged_spec = spec_factory()
+    bootstrap_safe = all(pack.bootstrap_safe is not False for pack in construct_packs)
+
     return build_treesitter_pack(
         language_name="typescript",
-        file_extensions=(".ts",),
+        file_extensions=merged_spec.file_extensions,
         status=GraceLanguagePackStatus.PILOT,
         spec_factory=spec_factory,
         adapter_factory=lambda: __import__("grace.typescript_adapter", fromlist=["TypeScriptAdapter"]).TypeScriptAdapter(),
+        bootstrap_safe=bootstrap_safe,
+        construct_pack_names=construct_pack_names,
     )
 
 

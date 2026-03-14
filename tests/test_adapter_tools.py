@@ -28,15 +28,16 @@ def test_probe_adapter_reports_pack_and_policy_for_python_file(tmp_path: Path) -
     assert probe.adapter_class_name == "PythonAdapter"
 
 
-def test_probe_adapter_reports_preview_only_for_tsx(tmp_path: Path) -> None:
+def test_probe_adapter_routes_tsx_through_typescript_construct_pack(tmp_path: Path) -> None:
     workspace = writable_dir(tmp_path, "adapter_probe_tsx")
     source_path = write_text(workspace / "App.tsx", "export const App = () => <div />;\n")
 
     probe = probe_adapter(source_path)
 
-    assert probe.language_name is None
-    assert probe.policy_verdict == "preview_only"
+    assert probe.language_name == "typescript"
+    assert probe.policy_verdict == "safe_apply"
     assert probe.file_class == "code"
+    assert probe.adapter_class_name == "TypeScriptAdapter"
 
 
 def test_collect_adapter_gaps_returns_only_non_green_files(tmp_path: Path) -> None:
@@ -47,8 +48,8 @@ def test_collect_adapter_gaps_returns_only_non_green_files(tmp_path: Path) -> No
 
     gaps = collect_adapter_gaps(workspace)
 
-    assert [gap.path for gap in gaps] == [tsx_path.resolve(), json_path.resolve()]
-    assert [gap.gap_kind for gap in gaps] == ["preview_only", "unsupported"]
+    assert [gap.path for gap in gaps] == [json_path.resolve()]
+    assert [gap.gap_kind for gap in gaps] == ["unsupported"]
 
 
 def test_evaluate_adapter_surface_summarizes_repository_policy(tmp_path: Path) -> None:
@@ -61,11 +62,9 @@ def test_evaluate_adapter_surface_summarizes_repository_policy(tmp_path: Path) -
 
     assert summary.file_count == 3
     assert summary.verdict_counts == {
-        "preview_only": 1,
-        "safe_apply": 1,
+        "safe_apply": 2,
         "unsupported": 1,
     }
     assert summary.gap_counts == {
-        "preview_only": 1,
         "unsupported": 1,
     }

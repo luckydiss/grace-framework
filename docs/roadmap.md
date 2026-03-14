@@ -270,6 +270,24 @@ Outcome:
 
 GRACE can now distinguish bootstrap-safe code from preview-only, unsupported, or ignored files before mutation begins.
 
+## v1.4 - Construct Packs
+
+Goal:
+
+Let agents extend missing language shapes declaratively without cloning a whole new adapter or editing parser core logic.
+
+Delivered scope:
+
+- added `grace.construct_pack` and `grace.construct_registry`
+- added built-in `typescript.tsx_function_components`
+- extended TypeScript routing from `.ts` to `.ts` + `.tsx` through construct-pack merge
+- added focused TSX coverage plus construct-pack tests
+- added `docs/construct_packs.md`
+
+Outcome:
+
+GRACE can now close specific frontend language gaps through declarative construct packs, and real TSX files become bootstrap-previewable without changing core semantics.
+
 ## v1.3 - Adapter Probe / Gaps / Eval CLI
 
 Goal:

@@ -117,6 +117,26 @@ def test_language_adapter_registry_returns_typescript_adapter_for_ts_path(tmp_pa
     assert adapter.language_name == "typescript"
 
 
+def test_language_adapter_registry_returns_typescript_adapter_for_tsx_path(tmp_path: Path) -> None:
+    path = write_temp_ts_file(
+        tmp_path,
+        make_file(
+            """
+            // @grace.anchor demo.ui.App
+            // @grace.complexity 1
+            export const App = () => <div />;
+            """
+        ),
+        name="App.tsx",
+    )
+
+    adapter = LANGUAGE_ADAPTER.get_language_adapter_for_path(path)
+
+    assert isinstance(adapter, TYPESCRIPT_ADAPTER.TypeScriptAdapter)
+    assert adapter.language_name == "typescript"
+    assert ".tsx" in adapter.file_extensions
+
+
 def test_typescript_adapter_parses_module_header_and_supported_blocks(tmp_path: Path) -> None:
     path = write_temp_ts_file(
         tmp_path,
@@ -165,6 +185,41 @@ def test_typescript_adapter_parses_module_header_and_supported_blocks(tmp_path: 
     assert grace_file.blocks[2].kind is MODELS.BlockKind.CLASS
     assert grace_file.blocks[3].kind is MODELS.BlockKind.METHOD
     assert grace_file.blocks[3].qualified_name == "StrategyRegistry.resolve"
+
+
+def test_typescript_adapter_parses_exported_tsx_components(tmp_path: Path) -> None:
+    path = write_temp_ts_file(
+        tmp_path,
+        make_file(
+            """
+            // @grace.anchor demo.ui.App
+            // @grace.complexity 1
+            export const App = () => <div className="app" />;
+
+            // @grace.anchor demo.ui.Screen
+            // @grace.complexity 1
+                export function Screen() {
+                  return <section />;
+                }
+            """,
+            header=(
+                "// @grace.module demo.ui\n"
+                "// @grace.purpose Describe UI component entrypoints in TypeScript/TSX.\n"
+                "// @grace.interfaces App(), Screen()\n"
+                "// @grace.invariant Component anchor ids remain stable unless UI identity changes.\n"
+            ),
+        ),
+        name="App.tsx",
+    )
+
+    grace_file = PARSER.parse_python_file(path)
+
+    assert grace_file.module.module_id == "demo.ui"
+    assert [block.anchor_id for block in grace_file.blocks] == [
+        "demo.ui.App",
+        "demo.ui.Screen",
+    ]
+    assert all(block.kind is MODELS.BlockKind.FUNCTION for block in grace_file.blocks)
 
 
 def test_typescript_adapter_parses_arrow_functions(tmp_path: Path) -> None:

@@ -19,6 +19,7 @@ The TypeScript pilot adapter lives in [docs/typescript_adapter.md](C:\Users\luck
 The Go pilot adapter lives in [docs/go_adapter.md](C:\Users\luckydiss\Documents\grace_framework\docs\go_adapter.md).
 The shared data-driven adapter architecture lives in [docs/universal_language_integration.md](C:\Users\luckydiss\Documents\grace_framework\docs\universal_language_integration.md).
 The declarative language-pack registry lives in [docs/language_packs.md](C:\Users\luckydiss\Documents\grace_framework\docs\language_packs.md).
+The construct-pack extension layer lives in [docs/construct_packs.md](C:\Users\luckydiss\Documents\grace_framework\docs\construct_packs.md).
 The deterministic file-policy layer lives in [docs/file_policy.md](C:\Users\luckydiss\Documents\grace_framework\docs\file_policy.md).
 The adapter probe and gap diagnostics live in [docs/adapter_probe.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_probe.md).
 The adapter compatibility matrix lives in [docs/adapter_compatibility.md](C:\Users\luckydiss\Documents\grace_framework\docs\adapter_compatibility.md).
@@ -47,12 +48,14 @@ Derived artifacts such as maps are built from the parsed model. Sidecars are not
 - `parser`: parses inline annotations and binds them to `def`, `async def`, `class`, and methods.
 - `language_adapter`: defines the language integration contract that feeds `GraceFileModel` into the core.
 - `language_pack`: defines declarative language-pack metadata for runtime dispatch.
+- `construct_pack`: defines declarative construct-pack metadata for extending specific language shapes without forking the base adapter.
+- `construct_registry`: registers built-in construct packs and returns deterministic language-scoped extension order.
 - `spec_registry`: registers built-in language packs and resolves adapters by extension.
 - `tree_sitter_adapter`: provides substrate helpers for non-Python pilot adapters without changing core semantics.
 - `treesitter_base`: provides the shared Tree-sitter execution engine plus declarative language specs.
 - `fallback_adapter`: provides deterministic text fallback for unsupported suffixes and bootstrap parsing.
 - `python_adapter`: reference adapter implemented on top of the shared Tree-sitter base.
-- `typescript_adapter`: pilot Tree-sitter-backed adapter for `.ts` files with module annotations, function declarations, async functions, arrow functions, classes, and object literal methods.
+- `typescript_adapter`: pilot Tree-sitter-backed adapter for `.ts` and `.tsx` files with module annotations, function declarations, async functions, arrow functions, exported TSX function components, classes, and object literal methods.
 - `go_adapter`: pilot Go adapter for `.go` files with module annotations, function declarations, receiver methods, and simple struct type declarations.
 - `bootstrapper`: generates deterministic scaffold annotations for unannotated files and directories.
 - `bootstrap_command`: exposes preview-first/apply bootstrap behavior through the CLI.
@@ -104,7 +107,7 @@ GRACE now includes deterministic adapter diagnostics for unfamiliar repositories
 - `grace adapter gaps <path>` produces a deterministic backlog of `preview_only`, `unsupported`, `ignored`, or fallback-routed files
 - `grace adapter eval <path>` summarizes repository coverage so an agent can decide whether bootstrap can start immediately or framework extension work is required first
 
-This makes repository onboarding explicit: an agent can inspect coverage gaps before attempting bootstrap or new language-pack work.
+This makes repository onboarding explicit: an agent can inspect coverage gaps before attempting bootstrap, add a construct pack for a missing frontend shape, and only then proceed to mutation.
 
 ## Bootstrap Layer
 

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added `grace.construct_pack` and `grace.construct_registry` so missing language shapes can be onboarded declaratively as construct packs instead of bespoke adapter rewrites.
+- Added built-in `typescript.tsx_function_components`, extending TypeScript routing to `.tsx` and covering exported TSX function components.
+- Added `docs/construct_packs.md` plus focused TSX, construct-pack, and adapter diagnostic coverage.
 - Added `grace.adapter_tools` plus `grace adapter probe/gaps/eval` so agents can inspect language-pack routing, file-policy verdicts, and repository coverage gaps before bootstrap or extension work.
 - Added `docs/adapter_probe.md` and focused runtime/CLI coverage for deterministic adapter diagnostics.
 - Added `grace.file_policy` plus `[tool.grace.file_policy]` overrides so repositories can classify files as `safe_apply`, `preview_only`, `unsupported`, or `ignore` before bootstrap.

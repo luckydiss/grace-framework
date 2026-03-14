@@ -12,14 +12,14 @@ This matrix records current GRACE adapter coverage after the TypeScript pilot, t
 | Arrow functions | Not applicable | Supported | Not applicable |
 | Function expressions | Unsupported | Unsupported | Unsupported |
 | Object methods | Unsupported | Supported | Not applicable |
-| JSX / TSX | Not applicable | Unsupported | Not applicable |
+| JSX / TSX | Not applicable | Partial support via construct pack | Not applicable |
 | Interface declarations as semantic blocks | Not applicable | Not applicable | Unsupported |
 | Bootstrap discovery | Supported via shared Tree-sitter base | Supported via shared Tree-sitter base | Supported via shared Tree-sitter base |
 
 ## Notes
 
 - Python remains the reference implementation.
-- TypeScript remains a pilot adapter with deliberately narrow syntax coverage.
+- TypeScript remains a pilot adapter with deliberately narrow syntax coverage, now extended by a built-in TSX construct pack.
 - Go remains a pilot adapter with deliberately narrow function/method plus struct-type coverage.
 - Python, TypeScript, and Go now reuse a shared Tree-sitter execution engine with language-specific declarative specs.
 - Unknown suffixes route through a deterministic fallback adapter instead of failing adapter lookup immediately.
@@ -32,7 +32,7 @@ This matrix records current GRACE adapter coverage after the TypeScript pilot, t
 | Adapter | Status | Parity Coverage | Conformance | Notes |
 | --- | --- | --- | --- | --- |
 | Python | Reference | Basic + async-shape + service-shape + links-shape | Stable | Normative baseline for adapter behavior. |
-| TypeScript | Pilot | Basic + async-shape + service-shape + links-shape | Stable | Supports function declarations, arrow functions, classes, and object literal methods; function expressions remain unsupported. |
+| TypeScript | Pilot | Basic + async-shape + service-shape + links-shape | Stable | Supports function declarations, arrow functions, classes, object literal methods, and exported TSX function components; function expressions remain unsupported. |
 | Go | Pilot | Basic + async-shape equivalent + service-shape + links-shape | Stable | Async parity is represented by a regular-function equivalent; interface blocks remain unsupported. |
 
 ## Support Tier Policy

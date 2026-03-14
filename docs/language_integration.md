@@ -65,7 +65,7 @@ The output must be compatible with `GraceFileModel`.
 - `grace/typescript_adapter.py` is the first non-Python pilot adapter.
 - `grace/go_adapter.py` is the second pilot adapter and keeps scope intentionally narrow.
 
-Python remains the normative reference implementation. The TypeScript and Go adapters prove the boundary with intentionally narrow construct coverage, while the fallback adapter keeps unsupported suffixes parseable without inventing new GRACE semantics. Adapter selection now routes through built-in language packs rather than hard-coded dispatch branches.
+Python remains the normative reference implementation. The TypeScript and Go adapters prove the boundary with intentionally narrow construct coverage, while the fallback adapter keeps unsupported suffixes parseable without inventing new GRACE semantics. Adapter selection now routes through built-in language packs rather than hard-coded dispatch branches, and missing shapes can be extended through declarative construct packs rather than bespoke adapter rewrites.
 
 ## Adding A New Language
 

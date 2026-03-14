@@ -22,7 +22,8 @@ class GraceLanguagePackStatus(str, Enum):
 
 
 # @grace.anchor grace.language_pack.GraceLanguagePack
-# @grace.complexity 3
+# @grace.complexity 2
+# @grace.belief Language packs should expose which construct packs are active so agents can inspect extension surfaces without reading registry internals.
 @dataclass(frozen=True, slots=True)
 class GraceLanguagePack:
     language_name: str
@@ -32,6 +33,7 @@ class GraceLanguagePack:
     adapter_factory: Callable[[], object]
     base_adapter_factory: Callable[[], object]
     bootstrap_safe: bool = True
+    construct_pack_names: tuple[str, ...] = ()
 
     @property
     def primary_extension(self) -> str:
@@ -39,7 +41,8 @@ class GraceLanguagePack:
 
 
 # @grace.anchor grace.language_pack.build_treesitter_pack
-# @grace.complexity 2
+# @grace.complexity 3
+# @grace.belief Tree-sitter pack construction should stay the single place where merged construct-pack metadata becomes runtime dispatch metadata, so registry callers can remain declarative.
 def build_treesitter_pack(
     *,
     language_name: str,
@@ -48,6 +51,7 @@ def build_treesitter_pack(
     spec_factory: Callable[[], TreeSitterLanguageSpec],
     adapter_factory: Callable[[], object] | None = None,
     bootstrap_safe: bool = True,
+    construct_pack_names: tuple[str, ...] = (),
 ) -> GraceLanguagePack:
     from grace.treesitter_base import TreeSitterAdapterBase
 
@@ -62,6 +66,7 @@ def build_treesitter_pack(
         adapter_factory=adapter_factory or base_adapter_factory,
         base_adapter_factory=base_adapter_factory,
         bootstrap_safe=bootstrap_safe,
+        construct_pack_names=construct_pack_names,
     )
 
 

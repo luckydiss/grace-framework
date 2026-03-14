@@ -81,7 +81,7 @@ from grace.validator import (
 
 # @grace.anchor grace.api._public_api
 # @grace.complexity 2
-# @grace.belief Public API exports should grow monotonically when new deterministic diagnostics become first-class runtime surfaces.
+# @grace.belief Public exports should make declarative extension layers visible to agents, otherwise new language and construct work still requires internal-module spelunking.
 def _public_api() -> tuple[str, ...]:
     return (
         "AdapterEval",
@@ -97,6 +97,7 @@ def _public_api() -> tuple[str, ...]:
         "GoAdapter",
         "GRACE_MAP_VERSION",
         "GraceBlockMetadata",
+        "GraceConstructPack",
         "GraceFileClass",
         "GraceFileModel",
         "GraceFilePolicy",
@@ -149,6 +150,7 @@ def _public_api() -> tuple[str, ...]:
         "ValidationIssueCode",
         "ValidationResult",
         "ValidationSuccess",
+        "apply_construct_packs",
         "apply_patch_plan",
         "build_anchor_neighbors",
         "build_file_map",
@@ -161,6 +163,8 @@ def _public_api() -> tuple[str, ...]:
         "extract_anchor_annotations",
         "extract_anchor_code",
         "filter_self_anchor",
+        "get_construct_pack",
+        "get_construct_packs",
         "get_language_adapter_for_path",
         "get_language_pack",
         "get_language_pack_for_path",
@@ -186,6 +190,7 @@ def _public_api() -> tuple[str, ...]:
         "query_path",
         "query_path_edge_types",
         "read_anchor_context",
+        "register_construct_pack",
         "register_language_pack",
         "resolve_file_policy",
         "try_parse_python_file",
@@ -195,12 +200,13 @@ def _public_api() -> tuple[str, ...]:
 
 
 # @grace.anchor grace.api.__getattr__
-# @grace.complexity 5
-# @grace.belief Lazy exports keep import costs stable while still surfacing adapter diagnostics as first-class APIs for agents and tests.
+# @grace.complexity 6
+# @grace.belief Lazy exports should cover both language packs and construct packs so agents can extend coverage through one consistent public surface instead of internal registry imports.
 def __getattr__(name: str) -> object:
     if name in {
         "FallbackTextAdapter",
         "GoAdapter",
+        "GraceConstructPack",
         "GraceFileClass",
         "GraceFilePolicy",
         "GraceFilePolicyVerdict",
@@ -212,14 +218,20 @@ def __getattr__(name: str) -> object:
         "TreeSitterBlockQuerySpec",
         "TreeSitterLanguageSpec",
         "TypeScriptAdapter",
+        "apply_construct_packs",
         "build_treesitter_pack",
+        "get_construct_pack",
+        "get_construct_packs",
         "get_language_adapter_for_path",
         "get_language_pack",
         "get_language_pack_for_path",
         "get_registered_language_packs",
+        "register_construct_pack",
         "register_language_pack",
         "resolve_file_policy",
     }:
+        from grace.construct_pack import GraceConstructPack, apply_construct_packs
+        from grace.construct_registry import get_construct_pack, get_construct_packs, register_construct_pack
         from grace.fallback_adapter import FallbackTextAdapter
         from grace.file_policy import GraceFileClass, GraceFilePolicy, GraceFilePolicyVerdict, resolve_file_policy
         from grace.go_adapter import GoAdapter
@@ -242,6 +254,7 @@ def __getattr__(name: str) -> object:
         exported = {
             "FallbackTextAdapter": FallbackTextAdapter,
             "GoAdapter": GoAdapter,
+            "GraceConstructPack": GraceConstructPack,
             "GraceFileClass": GraceFileClass,
             "GraceFilePolicy": GraceFilePolicy,
             "GraceFilePolicyVerdict": GraceFilePolicyVerdict,
@@ -253,11 +266,15 @@ def __getattr__(name: str) -> object:
             "TreeSitterBlockQuerySpec": TreeSitterBlockQuerySpec,
             "TreeSitterLanguageSpec": TreeSitterLanguageSpec,
             "TypeScriptAdapter": TypeScriptAdapter,
+            "apply_construct_packs": apply_construct_packs,
             "build_treesitter_pack": build_treesitter_pack,
+            "get_construct_pack": get_construct_pack,
+            "get_construct_packs": get_construct_packs,
             "get_language_adapter_for_path": get_language_adapter_for_path,
             "get_language_pack": get_language_pack,
             "get_language_pack_for_path": get_language_pack_for_path,
             "get_registered_language_packs": get_registered_language_packs,
+            "register_construct_pack": register_construct_pack,
             "register_language_pack": register_language_pack,
             "resolve_file_policy": resolve_file_policy,
         }
